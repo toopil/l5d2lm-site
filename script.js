@@ -97,12 +97,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = new FormData(form);
       const name = String(data.get('name') || '').trim();
       const email = String(data.get('email') || '').trim();
+      const phone = String(data.get('phone') || '').trim();
+
+      if (!email && !phone) {
+        if (status) {
+          status.textContent = 'Indique au moins un email ou un téléphone pour que je puisse te répondre.';
+        }
+        const emailField = form.querySelector('#email');
+        if (emailField) emailField.focus();
+        return;
+      }
+
       const requestType = String(data.get('type') || 'Autre demande').trim();
       const subject = `Demande — ${requestType}${name ? ` — ${name}` : ''}`;
       const body = [
         `Nom : ${name}`,
         `Email : ${email}`,
-        `Téléphone : ${String(data.get('phone') || '').trim()}`,
+        `Téléphone : ${phone}`,
         `Type de demande : ${requestType}`,
         `Lieu ou région : ${String(data.get('location') || '').trim()}`,
         `Date ou période : ${String(data.get('date') || '').trim()}`,
@@ -113,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ].join('\n');
 
       if (status) {
-        status.textContent = 'Votre messagerie va s’ouvrir. Vérifiez le message, puis confirmez son envoi.';
+        status.textContent = 'Un email va s’ouvrir avec les infos indiquées. Il restera à confirmer son envoi.';
       }
 
       window.location.href = `mailto:l5d2lm@ik.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
