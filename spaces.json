@@ -1,0 +1,14 @@
+{
+  "spaces": [
+    { "name": "Le Satellite", "url": "https://www.lesatellite.ch/" },
+    { "name": "L’Archipel Sion", "url": "https://archipelsion.ch/" },
+    { "name": "ASLEC", "url": "https://aslec.ch/" },
+    { "name": "Association Kaïros", "url": "https://www.associationkairos.com/" },
+    { "name": "Alexandre Bravo", "url": "https://www.linkedin.com/in/alexandre-bravo-661300284/" },
+    { "name": "Compagnie Digestif / Treffpunkt Tschudanga", "url": "https://www.compagniedigestif.ch/fr/angebote/treffpunkt-tschudanga/" },
+    { "name": "École aux Akènes", "url": "https://www.ecoleauxakenes.ch/" },
+    { "name": "EducaTerre", "url": "https://educaterre.ch/" },
+    { "name": "Mandala Schule", "url": "https://mandala-schule.ch/fr/accueil/" },
+    { "name": "Épicerie La Canopée", "url": "https://epicerielacanopee.ch/" }
+  ]
+}

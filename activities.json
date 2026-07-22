@@ -1,0 +1,34 @@
+{
+  "activities": [
+    {
+      "title": "Massages & réveil énergétique",
+      "description": "Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.",
+      "href": "massage-intuitif-reveil-energetique.html"
+    },
+    {
+      "title": "Corps & expression",
+      "description": "Playful extatique, improvisation, réveil du corps, jeux de mouvement et À portée de main.",
+      "href": "corps-expression.html"
+    },
+    {
+      "title": "Colo pour adultes",
+      "description": "Une expérience collective construite avec le groupe, à partir de 15 participants adultes.",
+      "href": "colos-sejours.html"
+    },
+    {
+      "title": "Animations participatives",
+      "description": "Des jeux, du mouvement et des souvenirs de groupe marquants pour rendre chacun acteur de l’événement.",
+      "href": "animations-participatives.html"
+    },
+    {
+      "title": "Mission Déclic",
+      "description": "Un outil participatif avec des missions à vivre dans la vraie vie.",
+      "href": "mission-declic.html"
+    },
+    {
+      "title": "Espaces à découvrir",
+      "description": "Des lieux, associations, écoles et initiatives existantes à faire connaître.",
+      "href": "espaces-a-decouvrir.html"
+    }
+  ]
+}
