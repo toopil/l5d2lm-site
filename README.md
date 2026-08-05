@@ -4,7 +4,7 @@ Ce dossier contient un site statique léger, responsive et pensé pour GitHub Pa
 
 ## Structure
 
-- Pages HTML : accueil, massages, corps & expression, colo pour adultes, animation participative, Mission Déclic, espaces et contact
+- Pages HTML : accueil, massages, corps & expression, colo pour adultes, animation participative, espaces et contact
 - CSS : styles réutilisables et responsive
 - JavaScript : menu burger et micro-interactions légères
 - Données : navigation, activités, espaces et formulaires en JSON
