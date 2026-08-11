@@ -1,14 +1,18 @@
 {
   "spaces": [
-    { "name": "Le Satellite", "url": "https://www.lesatellite.ch/" },
-    { "name": "L’Archipel Sion", "url": "https://archipelsion.ch/" },
-    { "name": "ASLEC", "url": "https://aslec.ch/" },
-    { "name": "Association Kaïros", "url": "https://www.associationkairos.com/" },
-    { "name": "Alexandre Bravo", "url": "https://www.linkedin.com/in/alexandre-bravo-661300284/" },
-    { "name": "Compagnie Digestif / Treffpunkt Tschudanga", "url": "https://www.compagniedigestif.ch/fr/angebote/treffpunkt-tschudanga/" },
-    { "name": "École aux Akènes", "url": "https://www.ecoleauxakenes.ch/" },
-    { "name": "EducaTerre", "url": "https://educaterre.ch/" },
-    { "name": "Mandala Schule", "url": "https://mandala-schule.ch/fr/accueil/" },
-    { "name": "Épicerie La Canopée", "url": "https://epicerielacanopee.ch/" }
+    { "name": "Le Satellite", "description": "Sierre — Culture, partage et vie de quartier : jardin, ateliers, coworking et marché.", "url": "https://www.lesatellite.ch/" },
+    { "name": "L’Archipel", "description": "Sion — Tiers-lieu avec ressourcerie, coworking, atelier partagé et jardin-forêt.", "url": "https://archipelsion.ch/" },
+    { "name": "ASLEC", "description": "Sierre — Loisirs, éducation et culture pour enfants et ados.", "url": "https://aslec.ch/" },
+    { "name": "Association Kaïros", "description": "Uvrier — Verger en permaculture, forêt nourricière, jus et nectars maison.", "url": "https://www.associationkairos.com/" },
+    { "name": "Compagnie Digestif / Treffpunkt Tschüdanga", "description": "Salgesch — Rencontre humain-nature-animaux en forêt de Finges : cirque, jardin et résidences d’artistes.", "url": "https://www.compagniedigestif.ch/fr/angebote/treffpunkt-tschudanga/" },
+    { "name": "École aux Akènes", "description": "Lens — École où l’enfant apprend à son rythme, en autonomie.", "url": "https://www.ecoleauxakenes.ch/" },
+    { "name": "EducaTerre", "description": "Valais — Apprendre et s’épanouir au contact de la nature.", "url": "https://educaterre.ch/" },
+    { "name": "Mandala Schule", "description": "Venthône — École privée pour les 4-15 ans, proche de la nature, reconnue depuis 2015.", "url": "https://mandala-schule.ch/fr/accueil/" },
+    { "name": "Épicerie La Canopée", "description": "Muraz — Épicerie coopérative, locale et démocratique.", "url": "https://epicerielacanopee.ch/" },
+    { "name": "Terra Formation", "description": "Fondation valaisanne autour de la biodiversité, de la régénération des écosystèmes et de la transmission de pratiques écologiques.", "url": "https://www.terraformation.ch/" },
+    { "name": "Journées de l’Agroécologie", "description": "Événements partout en Suisse autour de l’agroécologie : ateliers, visites, formations et rencontres. Il est possible de proposer son propre événement.", "url": "https://www.agroecologyworks.ch/fr/journees-de-l-agroecologie/2026/events" },
+    { "name": "Passeport des possibles", "description": "Parcours ludique à Fribourg pour découvrir plusieurs associations à travers des petites activités autour du réemploi, du bricolage et de l’économie circulaire.", "url": "https://lafabriquefribourg.ch/le-passeport-des-possibles/" },
+    { "name": "Transports publics gratuits", "description": "Initiative suisse visant à rendre les transports publics locaux et régionaux gratuits, et les déplacements longue distance beaucoup plus accessibles.", "url": "https://transports-publics-gratuits.ch/" },
+    { "name": "Sentiers des Savoirs", "description": "Réseau où l’on voyage, souvent à pied, pour rencontrer des personnes et apprendre directement auprès d’elles des savoir-faire artisanaux, agricoles ou liés au vivant.", "url": "https://sentiers-des-savoirs.ch/" }
   ]
 }
