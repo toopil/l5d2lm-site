@@ -52,79 +52,16 @@
       <div class="container reveal">
         <div class="section-heading">
           <p class="eyebrow">Demande</p>
-          <h2>Un formulaire simple pour commencer la conversation.</h2>
+          <h2>Qu’est-ce qui vous amène&nbsp;?</h2>
+          <p>Choisis d’abord l’espace qui correspond le mieux. Le formulaire s’adapte ensuite à la proposition.</p>
         </div>
-        <div class="contact-grid">
-          <div class="info-card">
-            <h3>Types de demande</h3>
-            <ul class="check-list">
-              <li>Massage intuitif</li>
-              <li>Massage aquatique</li>
-              <li>Réveil énergétique</li>
-              <li>Formation réveil énergétique</li>
-              <li>Corps &amp; expression</li>
-              <li>À portée de main — prochaines dates</li>
-              <li>À portée de main — lieu ou partenariat</li>
-              <li>Playful extatique</li>
-              <li>Théâtre d’improvisation</li>
-              <li>Réveil du corps</li>
-              <li>Jeux de mouvement</li>
-              <li>Colo pour adultes</li>
-              <li>Animation participative</li>
-              <li>Espace à découvrir</li>
-              <li>Autre demande</li>
-            </ul>
+        <div class="request-contact-layout">
+          <aside class="info-card request-contact-note">
+            <h3>Écrire simplement</h3>
+            <p>La demande sert seulement à commencer la conversation. Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.</p>
             <p><strong>Écrire directement :</strong><br><a href="mailto:l5d2lm@ik.me">l5d2lm@ik.me</a></p>
-          </div>
-          <form class="contact-form" data-contact-form action="mailto:l5d2lm@ik.me" method="post" enctype="text/plain">
-            <div class="field-group">
-              <label for="name">Nom</label>
-              <input id="name" name="name" type="text" autocomplete="name">
-            </div>
-            <div class="field-group">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" autocomplete="email">
-            </div>
-            <div class="field-group">
-              <label for="phone">Téléphone</label>
-              <input id="phone" name="phone" type="tel">
-            </div>
-            <div class="field-group">
-              <label for="type">Type de demande</label>
-              <select id="type" name="type">
-                <option>Massage intuitif</option>
-                <option>Massage aquatique</option>
-                <option>Réveil énergétique</option>
-                <option>Formation réveil énergétique</option>
-                <option>Corps &amp; expression</option>
-                <option>À portée de main — prochaines dates</option>
-                <option>À portée de main — lieu ou partenariat</option>
-                <option>Colo pour adultes</option>
-                <option>Animation participative</option>
-                <option>Espace à découvrir</option>
-                <option>Autre demande</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label for="location">Lieu ou région</label>
-              <input id="location" name="location" type="text">
-            </div>
-            <div class="field-group">
-              <label for="date">Date ou période envisagée</label>
-              <input id="date" name="date" type="text">
-            </div>
-            <div class="field-group">
-              <label for="people">Nombre de personnes</label>
-              <input id="people" name="people" type="number" min="1">
-            </div>
-            <div class="field-group full">
-              <label for="message">Message libre <span class="optional-label">facultatif</span></label>
-              <textarea id="message" name="message" rows="5"></textarea>
-            </div>
-            <button class="btn btn-primary" type="submit">Envoyer la demande</button>
-            <p class="form-help">Le message libre est facultatif. Indique simplement un email ou un téléphone pour que je puisse répondre.</p>
-            <p class="form-status" role="status" aria-live="polite"></p>
-          </form>
+          </aside>
+          <div class="request-contact-flow" data-request-contact-root></div>
         </div>
       </div>
     </section>
