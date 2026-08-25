@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     'animations-participatives': {
       label: 'Animations participatives',
-      description: 'Créer du lien dans un événement ou un lieu.',
+      description: 'Créer du lien dans votre événement ou votre lieu.',
       offers: {
         'animation-participative': {
           label: 'Animation participative',
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     autre: {
       label: 'Autre',
-      description: 'Pour une demande qui ne correspond pas aux catégories précédentes.',
+      description: 'Pour votre demande si elle ne correspond pas aux catégories précédentes.',
       offers: {
         'autre-demande': {
           label: 'Autre demande',
@@ -341,9 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
     panelShell.hidden = true;
     panelShell.innerHTML = `
       <button class="request-panel-tab" type="button" data-request-action="expand" aria-expanded="false">
-        Ma demande
+        Demande en cours
       </button>
-      <aside class="request-panel" aria-label="Votre demande" role="complementary">
+      <aside class="request-panel" aria-label="Demande en cours" role="complementary">
         <div data-request-panel-content></div>
       </aside>
     `;
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const intentLabel = getIntentLabel();
 
     if (!space) {
-      return '<p class="request-summary-empty">Choisis d’abord ce qui t’amène.</p>';
+      return '<p class="request-summary-empty">Un premier choix permet d’orienter votre demande.</p>';
     }
 
     return `
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${extraFields}
           </div>
           <button class="btn btn-primary" type="submit">Envoyer la demande</button>
-          <p class="form-help">Indique simplement un email ou un téléphone pour que je puisse répondre.</p>
+          <p class="form-help">Un email ou un téléphone suffit pour recevoir une réponse.</p>
           <p class="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const space = getSpace();
     const offer = getOffer();
     const tab = panelShell.querySelector('.request-panel-tab');
-    const labelParts = ['Ma demande'];
+    const labelParts = ['Demande en cours'];
     if (space) labelParts.push(space.label);
     if (offer) labelParts.push(offer.label);
 
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!email && !phone) {
       if (status) {
-        status.textContent = 'Indique au moins un email ou un téléphone pour que je puisse te répondre.';
+        status.textContent = 'Indiquer au moins un email ou un téléphone pour recevoir une réponse.';
       }
       const emailField = form.querySelector('[data-request-field="email"]');
       if (emailField) emailField.focus();

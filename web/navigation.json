@@ -2,7 +2,7 @@
   "items": [
     { "label": "Accueil", "href": "index.html" },
     {
-      "label": "Nos propositions",
+      "label": "Propositions",
       "href": "index.html#espaces",
       "children": [
         { "label": "Massage intuitif & réveil énergétique", "href": "massage-intuitif-reveil-energetique.html" },

@@ -2,7 +2,7 @@
   "items": [
     { "label": "Accueil", "href": "l5d2lm-index.html" },
     {
-      "label": "Nos propositions",
+      "label": "Propositions",
       "href": "l5d2lm-index.html#espaces",
       "children": [
         { "label": "Massage intuitif & réveil énergétique", "href": "l5d2lm-massage-intuitif-reveil-energetique.html" },
