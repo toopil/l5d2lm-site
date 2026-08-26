@@ -63,8 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.page-logo').forEach((img) => {
     img.addEventListener('error', () => {
       img.hidden = true;
-      const fallback = img.nextElementSibling;
-      if (fallback) fallback.hidden = false;
+      let fallback = img.nextElementSibling;
+      if (!fallback || !fallback.classList.contains('logo-fallback')) {
+        fallback = document.createElement('div');
+        fallback.className = 'logo-fallback';
+        fallback.innerHTML = 'Les 5 doigts<br>de la main';
+        img.after(fallback);
+      }
+      fallback.hidden = false;
     });
   });
 

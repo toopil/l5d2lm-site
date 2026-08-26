@@ -100,6 +100,13 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   margin: 0; max-width: 280px; text-align: center; color: var(--muted); font-size: 0.95rem;
 }
 .page-logo { width: min(280px, 100%); }
+.logo-fallback {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+}
 
 .section { padding: 1.2rem 0 3.8rem; }
 .section-alt { padding-top: 0.6rem; }
