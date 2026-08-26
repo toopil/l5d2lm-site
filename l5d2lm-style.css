@@ -391,7 +391,7 @@ textarea { resize: vertical; }
   .nav-list > li { margin-bottom: 0.25rem; }
   .nav-group .subnav { display: block; position: static; box-shadow: none; min-width: 0; padding-left: 0.8rem; }
   .hero-grid { grid-template-columns: 1fr; }
-  .hero-mark { order: -1; min-height: 240px; }
+  .hero-mark { min-height: 240px; }
   .service-detail { grid-template-columns: 1fr; gap: 0.2rem; }
   .practical-grid { grid-template-columns: 1fr; }
   .practical-card--wide { grid-column: auto; }
