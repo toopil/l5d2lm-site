@@ -4,6 +4,7 @@
   --sage: #b7d7b0;
   --blue: #c9d6df;
   --earth: #a68c6d;
+  --earth-link: #8a6f4f;
   --ink: #4b3a2f;
   --muted: #6f6258;
   --radius: 28px;
@@ -113,7 +114,15 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   box-shadow: var(--shadow);
 }
 .card { display: flex; flex-direction: column; gap: 0.6rem; }
-.card-link { margin-top: auto; color: var(--earth); font-weight: 700; text-decoration: none; }
+.card-link {
+  margin-top: auto;
+  color: var(--earth-link);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 0.08em;
+}
+.card-link:not(.card-link--request)::after { content: " \2192"; }
 .card-rhythm { font-family: Georgia, "Times New Roman", serif; font-size: 1.06rem; line-height: 1.65; color: var(--ink) !important; }
 
 /* Détails des propositions Corps & expression */
