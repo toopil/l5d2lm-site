@@ -358,8 +358,8 @@ textarea { resize: vertical; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 .copyright { margin-top: 0.8rem; color: var(--muted); font-size: 0.95rem; }
 
-.reveal { opacity: 0; transform: translateY(10px); transition: opacity 400ms ease, transform 400ms ease; }
-.reveal.visible { opacity: 1; transform: none; }
+.js-reveal .reveal { opacity: 0; transform: translateY(10px); transition: opacity 400ms ease, transform 400ms ease; }
+.js-reveal .reveal.visible { opacity: 1; transform: none; }
 
 @media (max-width: 900px) {
   .cards, .cards.two, .cards.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -421,5 +421,5 @@ textarea { resize: vertical; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }
-  .reveal { opacity: 1; transform: none; }
+  .js-reveal .reveal { opacity: 1; transform: none; }
 }

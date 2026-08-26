@@ -1,3 +1,5 @@
+document.documentElement.classList.add('js-reveal');
+
 document.addEventListener('DOMContentLoaded', () => {
   // Garde la ponctuation française avec le mot qui la précède,
   // même lorsque la largeur de la fenêtre change.
