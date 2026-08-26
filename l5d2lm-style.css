@@ -396,7 +396,7 @@ textarea { resize: vertical; }
 @media (max-width: 760px) {
   .nav-toggle { display: block; }
   .site-nav {
-    display: none; position: absolute; top: 72px; left: 1rem; right: 1rem;
+    display: none; position: absolute; top: 76px; left: 1rem; right: 1rem;
     background: var(--paper); padding: 0.7rem; border-radius: 22px; box-shadow: var(--shadow);
   }
   .site-nav.open { display: block; }
