@@ -669,6 +669,8 @@ document.addEventListener('DOMContentLoaded', () => {
     intent: trigger.dataset.requestIntent || ''
   });
 
+  const FORMCARRY_ENDPOINT = 'https://formcarry.com/s/NwuDa3bnZxj';
+
   const sendRequestMail = (form) => {
     const status = form.querySelector('[role="status"]');
     const name = requestState.fields.name.trim();
@@ -709,13 +711,37 @@ document.addEventListener('DOMContentLoaded', () => {
       lines.push(`${label} : ${value}`);
     });
 
+    const subject = subjectParts.join(' — ');
     const body = lines.join('\n');
 
-    if (status) {
-      status.textContent = 'Un email va s’ouvrir avec les infos indiquées. Il restera à confirmer son envoi.';
-    }
+    const fallbackToMail = () => {
+      if (status) {
+        status.textContent = 'Un email va s’ouvrir avec les infos indiquées. Il restera à confirmer son envoi.';
+      }
+      window.location.href = `mailto:l5d2lm@ik.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    };
 
-    window.location.href = `mailto:l5d2lm@ik.me?subject=${encodeURIComponent(subjectParts.join(' — '))}&body=${encodeURIComponent(body)}`;
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    if (status) status.textContent = 'Envoi en cours…';
+
+    fetch(FORMCARRY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, phone, sujet: subject, resume: body })
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('formcarry-error');
+        if (status) {
+          status.textContent = 'Demande envoyée. Vous recevrez une réponse par email ou téléphone.';
+        }
+      })
+      .catch(() => {
+        fallbackToMail();
+      })
+      .finally(() => {
+        if (submitButton) submitButton.disabled = false;
+      });
   };
 
   const initialSelection = getSelectionFromParams();
