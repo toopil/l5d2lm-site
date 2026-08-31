@@ -10,5 +10,4 @@ PAGES = [
     dict(slug="l5d2lm-contact", title="Contact | Les 5 doigts de la main en Valais", description="Contact et demandes pour Les 5 doigts de la main : ateliers, massages, colos, animations ou espaces à découvrir."),
     dict(slug="l5d2lm-mission-declic", title="Page en construction | Les 5 doigts de la main", description="Cette page des 5 doigts de la main est temporairement en construction.", robots="noindex"),
     dict(slug="l5d2lm-mentions-legales", title="Mentions légales | Les 5 doigts de la main", description="Mentions légales du site Les 5 doigts de la main : éditeur, contact et hébergement."),
-    dict(slug="l5d2lm-demo-jeu-de-piste", title="Démo — jeu de piste | Les 5 doigts de la main", description="Page de démonstration interne du composant de navigation par zones cliquables.", robots="noindex"),
 ]
