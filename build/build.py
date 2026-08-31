@@ -18,7 +18,7 @@ from pages import PAGES, BASE_URL  # noqa: E402
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20260831c"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20260831d"  # ex: "20260901" — vide = pas de paramètre de version
 
 
 def render_head(page: dict) -> str:

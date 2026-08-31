@@ -60,6 +60,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Lien de retour vers la page d'où l'on vient (utile quand le formulaire
+  // de contact s'ouvre dans un nouvel onglet, ou via un lien partagé direct).
+  const referrerBack = document.querySelector('[data-referrer-back]');
+  if (referrerBack) {
+    try {
+      const referrer = document.referrer ? new URL(document.referrer) : null;
+      if (referrer && referrer.origin === location.origin && referrer.pathname !== location.pathname) {
+        const link = document.createElement('a');
+        link.href = referrer.href;
+        link.textContent = '← Retour à la page précédente';
+        referrerBack.appendChild(link);
+        referrerBack.hidden = false;
+      }
+    } catch (error) {
+      // document.referrer invalide ou inaccessible : pas de lien, pas d'erreur bloquante.
+    }
+  }
+
   document.querySelectorAll('.page-logo').forEach((img) => {
     img.addEventListener('error', () => {
       img.hidden = true;
