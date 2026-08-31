@@ -278,6 +278,42 @@ document.addEventListener('DOMContentLoaded', () => {
   }[char]));
   const isSingleOffer = (space) => space && Object.keys(space.offers).length === 1;
 
+  // Image à zones cliquables (navigation "jeu de piste") : une galerie = une image
+  // (ou null -> vignette "Photo à venir") + des zones rectangulaires en %.
+  const hotspotGalleries = {
+    'demo-jeu-de-piste': {
+      image: null,
+      zones: [
+        { id: 'haut', label: 'En haut', href: 'l5d2lm-corps-expression.html', top: 4, left: 30, width: 40, height: 25 },
+        { id: 'droite', label: 'À droite', href: 'l5d2lm-colos-sejours.html', top: 35, left: 70, width: 26, height: 30 },
+        { id: 'bas', label: 'En bas', href: 'l5d2lm-animations-participatives.html', top: 70, left: 30, width: 40, height: 26 },
+        { id: 'milieu', label: 'Au milieu', href: 'l5d2lm-espaces-a-decouvrir.html', top: 38, left: 38, width: 24, height: 24 }
+      ]
+    }
+  };
+
+  const renderHotspotZone = (zone) => `
+    <a class="hotspot-image__zone" data-hotspot-zone="${escapeHtml(zone.id)}"
+       href="${escapeHtml(zone.href)}"
+       style="top:${zone.top}%;left:${zone.left}%;width:${zone.width}%;height:${zone.height}%"
+       aria-label="${escapeHtml(zone.label)}">
+      <span class="hotspot-image__label">${escapeHtml(zone.label)}</span>
+    </a>`;
+
+  const renderHotspotGallery = (root, config) => {
+    const media = config.image
+      ? `<img src="${escapeHtml(config.image.src)}" alt="${escapeHtml(config.image.alt)}">`
+      : `<div class="hotspot-image__placeholder">Photo à venir</div>`;
+    root.innerHTML = `${media}<div class="hotspot-image__zones">${config.zones.map(renderHotspotZone).join('')}</div>`;
+  };
+
+  const renderAllHotspotGalleries = () => {
+    document.querySelectorAll('[data-hotspot-gallery]').forEach((root) => {
+      const config = hotspotGalleries[root.dataset.hotspotGallery];
+      if (config) renderHotspotGallery(root, config);
+    });
+  };
+
   const normalizeSelection = (selection) => {
     const category = selection.category || '';
     const space = requestSpaces[category];
@@ -755,6 +791,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (contactRoot) {
     renderAllRequestSurfaces();
   }
+
+  renderAllHotspotGalleries();
 
   document.addEventListener('click', (event) => {
     const requestLink = event.target.closest('a[data-request-category]');
