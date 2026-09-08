@@ -108,6 +108,55 @@ document.addEventListener('DOMContentLoaded', () => {
     items.forEach((item) => observer.observe(item));
   }
 
+  // Cartes retournables (page Massage) : le verso reprend l'ancien bloc détail,
+  // la hauteur de la carte suit la face affichée pour ne jamais couper le texte.
+  const flipCards = document.querySelectorAll('.flip-card');
+  if (flipCards.length) {
+    const setFlipped = (card, flipped) => {
+      const inner = card.querySelector('.flip-card__inner');
+      const front = card.querySelector('.flip-card__face--front');
+      const back = card.querySelector('.flip-card__face--back');
+      const activeFace = flipped ? back : front;
+
+      if (inner && activeFace) inner.style.height = activeFace.scrollHeight + 'px';
+      card.classList.toggle('is-flipped', flipped);
+
+      if (front) {
+        front.toggleAttribute('inert', flipped);
+        front.setAttribute('aria-hidden', String(flipped));
+      }
+      if (back) {
+        back.toggleAttribute('inert', !flipped);
+        back.setAttribute('aria-hidden', String(!flipped));
+      }
+      card.querySelectorAll('[data-flip-action]').forEach((btn) => {
+        btn.setAttribute('aria-expanded', String(flipped));
+      });
+    };
+
+    flipCards.forEach((card) => setFlipped(card, false));
+
+    if (location.hash) {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target && target.classList.contains('flip-card')) setFlipped(target, true);
+    }
+
+    let flipResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(flipResizeTimer);
+      flipResizeTimer = setTimeout(() => {
+        flipCards.forEach((card) => setFlipped(card, card.classList.contains('is-flipped')));
+      }, 150);
+    });
+
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-flip-action]');
+      if (!trigger) return;
+      const card = trigger.closest('.flip-card');
+      if (card) setFlipped(card, trigger.dataset.flipAction === 'open');
+    });
+  }
+
   const requestSpaces = {
     massage: {
       label: 'Massage',
