@@ -112,13 +112,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // la hauteur de la carte suit la face affichée pour ne jamais couper le texte.
   const flipCards = document.querySelectorAll('.flip-card');
   if (flipCards.length) {
+    // Une face en position:absolute épouse la hauteur actuelle de sa carte
+    // (même quand son propre contenu est plus court) : scrollHeight seul ne
+    // peut donc pas mesurer sa hauteur naturelle lors d'un rétrécissement.
+    // On la sort brièvement du flux absolu pour lire sa vraie hauteur.
+    const measureNaturalHeight = (face) => {
+      const previousPosition = face.style.position;
+      face.style.position = 'static';
+      const height = face.scrollHeight;
+      face.style.position = previousPosition;
+      return height;
+    };
+
     const setFlipped = (card, flipped) => {
       const inner = card.querySelector('.flip-card__inner');
       const front = card.querySelector('.flip-card__face--front');
       const back = card.querySelector('.flip-card__face--back');
       const activeFace = flipped ? back : front;
 
-      if (inner && activeFace) inner.style.height = activeFace.scrollHeight + 'px';
+      if (inner && activeFace) inner.style.height = measureNaturalHeight(activeFace) + 'px';
       card.classList.toggle('is-flipped', flipped);
 
       if (front) {
