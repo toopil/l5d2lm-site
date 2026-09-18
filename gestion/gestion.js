@@ -352,6 +352,28 @@
     return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
   };
 
+  // Le nom d'origine (accents, espaces, majuscules) est conservé tel quel en
+  // base (original_filename) ; seul le CHEMIN de stockage doit être neutre,
+  // Supabase Storage refusant certains caractères (espaces, accents) dans
+  // les clés d'objet ("Invalid key").
+  const sanitizeStorageSegment = (filename) => {
+    const trimmed = String(filename || 'fichier').trim();
+    const lastDot = trimmed.lastIndexOf('.');
+    const base = lastDot > 0 ? trimmed.slice(0, lastDot) : trimmed;
+    const ext = lastDot > 0 ? trimmed.slice(lastDot + 1) : '';
+
+    const combiningDiacritics = new RegExp('[̀-ͯ]', 'g');
+    const clean = (part) => part
+      .normalize('NFD').replace(combiningDiacritics, '') // accents -> lettres de base
+      .replace(/[^a-zA-Z0-9._-]+/g, '-') // reste -> tiret
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const cleanBase = clean(base) || 'fichier';
+    const cleanExt = clean(ext);
+    return cleanExt ? `${cleanBase}.${cleanExt}` : cleanBase;
+  };
+
   const isHeicFile = (file) => {
     const type = String(file.type || '').toLowerCase();
     const name = String(file.name || '').toLowerCase();
@@ -585,7 +607,7 @@
           }
 
           const hash = await sha256Hex(blob);
-          const storagePath = `${batch.id}/${item.filename}`;
+          const storagePath = `${batch.id}/${sanitizeStorageSegment(item.filename)}`;
           const contentType = blob.type || item.mimeType || 'application/octet-stream';
 
           const { error: uploadError } = await supabase.storage
