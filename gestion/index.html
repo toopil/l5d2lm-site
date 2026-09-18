@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Gestion | Les 5 doigts de la main</title>
+  <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
+  <link rel="stylesheet" href="gestion-style.css?v=20260919d">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="gestion-media-catalog.js?v=20260919a"></script>
+  <script defer src="gestion.js?v=20260919f"></script>
+</head>
+<body class="gestion-page">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="gestion-header" aria-label="Administration L5D2LM">
+    <a class="gestion-brand" href="../l5d2lm-index.html">Les 5 doigts de la main</a>
+    <span class="gestion-private">Gestion privée</span>
+  </header>
+
+  <main id="contenu" class="gestion-shell">
+    <section class="gestion-hero">
+      <p class="eyebrow">Administration</p>
+      <h1>Gestion L5D2LM</h1>
+      <p class="lead">Un espace privé pour préparer l’administration des photos, textes, catégories et cartes postales.</p>
+    </section>
+
+    <section class="gestion-panel" data-view="loading" aria-live="polite">
+      <h2>Vérification de la session</h2>
+      <p>Connexion à l’espace sécurisé en cours.</p>
+    </section>
+
+    <section class="gestion-panel" data-view="login" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Connexion</p>
+        <h2>Entrer dans la gestion</h2>
+        <p>Utilisez l’email administrateur L5D2LM et le mot de passe créé dans Supabase.</p>
+      </div>
+      <form class="gestion-form" data-login-form>
+        <label>
+          Email
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <label>
+          Mot de passe
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Se connecter</button>
+        <button class="gestion-link-button" type="button" data-show-reset>Mot de passe oublié ou à créer</button>
+      </form>
+    </section>
+
+    <section class="gestion-panel" data-view="password-reset-request" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Mot de passe</p>
+        <h2>Recevoir un lien de réinitialisation</h2>
+        <p>Indiquez l’email administrateur. Supabase enverra un lien pour choisir un nouveau mot de passe.</p>
+      </div>
+      <form class="gestion-form" data-reset-request-form>
+        <label>
+          Email
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <div class="gestion-actions-line">
+          <button class="btn btn-primary" type="submit">Envoyer le lien</button>
+          <button class="btn" type="button" data-show-login>Retour</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="gestion-panel" data-view="password-update" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Nouveau mot de passe</p>
+        <h2>Choisir un mot de passe</h2>
+        <p>Utilisez un mot de passe long et unique. Gardez-le dans votre gestionnaire de mots de passe.</p>
+      </div>
+      <form class="gestion-form" data-password-update-form>
+        <label>
+          Nouveau mot de passe
+          <input type="password" name="password" autocomplete="new-password" minlength="12" required>
+        </label>
+        <label>
+          Confirmer le mot de passe
+          <input type="password" name="password_confirm" autocomplete="new-password" minlength="12" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Enregistrer le mot de passe</button>
+      </form>
+    </section>
+
+    <section class="gestion-panel" data-view="mfa-setup" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Sécurité</p>
+        <h2>Activer la double authentification</h2>
+        <p>Scannez le QR code avec une application d’authentification, puis indiquez le code à 6 chiffres.</p>
+      </div>
+      <div class="mfa-grid">
+        <div class="mfa-qr-card">
+          <button class="btn btn-primary" type="button" data-enroll-mfa>Créer le QR code MFA</button>
+          <img data-mfa-qr alt="QR code pour activer la double authentification" hidden>
+          <p class="mfa-secret" data-mfa-secret hidden></p>
+        </div>
+        <form class="gestion-form" data-verify-new-mfa>
+          <label>
+            Code de l’application
+            <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,}" required>
+          </label>
+          <button class="btn btn-primary" type="submit">Valider le MFA</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="gestion-panel" data-view="mfa-challenge" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Double authentification</p>
+        <h2>Confirmer le code de sécurité</h2>
+        <p>Ouvrez votre application d’authentification et indiquez le code à 6 chiffres.</p>
+      </div>
+      <form class="gestion-form" data-verify-mfa>
+        <label>
+          Code de l’application
+          <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,}" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Vérifier</button>
+      </form>
+    </section>
+
+    <section class="gestion-panel gestion-panel--warning" data-view="blocked" hidden>
+      <div class="gestion-panel__heading">
+        <p class="eyebrow">Accès refusé</p>
+        <h2>Ce compte n’a pas accès à L5D2LM</h2>
+        <p>Le compte connecté n’est pas autorisé comme administrateur L5D2LM, ou la double authentification n’est pas complète.</p>
+      </div>
+      <button class="btn" type="button" data-sign-out>Se déconnecter</button>
+    </section>
+
+    <section class="gestion-panel" data-view="admin" hidden>
+      <div class="gestion-admin-top">
+        <div>
+          <p class="eyebrow">Accès sécurisé</p>
+          <h2>Tableau de bord</h2>
+          <p data-admin-summary>Connecté avec double authentification.</p>
+        </div>
+        <button class="btn" type="button" data-sign-out>Se déconnecter</button>
+      </div>
+
+      <nav class="gestion-tabs" aria-label="Navigation de gestion">
+        <button type="button" class="gestion-tab is-active" data-tab="photos">Photos</button>
+        <button type="button" class="gestion-tab" data-tab="textes">Textes</button>
+        <button type="button" class="gestion-tab" data-tab="categories">Catégories</button>
+        <button type="button" class="gestion-tab" data-tab="cartes">Cartes postales</button>
+        <button type="button" class="gestion-tab" data-tab="affichage">Affichage du site</button>
+        <button type="button" class="gestion-tab" data-tab="corbeille">Corbeille</button>
+      </nav>
+
+      <div class="gestion-workspace">
+        <article class="gestion-card is-active" data-panel="photos">
+          <div class="media-heading">
+            <div>
+              <h3>Photos</h3>
+              <p>Importez vos propres photos depuis votre téléphone ou votre ordinateur, ou reprenez les images déjà utilisées sur le site. Tout arrive en brouillon, avec les droits à vérifier.</p>
+            </div>
+            <div class="media-counters" aria-label="Résumé de la médiathèque">
+              <span><strong data-media-total>0</strong> photos</span>
+              <span><strong data-media-imported>0</strong> importées</span>
+              <span><strong data-media-selected>0</strong> sélectionnées</span>
+            </div>
+          </div>
+
+          <div class="media-upload-zone">
+            <label class="btn btn-primary media-upload-button">
+              Importer depuis mon appareil
+              <input type="file" data-media-upload-input accept="image/*,.heic,.heif" multiple hidden>
+            </label>
+            <p class="media-upload-hint">JPEG, PNG, WEBP, HEIC/HEIF. Plusieurs photos à la fois.</p>
+          </div>
+
+          <div class="media-toolbar" aria-label="Actions sur les photos">
+            <div class="media-filter" data-media-filters></div>
+            <div class="media-actions">
+              <button class="btn" type="button" data-media-select-visible>Tout sélectionner</button>
+              <button class="btn" type="button" data-media-clear-selection>Effacer la sélection</button>
+              <button class="btn btn-primary" type="button" data-media-import>Importer la sélection</button>
+            </div>
+          </div>
+
+          <div class="media-import-note">
+            <p><strong>Important :</strong> l’import ne publie rien automatiquement. Les photos arrivent en brouillon, avec les droits à vérifier.</p>
+          </div>
+
+          <div class="media-grid" data-media-grid aria-live="polite"></div>
+        </article>
+        <article class="gestion-card" data-panel="textes">
+          <h3>Textes</h3>
+          <p>Les textes administrables seront structurés par page et par bloc, avec brouillon, aperçu et publication.</p>
+        </article>
+        <article class="gestion-card" data-panel="categories">
+          <h3>Catégories</h3>
+          <p>Les propositions pourront être ordonnées, masquées, publiées et organisées en hiérarchie simple.</p>
+        </article>
+        <article class="gestion-card" data-panel="cartes">
+          <h3>Cartes postales</h3>
+          <p>Les cartes pourront utiliser des photos fixes, aléatoires ou semi-aléatoires, sans répétition immédiate.</p>
+        </article>
+        <article class="gestion-card" data-panel="affichage">
+          <h3>Affichage du site</h3>
+          <p>Les réglages publiés contrôleront ce qui apparaît publiquement, sans trou dans la mise en page.</p>
+        </article>
+        <article class="gestion-card" data-panel="corbeille">
+          <h3>Corbeille</h3>
+          <p>Les suppressions ordinaires resteront récupérables avant suppression définitive.</p>
+        </article>
+      </div>
+    </section>
+
+    <p class="gestion-status" data-status role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /gestion/
 
 Sitemap: https://toopil.github.io/l5d2lm-site/sitemap.xml
