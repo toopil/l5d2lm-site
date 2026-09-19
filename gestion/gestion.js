@@ -133,6 +133,7 @@
     adminSummary.textContent = `${email} est connecté avec une session MFA valide.`;
     showView('admin');
     setStatus('Accès sécurisé confirmé.', 'success');
+    await loadCategoriesPanel();
     await loadMediaPanel();
     return true;
   };
@@ -329,6 +330,7 @@
   // dans l5d2lm_media (rien n'est publié automatiquement).
   const mediaGrid = document.querySelector('[data-media-grid]');
   const mediaFilters = document.querySelector('[data-media-filters]');
+  const mediaRightsFilters = document.querySelector('[data-media-rights-filters]');
   const mediaTotalEl = document.querySelector('[data-media-total]');
   const mediaImportedEl = document.querySelector('[data-media-imported]');
   const mediaSelectedEl = document.querySelector('[data-media-selected]');
@@ -336,15 +338,51 @@
   const mediaClearSelectionButton = document.querySelector('[data-media-clear-selection]');
   const mediaImportButton = document.querySelector('[data-media-import]');
   const mediaUploadInput = document.querySelector('[data-media-upload-input]');
+  const mediaBulkPanel = document.querySelector('[data-media-bulk-panel]');
+  const mediaBulkCountEl = document.querySelector('[data-media-bulk-count]');
+  const rightsButtonsContainer = document.querySelector('[data-rights-buttons]');
+  const bulkCategoryChecks = document.querySelector('[data-bulk-category-checks]');
+
+  // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
+  const categoriesTree = document.querySelector('[data-categories-tree]');
+  const categoryNewButton = document.querySelector('[data-category-new]');
+  const categorySeedButton = document.querySelector('[data-category-seed]');
+  const categoryForm = document.querySelector('[data-category-form]');
+  const categoryParentSelect = document.querySelector('[data-category-parent-select]');
+  const categoryCancelButton = document.querySelector('[data-category-cancel]');
+
+  const RIGHTS_STATUSES = [
+    { value: 'authorized', label: 'Autorisation OK' },
+    { value: 'faces_to_blur', label: 'Visages à flouter' },
+    { value: 'needs_review', label: 'À vérifier' },
+    { value: 'do_not_publish', label: 'Ne pas publier' }
+  ];
+
+  const CATEGORY_STATUS_LABEL = { draft: 'Brouillon', published: 'Publié', hidden: 'Masqué' };
+
+  // Regex partagée (diacritiques Unicode) pour le nom de fichier de stockage
+  // et pour les identifiants (slugs) de catégorie.
+  const COMBINING_DIACRITICS = new RegExp('[̀-ͯ]', 'g');
+
+  const slugify = (text) => String(text || '')
+    .normalize('NFD').replace(COMBINING_DIACRITICS, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
   const mediaState = {
     selected: new Set(),
     importedFilenames: new Set(),
+    importedByFilename: new Map(),
+    mediaSections: new Map(),
     localUploads: [],
     activeFilter: 'all',
+    rightsFilter: 'all',
     loaded: false,
     uploadCounter: 0
   };
+
+  const sectionsState = { items: [] };
 
   const sha256Hex = async (blob) => {
     const buffer = await blob.arrayBuffer();
@@ -362,9 +400,8 @@
     const base = lastDot > 0 ? trimmed.slice(0, lastDot) : trimmed;
     const ext = lastDot > 0 ? trimmed.slice(lastDot + 1) : '';
 
-    const combiningDiacritics = new RegExp('[̀-ͯ]', 'g');
     const clean = (part) => part
-      .normalize('NFD').replace(combiningDiacritics, '') // accents -> lettres de base
+      .normalize('NFD').replace(COMBINING_DIACRITICS, '') // accents -> lettres de base
       .replace(/[^a-zA-Z0-9._-]+/g, '-') // reste -> tiret
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -385,18 +422,42 @@
   const allMedia = () => [...mediaState.localUploads, ...allSiteMedia()];
 
   const visibleMedia = () => {
-    const items = allMedia();
-    if (mediaState.activeFilter === 'all') return items;
-    if (mediaState.activeFilter === 'new-upload') return items.filter((item) => item.kind === 'upload');
-    return items.filter((item) => item.sectionSlug === mediaState.activeFilter);
+    let items = allMedia();
+    if (mediaState.activeFilter === 'new-upload') items = items.filter((item) => item.kind === 'upload');
+    else if (mediaState.activeFilter !== 'all') items = items.filter((item) => item.sectionSlug === mediaState.activeFilter);
+
+    if (mediaState.rightsFilter !== 'all') {
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        return info && info.rights_status === mediaState.rightsFilter;
+      });
+    }
+    return items;
   };
 
-  const isItemImported = (item) => mediaState.importedFilenames.has(item.filename);
+  const isItemImported = (item) => mediaState.importedByFilename.has(item.filename);
+
+  const selectedImportedInfos = () => {
+    const infos = [];
+    allMedia().forEach((item) => {
+      if (!mediaState.selected.has(item.id)) return;
+      const info = mediaState.importedByFilename.get(item.filename);
+      if (info) infos.push(info);
+    });
+    return infos;
+  };
+
+  const updateBulkPanel = () => {
+    const count = selectedImportedInfos().length;
+    if (mediaBulkCountEl) mediaBulkCountEl.textContent = String(count);
+    if (mediaBulkPanel) mediaBulkPanel.hidden = count === 0;
+  };
 
   const updateMediaCounters = () => {
     if (mediaTotalEl) mediaTotalEl.textContent = String(allMedia().length);
-    if (mediaImportedEl) mediaImportedEl.textContent = String(mediaState.importedFilenames.size);
+    if (mediaImportedEl) mediaImportedEl.textContent = String(mediaState.importedByFilename.size);
     if (mediaSelectedEl) mediaSelectedEl.textContent = String(mediaState.selected.size);
+    updateBulkPanel();
   };
 
   const renderMediaFilters = () => {
@@ -420,6 +481,24 @@
     });
   };
 
+  const renderRightsFilters = () => {
+    if (!mediaRightsFilters) return;
+    const options = [{ value: 'all', label: 'Tous les droits' }, ...RIGHTS_STATUSES];
+    mediaRightsFilters.innerHTML = '';
+    options.forEach(({ value, label }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.classList.toggle('is-active', mediaState.rightsFilter === value);
+      button.addEventListener('click', () => {
+        mediaState.rightsFilter = value;
+        renderRightsFilters();
+        renderMediaGrid();
+      });
+      mediaRightsFilters.appendChild(button);
+    });
+  };
+
   const renderMediaGrid = () => {
     if (!mediaGrid) return;
     mediaGrid.innerHTML = '';
@@ -437,7 +516,6 @@
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.checked = mediaState.selected.has(item.id);
-      checkbox.disabled = isImported;
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) mediaState.selected.add(item.id);
         else mediaState.selected.delete(item.id);
@@ -445,7 +523,7 @@
         updateMediaCounters();
       });
       label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(isImported ? 'Déjà importée' : 'Sélectionner'));
+      label.appendChild(document.createTextNode(isImported ? 'Sélectionner (déjà importée)' : 'Sélectionner'));
       card.appendChild(label);
 
       const thumb = document.createElement('div');
@@ -484,6 +562,67 @@
       statusBadge.textContent = isImported ? 'Importée' : 'À importer';
       badges.appendChild(statusBadge);
       meta.appendChild(badges);
+
+      if (isImported) {
+        const info = mediaState.importedByFilename.get(item.filename);
+
+        const rightsRow = document.createElement('div');
+        rightsRow.className = 'media-item__rights';
+
+        const rightsBadge = document.createElement('span');
+        const rightsDef = RIGHTS_STATUSES.find((entry) => entry.value === info.rights_status);
+        rightsBadge.className = `media-badge media-badge--rights-${info.rights_status}`;
+        rightsBadge.textContent = rightsDef ? rightsDef.label : info.rights_status;
+        rightsRow.appendChild(rightsBadge);
+
+        const favoriteButton = document.createElement('button');
+        favoriteButton.type = 'button';
+        favoriteButton.className = 'media-item__favorite';
+        favoriteButton.textContent = info.favorite ? '★' : '☆';
+        favoriteButton.setAttribute('aria-label', info.favorite ? 'Retirer des favoris' : 'Marquer comme favori');
+        favoriteButton.addEventListener('click', () => toggleFavorite(info));
+        rightsRow.appendChild(favoriteButton);
+
+        meta.appendChild(rightsRow);
+
+        const assignments = mediaState.mediaSections.get(info.id) || new Map();
+        if (assignments.size) {
+          const sectionsRow = document.createElement('div');
+          sectionsRow.className = 'media-item__sections';
+          Array.from(assignments.entries())
+            .sort((a, b) => a[1] - b[1])
+            .forEach(([sectionId, order]) => {
+              const section = sectionsState.items.find((entry) => entry.id === sectionId);
+              if (!section) return;
+              const chip = document.createElement('span');
+              chip.className = 'media-badge media-item__section-chip';
+
+              const label = document.createElement('span');
+              label.textContent = `${section.title} · ordre ${order}`;
+              chip.appendChild(label);
+
+              const upButton = document.createElement('button');
+              upButton.type = 'button';
+              upButton.className = 'media-item__chip-move';
+              upButton.textContent = '▲';
+              upButton.setAttribute('aria-label', `Faire remonter dans ${section.title}`);
+              upButton.addEventListener('click', () => moveMediaInSection(info.id, sectionId, -1));
+              chip.appendChild(upButton);
+
+              const downButton = document.createElement('button');
+              downButton.type = 'button';
+              downButton.className = 'media-item__chip-move';
+              downButton.textContent = '▼';
+              downButton.setAttribute('aria-label', `Faire descendre dans ${section.title}`);
+              downButton.addEventListener('click', () => moveMediaInSection(info.id, sectionId, 1));
+              chip.appendChild(downButton);
+
+              sectionsRow.appendChild(chip);
+            });
+          meta.appendChild(sectionsRow);
+        }
+      }
+
       card.appendChild(meta);
 
       if (isUpload && !isImported) {
@@ -540,11 +679,209 @@
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('l5d2lm_media')
-      .select('original_filename')
+      .select('id, original_filename, rights_status, favorite, publish_status')
       .in('original_filename', filenames)
       .is('deleted_at', null);
     if (error) throw error;
-    mediaState.importedFilenames = new Set((data || []).map((row) => row.original_filename));
+    mediaState.importedByFilename = new Map((data || []).map((row) => [row.original_filename, row]));
+    mediaState.importedFilenames = new Set(mediaState.importedByFilename.keys());
+    await fetchMediaSections((data || []).map((row) => row.id));
+  };
+
+  const fetchMediaSections = async (mediaIds) => {
+    mediaState.mediaSections = new Map();
+    if (!mediaIds.length) return;
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('l5d2lm_media_sections')
+      .select('media_id, section_id, sort_order')
+      .in('media_id', mediaIds);
+    if (error) throw error;
+    (data || []).forEach(({ media_id: mediaId, section_id: sectionId, sort_order: order }) => {
+      if (!mediaState.mediaSections.has(mediaId)) mediaState.mediaSections.set(mediaId, new Map());
+      mediaState.mediaSections.get(mediaId).set(sectionId, order);
+    });
+  };
+
+  const fetchSections = async () => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('l5d2lm_sections')
+      .select('id, parent_id, slug, title, status, sort_order')
+      .is('deleted_at', null)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    sectionsState.items = data || [];
+  };
+
+  const fetchSectionMediaCounts = async () => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase.from('l5d2lm_media_sections').select('section_id');
+    if (error) throw error;
+    const counts = new Map();
+    (data || []).forEach(({ section_id: sectionId }) => counts.set(sectionId, (counts.get(sectionId) || 0) + 1));
+    return counts;
+  };
+
+  const renderBulkCategoryChecks = () => {
+    if (!bulkCategoryChecks) return;
+    bulkCategoryChecks.innerHTML = '';
+    if (!sectionsState.items.length) {
+      bulkCategoryChecks.textContent = 'Créez d’abord une catégorie dans l’onglet Catégories.';
+      return;
+    }
+    sectionsState.items.forEach((section) => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = section.id;
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(section.title));
+      bulkCategoryChecks.appendChild(label);
+    });
+  };
+
+  const toggleFavorite = async (info) => {
+    const supabase = getSupabase();
+    const newValue = !info.favorite;
+    const { error } = await supabase.from('l5d2lm_media').update({ favorite: newValue }).eq('id', info.id);
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre à jour le favori.', 'error');
+      return;
+    }
+    info.favorite = newValue;
+    renderMediaGrid();
+  };
+
+  // Ordre d'apparition d'une photo au sein d'une catégorie (du haut de page
+  // vers le bas). Limité aux photos actuellement connues dans cette session
+  // (catalogue du site + imports récents), pas une vue complète de la base.
+  const moveMediaInSection = async (mediaId, sectionId, direction) => {
+    const entries = [];
+    mediaState.mediaSections.forEach((sections, mid) => {
+      if (sections.has(sectionId)) entries.push({ mediaId: mid, order: sections.get(sectionId) });
+    });
+    entries.sort((a, b) => a.order - b.order);
+
+    const index = entries.findIndex((entry) => entry.mediaId === mediaId);
+    const targetIndex = index + direction;
+    if (index === -1 || targetIndex < 0 || targetIndex >= entries.length) return;
+
+    const current = entries[index];
+    const target = entries[targetIndex];
+    const supabase = getSupabase();
+
+    try {
+      const { error: error1 } = await supabase
+        .from('l5d2lm_media_sections')
+        .update({ sort_order: target.order })
+        .eq('media_id', current.mediaId)
+        .eq('section_id', sectionId);
+      if (error1) throw error1;
+
+      const { error: error2 } = await supabase
+        .from('l5d2lm_media_sections')
+        .update({ sort_order: current.order })
+        .eq('media_id', target.mediaId)
+        .eq('section_id', sectionId);
+      if (error2) throw error2;
+
+      await fetchMediaSections(Array.from(mediaState.importedByFilename.values()).map((info) => info.id));
+      renderMediaGrid();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de réordonner cette photo.', 'error');
+    }
+  };
+
+  const handleBulkRightsChange = async (status) => {
+    const infos = selectedImportedInfos();
+    if (!infos.length) {
+      setStatus('Sélectionnez au moins une photo déjà importée.', 'error');
+      return;
+    }
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media').update({ rights_status: status }).in('id', infos.map((info) => info.id));
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre à jour les droits.', 'error');
+      return;
+    }
+    infos.forEach((info) => { info.rights_status = status; });
+    renderMediaGrid();
+    setStatus(`Droits mis à jour pour ${infos.length} photo(s).`, 'success');
+  };
+
+  const handleBulkFavorite = async (value) => {
+    const infos = selectedImportedInfos();
+    if (!infos.length) {
+      setStatus('Sélectionnez au moins une photo déjà importée.', 'error');
+      return;
+    }
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media').update({ favorite: value }).in('id', infos.map((info) => info.id));
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre à jour les favoris.', 'error');
+      return;
+    }
+    infos.forEach((info) => { info.favorite = value; });
+    renderMediaGrid();
+    setStatus(`Favori ${value ? 'ajouté' : 'retiré'} pour ${infos.length} photo(s).`, 'success');
+  };
+
+  const handleBulkCategoryApply = async (mode) => {
+    const infos = selectedImportedInfos();
+    const checkedSectionIds = bulkCategoryChecks
+      ? Array.from(bulkCategoryChecks.querySelectorAll('input:checked')).map((el) => el.value)
+      : [];
+
+    if (!infos.length || !checkedSectionIds.length) {
+      setStatus('Sélectionnez des photos importées et au moins une catégorie.', 'error');
+      return;
+    }
+
+    const supabase = getSupabase();
+
+    if (mode === 'add') {
+      // sort_order place la photo en fin de catégorie (ordre d'apparition,
+      // du haut de page vers le bas) : on compte combien de photos sont déjà
+      // dans CETTE catégorie, pas combien de catégories a cette photo.
+      const countInSection = (sectionId) => {
+        let count = 0;
+        mediaState.mediaSections.forEach((sections) => { if (sections.has(sectionId)) count += 1; });
+        return count;
+      };
+      const sectionCounters = new Map(checkedSectionIds.map((sectionId) => [sectionId, countInSection(sectionId)]));
+
+      const rows = [];
+      infos.forEach((info) => {
+        checkedSectionIds.forEach((sectionId) => {
+          if (mediaState.mediaSections.get(info.id)?.has(sectionId)) return; // déjà dans cette catégorie
+          const order = sectionCounters.get(sectionId) * 10;
+          sectionCounters.set(sectionId, sectionCounters.get(sectionId) + 1);
+          rows.push({ media_id: info.id, section_id: sectionId, sort_order: order });
+        });
+      });
+      const { error } = await supabase
+        .from('l5d2lm_media_sections')
+        .upsert(rows, { onConflict: 'media_id,section_id', ignoreDuplicates: true });
+      if (error) {
+        setStatus(error.message || 'Impossible d’ajouter les catégories.', 'error');
+        return;
+      }
+    } else {
+      const { error } = await supabase
+        .from('l5d2lm_media_sections')
+        .delete()
+        .in('media_id', infos.map((info) => info.id))
+        .in('section_id', checkedSectionIds);
+      if (error) {
+        setStatus(error.message || 'Impossible de retirer les catégories.', 'error');
+        return;
+      }
+    }
+
+    await fetchMediaSections(Array.from(mediaState.importedByFilename.values()).map((info) => info.id));
+    renderMediaGrid();
+    setStatus(`Catégories ${mode === 'add' ? 'ajoutées' : 'retirées'} pour ${infos.length} photo(s).`, 'success');
   };
 
   const loadMediaPanel = async () => {
@@ -556,13 +893,15 @@
     }
     mediaState.loaded = true;
     renderMediaFilters();
+    renderRightsFilters();
     renderMediaGrid();
   };
 
   const handleSelectVisible = () => {
-    visibleMedia().forEach((item) => {
-      if (!isItemImported(item)) mediaState.selected.add(item.id);
-    });
+    // Sélectionne tout ce qui est visible : les photos pas encore importées
+    // (pour "Importer la sélection") et celles déjà importées (pour les
+    // actions groupées droits/favori/catégories, qui ignorent les autres).
+    visibleMedia().forEach((item) => mediaState.selected.add(item.id));
     renderMediaGrid();
   };
 
@@ -615,18 +954,30 @@
             .upload(storagePath, blob, { contentType, upsert: false });
           if (uploadError) throw uploadError;
 
-          const { error: insertError } = await supabase.from('l5d2lm_media').insert({
-            original_filename: item.filename,
-            original_mime_type: contentType,
-            original_byte_size: blob.size,
-            original_sha256: hash,
-            original_private_path: storagePath,
-            upload_batch_id: batch.id
-          });
+          const { data: insertedRow, error: insertError } = await supabase
+            .from('l5d2lm_media')
+            .insert({
+              original_filename: item.filename,
+              original_mime_type: contentType,
+              original_byte_size: blob.size,
+              original_sha256: hash,
+              original_private_path: storagePath,
+              upload_batch_id: batch.id
+            })
+            .select('id, original_filename, rights_status, favorite, publish_status')
+            .single();
 
           if (insertError) {
             if (insertError.code === '23505') {
               duplicates += 1;
+              const { data: existingRow } = await supabase
+                .from('l5d2lm_media')
+                .select('id, original_filename, rights_status, favorite, publish_status')
+                .eq('original_sha256', hash)
+                .is('deleted_at', null)
+                .limit(1)
+                .maybeSingle();
+              if (existingRow) mediaState.importedByFilename.set(item.filename, existingRow);
               mediaState.importedFilenames.add(item.filename);
               mediaState.selected.delete(item.id);
               continue;
@@ -634,9 +985,9 @@
             throw insertError;
           }
 
+          mediaState.importedByFilename.set(item.filename, insertedRow);
           mediaState.importedFilenames.add(item.filename);
           mediaState.selected.delete(item.id);
-          if (item.kind === 'upload' && item.src) URL.revokeObjectURL(item.src);
           imported += 1;
         } catch (itemError) {
           const reason = itemError?.message || itemError?.error_description || String(itemError);
@@ -669,6 +1020,303 @@
       handleFilesSelected(mediaUploadInput.files);
       mediaUploadInput.value = '';
     });
+  }
+  if (rightsButtonsContainer) {
+    RIGHTS_STATUSES.forEach(({ value, label }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn';
+      button.textContent = label;
+      button.addEventListener('click', () => handleBulkRightsChange(value));
+      rightsButtonsContainer.appendChild(button);
+    });
+  }
+  document.querySelectorAll('[data-bulk-favorite]').forEach((button) => {
+    button.addEventListener('click', () => handleBulkFavorite(button.dataset.bulkFavorite === 'true'));
+  });
+  document.querySelectorAll('[data-bulk-category-apply]').forEach((button) => {
+    button.addEventListener('click', () => handleBulkCategoryApply(button.dataset.bulkCategoryApply));
+  });
+
+  // Onglet Catégories : créer/modifier/ordonner/publier-masquer/supprimer
+  // les propositions (l5d2lm_sections), jusqu'à ~3 niveaux via parent_id.
+  let editingCategoryId = null;
+
+  const openCategoryForm = (category = null) => {
+    if (!categoryForm) return;
+    editingCategoryId = category ? category.id : null;
+    categoryForm.hidden = false;
+    categoryForm.querySelector('[name="title"]').value = category ? category.title : '';
+    categoryForm.querySelector('[name="slug"]').value = category ? category.slug : '';
+    categoryForm.querySelector('[name="parent_id"]').value = category?.parent_id || '';
+  };
+
+  const closeCategoryForm = () => {
+    if (!categoryForm) return;
+    categoryForm.hidden = true;
+    categoryForm.reset();
+    editingCategoryId = null;
+  };
+
+  const renderCategoryParentOptions = () => {
+    if (!categoryParentSelect) return;
+    const current = categoryParentSelect.value;
+    categoryParentSelect.innerHTML = '<option value="">— Aucune (premier niveau) —</option>';
+    sectionsState.items.forEach((section) => {
+      if (section.id === editingCategoryId) return; // une catégorie ne peut pas être son propre parent
+      const option = document.createElement('option');
+      option.value = section.id;
+      option.textContent = section.title;
+      categoryParentSelect.appendChild(option);
+    });
+    categoryParentSelect.value = current;
+  };
+
+  const moveCategory = async (section, siblings, index, direction) => {
+    const target = siblings[index + direction];
+    if (!target) return;
+    const supabase = getSupabase();
+    const a = section.sort_order;
+    const b = target.sort_order;
+    try {
+      const { error: error1 } = await supabase.from('l5d2lm_sections').update({ sort_order: b }).eq('id', section.id);
+      if (error1) throw error1;
+      const { error: error2 } = await supabase.from('l5d2lm_sections').update({ sort_order: a }).eq('id', target.id);
+      if (error2) throw error2;
+      await loadCategoriesPanel();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de réordonner les catégories.', 'error');
+    }
+  };
+
+  const changeCategoryStatus = async (section, status) => {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_sections').update({ status }).eq('id', section.id);
+    if (error) {
+      setStatus(error.message || 'Impossible de changer le statut.', 'error');
+      return;
+    }
+    setStatus(`« ${section.title} » : ${CATEGORY_STATUS_LABEL[status] || status}.`, 'success');
+    await loadCategoriesPanel();
+  };
+
+  const deleteCategory = async (section) => {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('l5d2lm_sections')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', section.id);
+    if (error) {
+      setStatus(error.message || 'Impossible de supprimer la catégorie.', 'error');
+      return;
+    }
+    setStatus(`« ${section.title} » mise à la corbeille.`, 'success');
+    await loadCategoriesPanel();
+  };
+
+  const renderCategoryTree = async () => {
+    if (!categoriesTree) return;
+    categoriesTree.innerHTML = '';
+
+    let counts = new Map();
+    try {
+      counts = await fetchSectionMediaCounts();
+    } catch (error) {
+      // Le compte de photos reste indicatif : une erreur ici n'empêche pas de gérer les catégories.
+    }
+
+    if (!sectionsState.items.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'Aucune catégorie pour l’instant. Créez-en une, ou reprenez celles déjà utilisées sur le site.';
+      categoriesTree.appendChild(empty);
+      return;
+    }
+
+    const renderLevel = (parentId, depth) => {
+      const siblings = sectionsState.items
+        .filter((section) => (section.parent_id || null) === parentId)
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+      siblings.forEach((section, index) => {
+        const node = document.createElement('div');
+        node.className = `category-node category-node--status-${section.status}`;
+        node.style.marginLeft = `${depth * 1.5}rem`;
+
+        const head = document.createElement('div');
+        head.className = 'category-node__head';
+
+        const title = document.createElement('span');
+        title.className = 'category-node__title';
+        title.textContent = section.title;
+        head.appendChild(title);
+
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'media-badge';
+        statusBadge.textContent = CATEGORY_STATUS_LABEL[section.status] || section.status;
+        head.appendChild(statusBadge);
+
+        const count = counts.get(section.id) || 0;
+        const meta = document.createElement('span');
+        meta.className = 'category-node__meta';
+        meta.textContent = `${count} photo(s)`;
+        head.appendChild(meta);
+
+        node.appendChild(head);
+
+        if (section.status === 'published' && count === 0) {
+          const warning = document.createElement('p');
+          warning.className = 'category-node__warning';
+          warning.textContent = 'Publiée sans aucune photo : elle n’apparaîtra pas correctement publiquement.';
+          node.appendChild(warning);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'category-node__actions';
+
+        const upButton = document.createElement('button');
+        upButton.type = 'button';
+        upButton.textContent = '↑ Monter';
+        upButton.disabled = index === 0;
+        upButton.addEventListener('click', () => moveCategory(section, siblings, index, -1));
+        actions.appendChild(upButton);
+
+        const downButton = document.createElement('button');
+        downButton.type = 'button';
+        downButton.textContent = '↓ Descendre';
+        downButton.disabled = index === siblings.length - 1;
+        downButton.addEventListener('click', () => moveCategory(section, siblings, index, 1));
+        actions.appendChild(downButton);
+
+        Object.keys(CATEGORY_STATUS_LABEL)
+          .filter((status) => status !== section.status)
+          .forEach((status) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = { draft: 'Mettre en brouillon', published: 'Publier', hidden: 'Masquer' }[status];
+            button.addEventListener('click', () => changeCategoryStatus(section, status));
+            actions.appendChild(button);
+          });
+
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.textContent = 'Modifier';
+        editButton.addEventListener('click', () => {
+          renderCategoryParentOptions();
+          openCategoryForm(section);
+        });
+        actions.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.addEventListener('click', () => deleteCategory(section));
+        actions.appendChild(deleteButton);
+
+        node.appendChild(actions);
+        categoriesTree.appendChild(node);
+
+        renderLevel(section.id, depth + 1);
+      });
+    };
+
+    renderLevel(null, 0);
+  };
+
+  const handleCategorySubmit = async (event) => {
+    event.preventDefault();
+    const form = new FormData(categoryForm);
+    const title = String(form.get('title') || '').trim();
+    const slug = String(form.get('slug') || '').trim() || slugify(title);
+    const parentId = String(form.get('parent_id') || '') || null;
+
+    if (!title || !slug) {
+      setStatus('Le titre et l’identifiant sont obligatoires.', 'error');
+      return;
+    }
+
+    const supabase = getSupabase();
+    try {
+      if (editingCategoryId) {
+        const { error } = await supabase
+          .from('l5d2lm_sections')
+          .update({ title, slug, parent_id: parentId })
+          .eq('id', editingCategoryId);
+        if (error) throw error;
+        setStatus(`Catégorie « ${title} » modifiée.`, 'success');
+      } else {
+        const siblings = sectionsState.items.filter((section) => (section.parent_id || null) === parentId);
+        const maxOrder = siblings.reduce((max, section) => Math.max(max, section.sort_order || 0), 0);
+        const { error } = await supabase.from('l5d2lm_sections').insert({
+          title,
+          slug,
+          parent_id: parentId,
+          status: 'draft',
+          sort_order: maxOrder + 10
+        });
+        if (error) throw error;
+        setStatus(`Catégorie « ${title} » créée en brouillon.`, 'success');
+      }
+      closeCategoryForm();
+      await loadCategoriesPanel();
+    } catch (error) {
+      setStatus(error.message || 'Impossible d’enregistrer la catégorie.', 'error');
+    }
+  };
+
+  const handleCategorySeed = async () => {
+    const supabase = getSupabase();
+    const existingSlugs = new Set(sectionsState.items.map((section) => section.slug));
+    const toCreate = allSections().filter((section) => !existingSlugs.has(section.slug));
+    if (!toCreate.length) {
+      setStatus('Les catégories du site existent déjà.', 'error');
+      return;
+    }
+    const rows = toCreate.map((section) => ({
+      title: section.title,
+      slug: section.slug,
+      status: 'published',
+      sort_order: section.sortOrder || 0
+    }));
+    const { error } = await supabase.from('l5d2lm_sections').insert(rows);
+    if (error) {
+      setStatus(error.message || 'Impossible de créer les catégories.', 'error');
+      return;
+    }
+    setStatus(`${rows.length} catégorie(s) créée(s) depuis le catalogue du site.`, 'success');
+    await loadCategoriesPanel();
+  };
+
+  const loadCategoriesPanel = async () => {
+    if (!categoriesTree) return;
+    try {
+      await fetchSections();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de charger les catégories.', 'error');
+      return;
+    }
+    renderCategoryParentOptions();
+    await renderCategoryTree();
+    renderBulkCategoryChecks();
+  };
+
+  if (categoryNewButton) {
+    categoryNewButton.addEventListener('click', () => {
+      renderCategoryParentOptions();
+      openCategoryForm();
+    });
+  }
+  if (categorySeedButton) categorySeedButton.addEventListener('click', handleCategorySeed);
+  if (categoryCancelButton) categoryCancelButton.addEventListener('click', closeCategoryForm);
+  if (categoryForm) {
+    categoryForm.addEventListener('submit', handleCategorySubmit);
+    const titleInput = categoryForm.querySelector('[name="title"]');
+    if (titleInput) {
+      titleInput.addEventListener('input', (event) => {
+        if (editingCategoryId) return; // ne pas re-générer le slug en modification
+        const slugField = categoryForm.querySelector('[name="slug"]');
+        if (slugField) slugField.value = slugify(event.target.value);
+      });
+    }
   }
 
   const init = async () => {

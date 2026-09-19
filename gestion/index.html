@@ -8,10 +8,10 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260919d">
+  <link rel="stylesheet" href="gestion-style.css?v=20260919f">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260919g"></script>
+  <script defer src="gestion.js?v=20260919k"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -179,6 +179,7 @@
 
           <div class="media-toolbar" aria-label="Actions sur les photos">
             <div class="media-filter" data-media-filters></div>
+            <div class="media-filter" data-media-rights-filters aria-label="Filtrer par statut des droits"></div>
             <div class="media-actions">
               <button class="btn" type="button" data-media-select-visible>Tout sélectionner</button>
               <button class="btn" type="button" data-media-clear-selection>Effacer la sélection</button>
@@ -190,6 +191,32 @@
             <p><strong>Important :</strong> l’import ne publie rien automatiquement. Les photos arrivent en brouillon, avec les droits à vérifier.</p>
           </div>
 
+          <div class="media-bulk-panel" data-media-bulk-panel hidden>
+            <p class="media-bulk-title"><strong data-media-bulk-count>0</strong> photo(s) importée(s) sélectionnée(s) — actions groupées</p>
+
+            <div class="media-bulk-group">
+              <span class="media-bulk-label">Droits</span>
+              <div class="media-actions" data-rights-buttons></div>
+            </div>
+
+            <div class="media-bulk-group">
+              <span class="media-bulk-label">Favori</span>
+              <div class="media-actions">
+                <button class="btn" type="button" data-bulk-favorite="true">★ Marquer favori</button>
+                <button class="btn" type="button" data-bulk-favorite="false">☆ Retirer des favoris</button>
+              </div>
+            </div>
+
+            <div class="media-bulk-group">
+              <span class="media-bulk-label">Catégories</span>
+              <div class="media-category-checks" data-bulk-category-checks></div>
+              <div class="media-actions">
+                <button class="btn btn-primary" type="button" data-bulk-category-apply="add">Ajouter aux sélectionnées</button>
+                <button class="btn" type="button" data-bulk-category-apply="remove">Retirer des sélectionnées</button>
+              </div>
+            </div>
+          </div>
+
           <div class="media-grid" data-media-grid aria-live="polite"></div>
         </article>
         <article class="gestion-card" data-panel="textes">
@@ -197,8 +224,40 @@
           <p>Les textes administrables seront structurés par page et par bloc, avec brouillon, aperçu et publication.</p>
         </article>
         <article class="gestion-card" data-panel="categories">
-          <h3>Catégories</h3>
-          <p>Les propositions pourront être ordonnées, masquées, publiées et organisées en hiérarchie simple.</p>
+          <div class="media-heading">
+            <div>
+              <h3>Catégories</h3>
+              <p>Créez, ordonnez, publiez ou masquez les propositions du site. Une catégorie masquée disparaît entièrement du site public.</p>
+            </div>
+          </div>
+
+          <div class="categories-toolbar">
+            <button class="btn btn-primary" type="button" data-category-new>Créer une catégorie</button>
+            <button class="btn" type="button" data-category-seed>Créer les 6 catégories du site</button>
+          </div>
+
+          <form class="gestion-form categories-form" data-category-form hidden>
+            <label>
+              Titre
+              <input type="text" name="title" required placeholder="Ex. Festival">
+            </label>
+            <label>
+              Identifiant (slug)
+              <input type="text" name="slug" required placeholder="ex-festival">
+            </label>
+            <label>
+              Catégorie parente (optionnel)
+              <select name="parent_id" data-category-parent-select>
+                <option value="">— Aucune (premier niveau) —</option>
+              </select>
+            </label>
+            <div class="gestion-actions-line">
+              <button class="btn btn-primary" type="submit">Enregistrer</button>
+              <button class="btn" type="button" data-category-cancel>Annuler</button>
+            </div>
+          </form>
+
+          <div class="categories-tree" data-categories-tree aria-live="polite"></div>
         </article>
         <article class="gestion-card" data-panel="cartes">
           <h3>Cartes postales</h3>
