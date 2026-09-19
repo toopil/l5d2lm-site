@@ -27,12 +27,17 @@
   const panels = Array.from(document.querySelectorAll('[data-panel]'));
 
   const gestionShell = document.querySelector('.gestion-shell');
+  const preLoginHeader = document.querySelector('[data-pre-login-header]');
+  const adminTopbar = document.querySelector('[data-admin-topbar]');
 
   const showView = (name) => {
     views.forEach((view) => {
       view.hidden = view.dataset.view !== name;
     });
-    if (gestionShell) gestionShell.classList.toggle('is-admin-view', name === 'admin');
+    const isAdmin = name === 'admin';
+    if (gestionShell) gestionShell.classList.toggle('is-admin-view', isAdmin);
+    if (preLoginHeader) preLoginHeader.hidden = isAdmin;
+    if (adminTopbar) adminTopbar.hidden = !isAdmin;
   };
 
   // Sous-navigations génériques (Site > Structure/Textes/Publication,
@@ -374,6 +379,18 @@
   const rightsButtonsContainer = document.querySelector('[data-rights-buttons]');
   const bulkCategoryChecks = document.querySelector('[data-bulk-category-checks]');
   const bulkTrashButton = document.querySelector('[data-bulk-trash]');
+  const pageNavEl = document.querySelector('[data-page-nav]');
+  const photosAllView = document.querySelector('[data-photos-all-view]');
+  const photosSectionView = document.querySelector('[data-photos-section-view]');
+  const sectionViewTitle = document.querySelector('[data-section-view-title]');
+  const sectionViewCount = document.querySelector('[data-section-view-count]');
+  const sectionOrderList = document.querySelector('[data-section-order-list]');
+  const sectionAddPhotoButton = document.querySelector('[data-section-add-photo]');
+  const mediaPicker = document.querySelector('[data-media-picker]');
+  const mediaPickerTitle = document.querySelector('[data-media-picker-title]');
+  const mediaPickerGrid = document.querySelector('[data-media-picker-grid]');
+  const mediaPickerSearch = document.querySelector('[data-media-picker-search]');
+  const mediaPickerCloseButton = document.querySelector('[data-media-picker-close]');
 
   // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
   const categoriesTree = document.querySelector('[data-categories-tree]');
@@ -415,6 +432,14 @@
     searchQuery: '',
     lastBatchId: null,
     trashedFilenames: new Set(),
+    activePage: 'all',
+    libraryCounts: { bySection: new Map(), total: 0 },
+    sectionOrderItems: [],
+    signedUrlCache: new Map(),
+    dragMediaId: null,
+    pickerMode: null,
+    pickerContext: null,
+    pickerSearch: '',
     loaded: false,
     uploadCounter: 0
   };
@@ -858,14 +883,508 @@
     sectionsState.items = data || [];
   };
 
-  const fetchSectionMediaCounts = async () => {
+  // Compte réel par catégorie (et total médiathèque), en excluant les
+  // photos à la corbeille. Utilisé par l'onglet Catégories ET par la
+  // navigation par page dans Photos — une seule source de vérité.
+  const fetchLibraryCounts = async () => {
     const supabase = getSupabase();
-    const { data, error } = await supabase.from('l5d2lm_media_sections').select('section_id');
-    if (error) throw error;
-    const counts = new Map();
-    (data || []).forEach(({ section_id: sectionId }) => counts.set(sectionId, (counts.get(sectionId) || 0) + 1));
-    return counts;
+
+    const { data: mediaRows, error: mediaError } = await supabase
+      .from('l5d2lm_media')
+      .select('id')
+      .is('deleted_at', null);
+    if (mediaError) throw mediaError;
+    const activeIds = new Set((mediaRows || []).map((row) => row.id));
+
+    const { data: assocRows, error: assocError } = await supabase
+      .from('l5d2lm_media_sections')
+      .select('section_id, media_id');
+    if (assocError) throw assocError;
+
+    const bySection = new Map();
+    assocRows.forEach(({ section_id: sectionId, media_id: mediaId }) => {
+      if (!activeIds.has(mediaId)) return;
+      bySection.set(sectionId, (bySection.get(sectionId) || 0) + 1);
+    });
+
+    return { bySection, total: activeIds.size };
   };
+
+  // Résout une URL affichable pour une photo : d'abord le chemin déjà connu
+  // (catalogue du site ou import de cette session, gratuit), sinon une URL
+  // signée du bucket privé (l'admin y a accès via RLS, pas le public).
+  const resolveMediaSrc = async (mediaRow) => {
+    const known = mediaState.importedByFilename.get(mediaRow.original_filename);
+    const catalogEntry = allSiteMedia().find((item) => item.filename === mediaRow.original_filename);
+    if (catalogEntry?.src) return catalogEntry.src;
+    if (known?.id === mediaRow.id) {
+      const localUpload = mediaState.localUploads.find((item) => item.filename === mediaRow.original_filename && item.src);
+      if (localUpload) return localUpload.src;
+    }
+
+    if (mediaState.signedUrlCache.has(mediaRow.id)) return mediaState.signedUrlCache.get(mediaRow.id);
+    if (!mediaRow.original_private_path) return '';
+
+    const supabase = getSupabase();
+    const { data, error } = await supabase.storage
+      .from('l5d2lm-private-originals')
+      .createSignedUrl(mediaRow.original_private_path, 3600);
+    if (error || !data?.signedUrl) return '';
+    mediaState.signedUrlCache.set(mediaRow.id, data.signedUrl);
+    return data.signedUrl;
+  };
+
+  // Navigation par page : toujours visible, compteurs réels (non écrits en
+  // dur), un seul clic pour changer de page — remplace le filtre Catégorie
+  // caché dans "Filtres ▾".
+  const refreshLibraryCounts = async () => {
+    try {
+      mediaState.libraryCounts = await fetchLibraryCounts();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de calculer les compteurs par page.', 'error');
+    }
+  };
+
+  const renderPageNav = () => {
+    if (!pageNavEl) return;
+    pageNavEl.innerHTML = '';
+
+    const makeItem = (id, title, count) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'page-nav__item';
+      button.classList.toggle('is-active', mediaState.activePage === id);
+      button.innerHTML = '';
+      button.append(title + ' ');
+      const countEl = document.createElement('span');
+      countEl.textContent = String(count);
+      button.appendChild(countEl);
+      button.addEventListener('click', () => {
+        mediaState.activePage = id;
+        switchPhotosView();
+      });
+      return button;
+    };
+
+    pageNavEl.appendChild(makeItem('all', 'Toutes les pages', mediaState.libraryCounts.total));
+    sectionsState.items
+      .filter((section) => !section.parent_id) // premier niveau seulement dans cette rangée
+      .forEach((section) => {
+        pageNavEl.appendChild(
+          makeItem(section.id, section.title, mediaState.libraryCounts.bySection.get(section.id) || 0)
+        );
+      });
+  };
+
+  const switchPhotosView = async () => {
+    renderPageNav();
+    const isAll = mediaState.activePage === 'all';
+    if (photosAllView) photosAllView.hidden = !isAll;
+    if (photosSectionView) photosSectionView.hidden = isAll;
+    document.querySelectorAll('.photos-toolbar-top .photos-search, .photos-toolbar-top [data-filters-details]').forEach((el) => {
+      el.style.display = isAll ? '' : 'none';
+    });
+
+    if (isAll) {
+      renderMediaGrid();
+    } else {
+      await loadSectionOrderView(mediaState.activePage);
+    }
+  };
+
+  const loadSectionOrderView = async (sectionId) => {
+    if (!sectionOrderList) return;
+    const section = sectionsState.items.find((entry) => entry.id === sectionId);
+    if (sectionViewTitle) sectionViewTitle.textContent = section ? section.title : '—';
+    sectionOrderList.setAttribute('aria-busy', 'true');
+
+    const supabase = getSupabase();
+    try {
+      const { data: assocRows, error: assocError } = await supabase
+        .from('l5d2lm_media_sections')
+        .select('media_id, sort_order')
+        .eq('section_id', sectionId)
+        .order('sort_order', { ascending: true });
+      if (assocError) throw assocError;
+
+      const mediaIds = (assocRows || []).map((row) => row.media_id);
+      let mediaById = new Map();
+      if (mediaIds.length) {
+        const { data: mediaRows, error: mediaError } = await supabase
+          .from('l5d2lm_media')
+          .select('id, original_filename, original_private_path, default_annotation, rights_status, favorite')
+          .in('id', mediaIds)
+          .is('deleted_at', null);
+        if (mediaError) throw mediaError;
+        mediaById = new Map((mediaRows || []).map((row) => [row.id, row]));
+      }
+
+      const items = [];
+      for (const assoc of assocRows || []) {
+        const media = mediaById.get(assoc.media_id);
+        if (!media) continue; // à la corbeille entre-temps : ignorée, pas de trou numéroté
+        const src = await resolveMediaSrc(media);
+        items.push({
+          mediaId: media.id,
+          sectionId,
+          sortOrder: assoc.sort_order,
+          filename: media.original_filename,
+          annotation: media.default_annotation,
+          rightsStatus: media.rights_status,
+          favorite: media.favorite,
+          src
+        });
+      }
+
+      mediaState.sectionOrderItems = items;
+      if (sectionViewCount) sectionViewCount.textContent = `${items.length} photo${items.length > 1 ? 's' : ''}`;
+      renderSectionOrderList();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de charger les photos de cette page.', 'error');
+    } finally {
+      sectionOrderList.setAttribute('aria-busy', 'false');
+    }
+  };
+
+  const renderSectionOrderList = () => {
+    if (!sectionOrderList) return;
+    sectionOrderList.innerHTML = '';
+
+    mediaState.sectionOrderItems.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'section-order-item';
+      li.draggable = true;
+      li.dataset.mediaId = item.mediaId;
+
+      li.addEventListener('dragstart', () => {
+        mediaState.dragMediaId = item.mediaId;
+        li.classList.add('is-dragging');
+      });
+      li.addEventListener('dragend', () => li.classList.remove('is-dragging'));
+      li.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        li.classList.add('is-drop-target');
+      });
+      li.addEventListener('dragleave', () => li.classList.remove('is-drop-target'));
+      li.addEventListener('drop', (event) => {
+        event.preventDefault();
+        li.classList.remove('is-drop-target');
+        if (mediaState.dragMediaId && mediaState.dragMediaId !== item.mediaId) {
+          reorderSectionItems(mediaState.dragMediaId, index);
+        }
+        mediaState.dragMediaId = null;
+      });
+
+      const handle = document.createElement('span');
+      handle.className = 'section-order-item__handle';
+      handle.textContent = '⠿';
+      handle.setAttribute('aria-hidden', 'true');
+      li.appendChild(handle);
+
+      const numberInput = document.createElement('input');
+      numberInput.type = 'number';
+      numberInput.min = '1';
+      numberInput.max = String(mediaState.sectionOrderItems.length);
+      numberInput.value = String(index + 1);
+      numberInput.className = 'section-order-item__number';
+      numberInput.setAttribute('aria-label', `Position de ${item.filename}`);
+      numberInput.addEventListener('change', () => {
+        const requested = parseInt(numberInput.value, 10);
+        if (Number.isFinite(requested)) reorderSectionItems(item.mediaId, requested - 1);
+      });
+      li.appendChild(numberInput);
+
+      const thumb = document.createElement('div');
+      thumb.className = 'section-order-item__thumb';
+      if (item.src) {
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = '';
+        img.loading = 'lazy';
+        thumb.appendChild(img);
+      }
+      li.appendChild(thumb);
+
+      const body = document.createElement('div');
+      body.className = 'section-order-item__body';
+      const name = document.createElement('strong');
+      name.textContent = item.filename;
+      body.appendChild(name);
+      const annotation = document.createElement('p');
+      annotation.className = 'section-order-item__annotation';
+      annotation.textContent = item.annotation || '(sans titre)';
+      body.appendChild(annotation);
+      li.appendChild(body);
+
+      const actions = document.createElement('div');
+      actions.className = 'section-order-item__actions';
+
+      const changeButton = document.createElement('button');
+      changeButton.type = 'button';
+      changeButton.className = 'btn';
+      changeButton.textContent = 'Changer';
+      changeButton.addEventListener('click', () => {
+        openMediaPicker('replace', { sectionId: item.sectionId, oldMediaId: item.mediaId, sortOrder: item.sortOrder });
+      });
+      actions.appendChild(changeButton);
+
+      const moreMenu = document.createElement('details');
+      moreMenu.className = 'bulk-menu';
+      const moreSummary = document.createElement('summary');
+      moreSummary.textContent = '…';
+      moreMenu.appendChild(moreSummary);
+      const morePanel = document.createElement('div');
+      morePanel.className = 'bulk-menu__panel';
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'btn';
+      removeButton.textContent = 'Retirer de cette page';
+      removeButton.addEventListener('click', () => handleRemoveFromSection(item));
+      morePanel.appendChild(removeButton);
+
+      RIGHTS_STATUSES.forEach(({ value, label }) => {
+        const rightsButton = document.createElement('button');
+        rightsButton.type = 'button';
+        rightsButton.className = 'btn';
+        rightsButton.textContent = label;
+        rightsButton.addEventListener('click', () => handleItemRightsChange(item, value));
+        morePanel.appendChild(rightsButton);
+      });
+
+      const trashButton = document.createElement('button');
+      trashButton.type = 'button';
+      trashButton.className = 'btn';
+      trashButton.textContent = 'Mettre à la corbeille';
+      trashButton.addEventListener('click', () => handleItemTrash(item));
+      morePanel.appendChild(trashButton);
+
+      moreMenu.appendChild(morePanel);
+      actions.appendChild(moreMenu);
+
+      li.appendChild(actions);
+      sectionOrderList.appendChild(li);
+    });
+  };
+
+  // Un seul chemin de réordonnancement, utilisé par le glisser-déposer ET
+  // la saisie directe du numéro — jamais deux logiques différentes.
+  const reorderSectionItems = async (mediaId, newIndex) => {
+    const items = mediaState.sectionOrderItems;
+    const currentIndex = items.findIndex((entry) => entry.mediaId === mediaId);
+    if (currentIndex === -1) return;
+    const clamped = Math.max(0, Math.min(items.length - 1, newIndex));
+    if (clamped === currentIndex) {
+      renderSectionOrderList();
+      return;
+    }
+
+    const [moved] = items.splice(currentIndex, 1);
+    items.splice(clamped, 0, moved);
+    items.forEach((entry, idx) => { entry.sortOrder = idx * 10; });
+    renderSectionOrderList();
+
+    const supabase = getSupabase();
+    try {
+      for (const entry of items) {
+        const { error } = await supabase
+          .from('l5d2lm_media_sections')
+          .update({ sort_order: entry.sortOrder })
+          .eq('media_id', entry.mediaId)
+          .eq('section_id', entry.sectionId);
+        if (error) throw error;
+      }
+      setStatus('Ordre mis à jour.', 'success');
+    } catch (error) {
+      setStatus(error.message || 'Impossible d’enregistrer le nouvel ordre.', 'error');
+      await loadSectionOrderView(mediaState.activePage);
+    }
+  };
+
+  const handleRemoveFromSection = async (item) => {
+    const confirmed = window.confirm(`Retirer cette photo de "${sectionsState.items.find((s) => s.id === item.sectionId)?.title || 'cette page'}" ? Le fichier reste dans la médiathèque.`);
+    if (!confirmed) return;
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('l5d2lm_media_sections')
+      .delete()
+      .eq('media_id', item.mediaId)
+      .eq('section_id', item.sectionId);
+    if (error) {
+      setStatus(error.message || 'Impossible de retirer cette photo.', 'error');
+      return;
+    }
+    await loadSectionOrderView(item.sectionId);
+    await refreshLibraryCounts();
+    renderPageNav();
+    setStatus('Photo retirée de la page.', 'success');
+  };
+
+  const handleItemRightsChange = async (item, status) => {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media').update({ rights_status: status }).eq('id', item.mediaId);
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre à jour les droits.', 'error');
+      return;
+    }
+    item.rightsStatus = status;
+    const known = Array.from(mediaState.importedByFilename.values()).find((entry) => entry.id === item.mediaId);
+    if (known) known.rights_status = status;
+    setStatus('Droits mis à jour.', 'success');
+  };
+
+  const handleItemTrash = async (item) => {
+    const confirmed = window.confirm('Mettre cette photo à la corbeille ?');
+    if (!confirmed) return;
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('l5d2lm_media')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', item.mediaId);
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre cette photo à la corbeille.', 'error');
+      return;
+    }
+    mediaState.importedByFilename.delete(item.filename);
+    mediaState.trashedFilenames.add(item.filename);
+    await loadSectionOrderView(item.sectionId);
+    await refreshLibraryCounts();
+    renderPageNav();
+    setStatus('Photo mise à la corbeille.', 'success');
+  };
+
+  // Sélecteur de photo : "Changer" (remplace une position, même ordre) et
+  // "+ Ajouter une photo" (ajoute en dernière position). Ne détruit jamais
+  // l'ancienne photo : seule l'association à cette page change.
+  const openMediaPicker = (mode, context) => {
+    if (!mediaPicker) return;
+    mediaState.pickerMode = mode;
+    mediaState.pickerContext = context;
+    mediaState.pickerSearch = '';
+    if (mediaPickerSearch) mediaPickerSearch.value = '';
+    if (mediaPickerTitle) {
+      mediaPickerTitle.textContent = mode === 'replace' ? 'Choisir une photo de remplacement' : 'Ajouter une photo à cette page';
+    }
+    mediaPicker.hidden = false;
+    renderMediaPickerGrid();
+  };
+
+  const closeMediaPicker = () => {
+    if (!mediaPicker) return;
+    mediaPicker.hidden = true;
+    mediaState.pickerMode = null;
+    mediaState.pickerContext = null;
+  };
+
+  const renderMediaPickerGrid = () => {
+    if (!mediaPickerGrid) return;
+    mediaPickerGrid.innerHTML = '';
+
+    const query = mediaState.pickerSearch.toLowerCase();
+    // (media_id, section_id) est une clé composite unique en base : une photo
+    // déjà présente sur cette page ne peut pas y occuper une deuxième position.
+    const alreadyOnPage = new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
+    const entries = Array.from(mediaState.importedByFilename.entries()).filter(([filename, info]) => {
+      if (alreadyOnPage.has(info?.id)) return false; // déjà utilisée sur cette page (couvre aussi "elle-même" en mode Changer)
+      return !query || filename.toLowerCase().includes(query);
+    });
+
+    entries.forEach(([filename, info]) => {
+      const catalogEntry = allSiteMedia().find((item) => item.filename === filename);
+      const localUpload = mediaState.localUploads.find((item) => item.filename === filename);
+      const src = catalogEntry?.src || localUpload?.src || '';
+
+      const card = document.createElement('article');
+      card.className = 'media-item';
+      card.addEventListener('click', () => choosePickerMedia(info.id));
+
+      const thumb = document.createElement('div');
+      thumb.className = 'media-item__thumb';
+      if (src) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = '';
+        img.loading = 'lazy';
+        thumb.appendChild(img);
+      } else {
+        thumb.textContent = 'Aperçu indisponible';
+      }
+      card.appendChild(thumb);
+
+      const meta = document.createElement('div');
+      meta.className = 'media-item__meta';
+      const name = document.createElement('strong');
+      name.textContent = filename;
+      meta.appendChild(name);
+      if (info.default_annotation) {
+        const title = document.createElement('p');
+        title.className = 'media-item__title';
+        title.textContent = info.default_annotation;
+        meta.appendChild(title);
+      }
+      card.appendChild(meta);
+
+      mediaPickerGrid.appendChild(card);
+    });
+
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'Aucune photo importée ne correspond.';
+      mediaPickerGrid.appendChild(empty);
+    }
+  };
+
+  const choosePickerMedia = async (mediaId) => {
+    const context = mediaState.pickerContext;
+    const mode = mediaState.pickerMode;
+    if (!context) return;
+
+    const supabase = getSupabase();
+    try {
+      if (mode === 'replace') {
+        const { error: deleteError } = await supabase
+          .from('l5d2lm_media_sections')
+          .delete()
+          .eq('media_id', context.oldMediaId)
+          .eq('section_id', context.sectionId);
+        if (deleteError) throw deleteError;
+
+        const { error: insertError } = await supabase
+          .from('l5d2lm_media_sections')
+          .insert({ media_id: mediaId, section_id: context.sectionId, sort_order: context.sortOrder });
+        if (insertError) throw insertError;
+        setStatus('Photo remplacée — même position, ancienne photo conservée dans la médiathèque.', 'success');
+      } else {
+        const maxOrder = mediaState.sectionOrderItems.reduce((max, entry) => Math.max(max, entry.sortOrder), -10);
+        const { error: insertError } = await supabase
+          .from('l5d2lm_media_sections')
+          .insert({ media_id: mediaId, section_id: context.sectionId, sort_order: maxOrder + 10 });
+        if (insertError) throw insertError;
+        setStatus('Photo ajoutée à la page.', 'success');
+      }
+
+      closeMediaPicker();
+      await loadSectionOrderView(context.sectionId);
+      await refreshLibraryCounts();
+      renderPageNav();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de choisir cette photo.', 'error');
+    }
+  };
+
+  if (mediaPickerCloseButton) mediaPickerCloseButton.addEventListener('click', closeMediaPicker);
+  if (mediaPickerSearch) {
+    mediaPickerSearch.addEventListener('input', () => {
+      mediaState.pickerSearch = mediaPickerSearch.value.trim();
+      renderMediaPickerGrid();
+    });
+  }
+  if (sectionAddPhotoButton) {
+    sectionAddPhotoButton.addEventListener('click', () => {
+      if (mediaState.activePage === 'all') return;
+      openMediaPicker('add', { sectionId: mediaState.activePage });
+    });
+  }
 
   const renderBulkCategoryChecks = () => {
     if (!bulkCategoryChecks) return;
@@ -1142,6 +1661,8 @@
 
     await fetchMediaSections(Array.from(mediaState.importedByFilename.values()).map((info) => info.id));
     renderMediaGrid();
+    await refreshLibraryCounts();
+    renderPageNav();
     setStatus(`Catégories ${mode === 'add' ? 'ajoutées' : 'retirées'} pour ${infos.length} photo(s).`, 'success');
   };
 
@@ -1176,6 +1697,8 @@
       mediaState.selected.delete(info.id);
     });
     renderMediaGrid();
+    await refreshLibraryCounts();
+    renderPageNav();
     setStatus(`${infos.length} photo(s) mise(s) à la corbeille.`, 'success');
   };
 
@@ -1190,7 +1713,8 @@
     populateFilterSelects();
     syncFilterSelects();
     renderActiveFilterChips();
-    renderMediaGrid();
+    await refreshLibraryCounts();
+    await switchPhotosView();
   };
 
   const handleSelectVisible = () => {
@@ -1294,6 +1818,8 @@
       }
 
       renderMediaGrid();
+      await refreshLibraryCounts();
+      renderPageNav();
       const parts = [];
       if (imported) parts.push(`${imported} photo(s) importée(s) en brouillon, droits à vérifier`);
       if (duplicates) parts.push(`${duplicates} déjà présente(s) (contenu identique)`);
@@ -1424,7 +1950,7 @@
 
     let counts = new Map();
     try {
-      counts = await fetchSectionMediaCounts();
+      counts = (await fetchLibraryCounts()).bySection;
     } catch (error) {
       // Le compte de photos reste indicatif : une erreur ici n'empêche pas de gérer les catégories.
     }
@@ -1670,6 +2196,20 @@
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => activateTab(tab.dataset.tab));
   });
+
+  const accountSecurityButton = document.querySelector('[data-account-security]');
+  const accountMenuDetails = document.querySelector('.account-menu');
+  if (accountSecurityButton) {
+    accountSecurityButton.addEventListener('click', () => {
+      activateTab('plus');
+      const securiteSubtab = document.querySelector('[data-panel="plus"] [data-subtab="securite"]');
+      if (securiteSubtab) securiteSubtab.click();
+      if (accountMenuDetails) accountMenuDetails.open = false;
+    });
+  }
+  if (signOutButtons.length && accountMenuDetails) {
+    signOutButtons.forEach((button) => button.addEventListener('click', () => { accountMenuDetails.open = false; }));
+  }
 
   init();
 })();

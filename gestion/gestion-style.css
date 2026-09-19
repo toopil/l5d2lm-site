@@ -17,6 +17,79 @@
   backdrop-filter: blur(12px);
 }
 
+/* En-tête admin unique, sticky, une fois connecté */
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.5rem 1rem;
+  background: rgba(248, 245, 240, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.admin-topbar[hidden] {
+  display: none;
+}
+
+.admin-topbar__brand {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-topbar .gestion-tabs {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.account-menu {
+  margin-left: auto;
+}
+
+.account-menu summary {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(75, 58, 47, 0.14);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.account-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-menu__panel {
+  position: absolute;
+  z-index: 25;
+  right: 1rem;
+  margin-top: 0.4rem;
+  min-width: 220px;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.account-menu__panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .gestion-brand {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
@@ -344,6 +417,49 @@
   border-radius: 12px;
   padding: 0.4rem 0.6rem;
   background: #fff;
+  color: var(--ink);
+}
+
+/* Navigation par page : toujours visible, un clic suffit */
+.page-nav {
+  position: sticky;
+  top: 64px;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.9rem 0;
+  padding: 0.7rem 0;
+  background: var(--bg);
+}
+
+.page-nav__item {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(75, 58, 47, 0.16);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.page-nav__item.is-active {
+  background: var(--sage);
+  border-color: transparent;
+}
+
+.page-nav__item span {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.page-nav__item.is-active span {
   color: var(--ink);
 }
 
@@ -718,6 +834,155 @@
   color: #587d3e;
 }
 
+/* Vue d'une page précise : liste ordonnée, numéro modifiable, glisser-déposer */
+.section-view-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 0 1rem;
+}
+
+.section-view-header h3 {
+  margin: 0;
+}
+
+.section-view-header span {
+  color: var(--muted);
+}
+
+.section-order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.section-order-item {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(75, 58, 47, 0.1);
+  cursor: grab;
+}
+
+.section-order-item.is-dragging {
+  opacity: 0.4;
+}
+
+.section-order-item.is-drop-target {
+  border-color: rgba(88, 125, 62, 0.6);
+  box-shadow: 0 0 0 2px rgba(183, 215, 176, 0.5);
+}
+
+.section-order-item__handle {
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: grab;
+  padding: 0 0.2rem;
+}
+
+.section-order-item__number {
+  width: 3.4rem;
+  min-height: 40px;
+  border: 1px solid rgba(75, 58, 47, 0.18);
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  background: rgba(255, 253, 248, 0.9);
+  color: var(--ink);
+}
+
+.section-order-item__thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: rgba(248, 245, 240, 0.9);
+}
+
+.section-order-item__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.section-order-item__body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.section-order-item__annotation {
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.section-order-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-order-item__actions .bulk-menu__panel {
+  right: 0;
+  left: auto;
+}
+
+/* Sélecteur de photo (Changer / + Ajouter une photo) */
+.media-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background: rgba(43, 33, 27, 0.45);
+}
+
+.media-picker[hidden] {
+  display: none;
+}
+
+.media-picker__panel {
+  width: min(920px, 100%);
+  max-height: min(85vh, 900px);
+  overflow-y: auto;
+  padding: 1.4rem;
+  border-radius: 24px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.media-picker__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.media-picker__heading h3 {
+  margin: 0;
+}
+
+.media-grid--picker .media-item {
+  cursor: pointer;
+}
+
 @media (max-width: 760px) {
   .gestion-header {
     align-items: flex-start;
@@ -726,10 +991,24 @@
     padding-block: 0.8rem;
   }
 
-  .mfa-grid,
-  .gestion-admin-top {
+  .mfa-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* En-tête et navigation par page restent visibles, mais pas figés en
+     sticky sur petit écran : évite tout chevauchement quand ça s'empile. */
+  .admin-topbar {
+    position: static;
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .account-menu {
+    margin-left: 0;
+  }
+
+  .page-nav {
+    position: static;
   }
 
   .gestion-tabs {
@@ -740,6 +1019,22 @@
   .gestion-tab {
     border-radius: 14px;
   }
+
+  .section-order-item {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "handle thumb"
+      "number thumb"
+      "body body"
+      "actions actions";
+    row-gap: 0.5rem;
+  }
+
+  .section-order-item__handle { grid-area: handle; }
+  .section-order-item__number { grid-area: number; }
+  .section-order-item__thumb { grid-area: thumb; justify-self: end; }
+  .section-order-item__body { grid-area: body; }
+  .section-order-item__actions { grid-area: actions; }
 
   .media-heading {
     grid-template-columns: 1fr;

@@ -8,17 +8,35 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260920b">
+  <link rel="stylesheet" href="gestion-style.css?v=20260921b">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260920a"></script>
+  <script defer src="gestion.js?v=20260921b"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-  <header class="gestion-header" aria-label="Administration L5D2LM">
+  <header class="gestion-header" data-pre-login-header aria-label="Administration L5D2LM">
     <a class="gestion-brand" href="../l5d2lm-index.html">Les 5 doigts de la main</a>
     <span class="gestion-private">Gestion privée</span>
+  </header>
+
+  <header class="admin-topbar" data-admin-topbar hidden aria-label="Navigation de gestion">
+    <span class="admin-topbar__brand">Gestion L5D2LM</span>
+    <nav class="gestion-tabs">
+      <button type="button" class="gestion-tab is-active" data-tab="photos">Photos</button>
+      <button type="button" class="gestion-tab" data-tab="site">Site</button>
+      <button type="button" class="gestion-tab" data-tab="cartes">Cartes postales</button>
+      <button type="button" class="gestion-tab" data-tab="plus">Plus</button>
+    </nav>
+    <details class="account-menu">
+      <summary>Compte ▾</summary>
+      <div class="account-menu__panel">
+        <p data-admin-summary>Connexion sécurisée</p>
+        <button type="button" class="gestion-link-button" data-account-security>Sécurité</button>
+        <button type="button" class="gestion-link-button" data-sign-out>Se déconnecter</button>
+      </div>
+    </details>
   </header>
 
   <main id="contenu" class="gestion-shell">
@@ -137,18 +155,6 @@
     </section>
 
     <section class="gestion-panel gestion-panel--admin" data-view="admin" hidden>
-      <div class="gestion-admin-top">
-        <p data-admin-summary>Connexion sécurisée</p>
-        <button class="gestion-link-button" type="button" data-sign-out>Se déconnecter</button>
-      </div>
-
-      <nav class="gestion-tabs" aria-label="Navigation de gestion">
-        <button type="button" class="gestion-tab is-active" data-tab="photos">Photos</button>
-        <button type="button" class="gestion-tab" data-tab="site">Site</button>
-        <button type="button" class="gestion-tab" data-tab="cartes">Cartes postales</button>
-        <button type="button" class="gestion-tab" data-tab="plus">Plus</button>
-      </nav>
-
       <div class="gestion-workspace">
         <article class="gestion-card is-active" data-panel="photos">
           <div class="photos-toolbar-top">
@@ -160,9 +166,6 @@
             <details class="photos-filters" data-filters-details>
               <summary>Filtres</summary>
               <div class="photos-filters__panel">
-                <label>Catégorie
-                  <select data-filter-category></select>
-                </label>
                 <label>Droits
                   <select data-filter-rights></select>
                 </label>
@@ -183,50 +186,74 @@
             </details>
           </div>
 
-          <div class="photos-active-filters" data-active-filter-chips></div>
+          <nav class="page-nav" data-page-nav aria-label="Pages du site"></nav>
 
-          <p class="photos-summary">
-            <strong data-media-total>0</strong> photos ·
-            <button type="button" class="gestion-link-button" data-media-select-visible>Tout sélectionner</button>
-          </p>
+          <div data-photos-all-view>
+            <div class="photos-active-filters" data-active-filter-chips></div>
 
-          <div class="media-import-bar" data-media-import-bar hidden>
-            <span><strong data-media-import-count>0</strong> photo(s) à importer — brouillon, droits à vérifier</span>
-            <button class="btn btn-primary" type="button" data-media-import>Importer</button>
-          </div>
+            <p class="photos-summary">
+              <strong data-media-total>0</strong> photos ·
+              <button type="button" class="gestion-link-button" data-media-select-visible>Tout sélectionner</button>
+            </p>
 
-          <div class="media-bulk-bar" data-media-bulk-panel hidden>
-            <strong data-media-bulk-count>0</strong> sélectionnées
+            <div class="media-import-bar" data-media-import-bar hidden>
+              <span><strong data-media-import-count>0</strong> photo(s) à importer — brouillon, droits à vérifier</span>
+              <button class="btn btn-primary" type="button" data-media-import>Importer</button>
+            </div>
 
-            <details class="bulk-menu">
-              <summary>Classer</summary>
-              <div class="bulk-menu__panel">
-                <div class="media-category-checks" data-bulk-category-checks></div>
-                <div class="media-actions">
-                  <button class="btn btn-primary" type="button" data-bulk-category-apply="add">Ajouter</button>
-                  <button class="btn" type="button" data-bulk-category-apply="remove">Retirer</button>
+            <div class="media-bulk-bar" data-media-bulk-panel hidden>
+              <strong data-media-bulk-count>0</strong> sélectionnées
+
+              <details class="bulk-menu">
+                <summary>Classer</summary>
+                <div class="bulk-menu__panel">
+                  <div class="media-category-checks" data-bulk-category-checks></div>
+                  <div class="media-actions">
+                    <button class="btn btn-primary" type="button" data-bulk-category-apply="add">Ajouter</button>
+                    <button class="btn" type="button" data-bulk-category-apply="remove">Retirer</button>
+                  </div>
                 </div>
-              </div>
-            </details>
+              </details>
 
-            <details class="bulk-menu">
-              <summary>Droits</summary>
-              <div class="bulk-menu__panel media-actions" data-rights-buttons></div>
-            </details>
+              <details class="bulk-menu">
+                <summary>Droits</summary>
+                <div class="bulk-menu__panel media-actions" data-rights-buttons></div>
+              </details>
 
-            <button class="btn" type="button" data-bulk-favorite="true">★ Favori</button>
+              <button class="btn" type="button" data-bulk-favorite="true">★ Favori</button>
 
-            <details class="bulk-menu">
-              <summary>Plus</summary>
-              <div class="bulk-menu__panel media-actions">
-                <button class="btn" type="button" data-bulk-trash>Mettre à la corbeille</button>
-              </div>
-            </details>
+              <details class="bulk-menu">
+                <summary>Plus</summary>
+                <div class="bulk-menu__panel media-actions">
+                  <button class="btn" type="button" data-bulk-trash>Mettre à la corbeille</button>
+                </div>
+              </details>
 
-            <button class="gestion-link-button" type="button" data-media-clear-selection>Effacer la sélection</button>
+              <button class="gestion-link-button" type="button" data-media-clear-selection>Effacer la sélection</button>
+            </div>
+
+            <div class="media-grid" data-media-grid aria-live="polite"></div>
           </div>
 
-          <div class="media-grid" data-media-grid aria-live="polite"></div>
+          <div data-photos-section-view hidden>
+            <div class="section-view-header">
+              <h3 data-section-view-title>—</h3>
+              <span data-section-view-count>0 photos</span>
+              <button class="btn btn-primary" type="button" data-section-add-photo>+ Ajouter une photo</button>
+            </div>
+            <ol class="section-order-list" data-section-order-list aria-live="polite"></ol>
+          </div>
+
+          <div class="media-picker" data-media-picker hidden>
+            <div class="media-picker__panel">
+              <div class="media-picker__heading">
+                <h3 data-media-picker-title>Choisir une photo</h3>
+                <button type="button" class="gestion-link-button" data-media-picker-close>Annuler</button>
+              </div>
+              <input type="search" class="photos-search" data-media-picker-search placeholder="Rechercher…" aria-label="Rechercher une photo">
+              <div class="media-grid media-grid--picker" data-media-picker-grid aria-live="polite"></div>
+            </div>
+          </div>
         </article>
 
         <article class="gestion-card" data-panel="site">
