@@ -158,7 +158,7 @@
     }
 
     const email = state.session?.user?.email || 'compte administrateur';
-    adminSummary.textContent = `Les 5 doigts de la main · Gestion — ${email}`;
+    adminSummary.textContent = email;
     const securityEmail = document.querySelector('[data-security-email]');
     if (securityEmail) securityEmail.textContent = `${email} · double authentification active`;
     showView('admin');
@@ -409,6 +409,10 @@
 
   const CATEGORY_STATUS_LABEL = { draft: 'Brouillon', published: 'Publié', hidden: 'Masqué' };
 
+  // Longueur au-delà de laquelle une annotation risque de déborder une
+  // vraie carte postale publique (espace bien plus contraint que l'admin).
+  const ANNOTATION_WARNING_LENGTH = 140;
+
   // Regex partagée (diacritiques Unicode) pour le nom de fichier de stockage
   // et pour les identifiants (slugs) de catégorie.
   const COMBINING_DIACRITICS = new RegExp('[̀-ͯ]', 'g');
@@ -421,6 +425,11 @@
 
   const mediaState = {
     selected: new Set(),
+    // Source de vérité : tous les médias Supabase actifs (non supprimés),
+    // indexés par id réel. importedByFilename/importedFilenames restent
+    // dérivés de library (par nom de fichier) pour ne pas casser le reste
+    // du code qui recherche déjà une "fiche" par original_filename.
+    library: new Map(),
     importedFilenames: new Set(),
     importedByFilename: new Map(),
     mediaSections: new Map(),
@@ -431,7 +440,6 @@
     batchFilter: 'all',
     searchQuery: '',
     lastBatchId: null,
-    trashedFilenames: new Set(),
     activePage: 'all',
     libraryCounts: { bySection: new Map(), total: 0 },
     sectionOrderItems: [],
@@ -481,9 +489,22 @@
 
   const allSiteMedia = () => window.L5D2LM_SITE_MEDIA || [];
   const allSections = () => window.L5D2LM_SECTIONS || [];
-  const allMedia = () => [...mediaState.localUploads, ...allSiteMedia()].filter(
-    (item) => !mediaState.trashedFilenames.has(item.filename)
-  );
+
+  // Médiathèque Supabase = source de vérité. gestion-media-catalog.js ne
+  // sert plus qu'à proposer la migration des anciennes photos du dépôt qui
+  // ne sont pas encore dans l5d2lm_media (voir loadMediaLibrary).
+  const allMedia = () => {
+    const libraryItems = Array.from(mediaState.library.values()).map((row) => ({
+      id: row.id,
+      filename: row.original_filename,
+      kind: 'library'
+    }));
+    const migratedFilenames = new Set(libraryItems.map((item) => item.filename));
+    const catalogItems = allSiteMedia()
+      .filter((item) => !migratedFilenames.has(item.filename))
+      .map((item) => ({ ...item, kind: 'catalog' }));
+    return [...mediaState.localUploads, ...libraryItems, ...catalogItems];
+  };
 
   const visibleMedia = () => {
     let items = allMedia();
@@ -544,7 +565,7 @@
     return items;
   };
 
-  const isItemImported = (item) => mediaState.importedByFilename.has(item.filename);
+  const isItemImported = (item) => item.kind === 'library';
 
   const selectedImportedInfos = () => {
     const infos = [];
@@ -697,9 +718,15 @@
         thumb.textContent = 'HEIC — aperçu indisponible, fichier conservé tel quel';
       } else {
         const img = document.createElement('img');
-        img.src = item.src;
         img.alt = '';
         img.loading = 'lazy';
+        if (item.kind === 'library') {
+          const row = mediaState.library.get(item.id);
+          if (row) img.style.objectPosition = `${(row.focal_x ?? 0.5) * 100}% ${(row.focal_y ?? 0.5) * 100}%`;
+          attachMediaImage(img, row);
+        } else {
+          img.src = item.src;
+        }
         thumb.appendChild(img);
       }
       card.appendChild(thumb);
@@ -842,16 +869,27 @@
     renderMediaGrid();
   };
 
-  const refreshImportedStatus = async () => {
-    const filenames = allSiteMedia().map((item) => item.filename);
-    if (!filenames.length) return;
+  // Charge TOUTE la médiathèque Supabase active (pas seulement les médias
+  // dont le nom de fichier existe dans le catalogue statique) : une photo
+  // envoyée depuis un téléphone doit rester visible après rechargement,
+  // reconnexion ou changement d'appareil.
+  const loadMediaLibrary = async () => {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('l5d2lm_media')
-      .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
-      .in('original_filename', filenames)
-      .is('deleted_at', null);
+      .select(`
+        id, original_filename, original_private_path, public_path,
+        default_annotation, alt_text, rights_status, favorite,
+        publish_status, processing_status, upload_batch_id, collection_id,
+        focal_x, focal_y, created_at
+      `)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
     if (error) throw error;
+
+    mediaState.library = new Map((data || []).map((row) => [row.id, row]));
+    // Dérivé par nom de fichier pour le reste du code (édition, recherche,
+    // filtres, actions groupées) qui retrouve déjà une fiche par filename.
     mediaState.importedByFilename = new Map((data || []).map((row) => [row.original_filename, row]));
     mediaState.importedFilenames = new Set(mediaState.importedByFilename.keys());
     await fetchMediaSections((data || []).map((row) => row.id));
@@ -910,28 +948,70 @@
     return { bySection, total: activeIds.size };
   };
 
-  // Résout une URL affichable pour une photo : d'abord le chemin déjà connu
-  // (catalogue du site ou import de cette session, gratuit), sinon une URL
-  // signée du bucket privé (l'admin y a accès via RLS, pas le public).
-  const resolveMediaSrc = async (mediaRow) => {
-    const known = mediaState.importedByFilename.get(mediaRow.original_filename);
-    const catalogEntry = allSiteMedia().find((item) => item.filename === mediaRow.original_filename);
-    if (catalogEntry?.src) return catalogEntry.src;
-    if (known?.id === mediaRow.id) {
-      const localUpload = mediaState.localUploads.find((item) => item.filename === mediaRow.original_filename && item.src);
-      if (localUpload) return localUpload.src;
-    }
+  const SIGNED_URL_TTL_SECONDS = 3600;
+  const SIGNED_URL_REFRESH_MARGIN_MS = 60 * 1000; // renouvelée 1 min avant expiration
 
-    if (mediaState.signedUrlCache.has(mediaRow.id)) return mediaState.signedUrlCache.get(mediaRow.id);
+  // Cache { url, expiresAt } : une signed URL expirée ne doit jamais être
+  // réutilisée (le cache précédent ne mémorisait pas d'expiration).
+  const getSignedMediaUrl = async (mediaRow, { forceFresh = false } = {}) => {
     if (!mediaRow.original_private_path) return '';
+    const cached = mediaState.signedUrlCache.get(mediaRow.id);
+    if (!forceFresh && cached && cached.expiresAt > Date.now() + SIGNED_URL_REFRESH_MARGIN_MS) {
+      return cached.url;
+    }
 
     const supabase = getSupabase();
     const { data, error } = await supabase.storage
       .from('l5d2lm-private-originals')
-      .createSignedUrl(mediaRow.original_private_path, 3600);
+      .createSignedUrl(mediaRow.original_private_path, SIGNED_URL_TTL_SECONDS);
     if (error || !data?.signedUrl) return '';
-    mediaState.signedUrlCache.set(mediaRow.id, data.signedUrl);
+
+    mediaState.signedUrlCache.set(mediaRow.id, {
+      url: data.signedUrl,
+      expiresAt: Date.now() + SIGNED_URL_TTL_SECONDS * 1000
+    });
     return data.signedUrl;
+  };
+
+  // Résout une URL affichable pour une photo Supabase, quelle que soit son
+  // origine (catalogue historique migré, import de cette session, ou photo
+  // jamais présente dans gestion-media-catalog.js) : le sélecteur "Changer"
+  // et la médiathèque doivent pouvoir afficher TOUT média actif.
+  const resolveMediaSrc = async (mediaRow) => {
+    if (!mediaRow) return '';
+    const localUpload = mediaState.localUploads.find((item) => item.filename === mediaRow.original_filename && item.src);
+    if (localUpload) return localUpload.src;
+
+    const catalogEntry = allSiteMedia().find((item) => item.filename === mediaRow.original_filename);
+    if (catalogEntry?.src) return catalogEntry.src;
+
+    if (mediaRow.public_path) return mediaRow.public_path;
+
+    return getSignedMediaUrl(mediaRow);
+  };
+
+  // Une signed URL en cache peut être révoquée/expirée côté Storage avant
+  // son terme théorique : si l'<img> échoue au chargement, on régénère une
+  // seule fois avant d'abandonner.
+  const attachMediaImage = (img, mediaRow) => {
+    let retried = false;
+    img.addEventListener('error', () => {
+      if (!mediaRow) return;
+      if (retried) {
+        img.replaceWith(document.createTextNode('Aperçu indisponible'));
+        return;
+      }
+      retried = true;
+      mediaState.signedUrlCache.delete(mediaRow.id);
+      getSignedMediaUrl(mediaRow, { forceFresh: true }).then((src) => {
+        if (src) img.src = src;
+        else img.dispatchEvent(new Event('error'));
+      });
+    });
+    resolveMediaSrc(mediaRow).then((src) => {
+      if (src) img.src = src;
+      else img.dispatchEvent(new Event('error'));
+    });
   };
 
   // Navigation par page : toujours visible, compteurs réels (non écrits en
@@ -1009,30 +1089,42 @@
 
       const mediaIds = (assocRows || []).map((row) => row.media_id);
       let mediaById = new Map();
+      let usageAnnotationByMediaId = new Map();
       if (mediaIds.length) {
         const { data: mediaRows, error: mediaError } = await supabase
           .from('l5d2lm_media')
-          .select('id, original_filename, original_private_path, default_annotation, rights_status, favorite')
+          .select('id, original_filename, original_private_path, public_path, default_annotation, rights_status, favorite, focal_x, focal_y')
           .in('id', mediaIds)
           .is('deleted_at', null);
         if (mediaError) throw mediaError;
         mediaById = new Map((mediaRows || []).map((row) => [row.id, row]));
+
+        // Priorité d'annotation : un override propre à CETTE page
+        // (l5d2lm_media_usages) l'emporte sur l'annotation générale de la
+        // photo — la même photo peut dire autre chose sur deux pages.
+        const { data: usageRows } = await supabase
+          .from('l5d2lm_media_usages')
+          .select('media_id, annotation_override')
+          .eq('section_id', sectionId)
+          .in('media_id', mediaIds)
+          .is('deleted_at', null)
+          .not('annotation_override', 'is', null);
+        usageAnnotationByMediaId = new Map((usageRows || []).map((row) => [row.media_id, row.annotation_override]));
       }
 
       const items = [];
       for (const assoc of assocRows || []) {
         const media = mediaById.get(assoc.media_id);
         if (!media) continue; // à la corbeille entre-temps : ignorée, pas de trou numéroté
-        const src = await resolveMediaSrc(media);
         items.push({
           mediaId: media.id,
           sectionId,
           sortOrder: assoc.sort_order,
           filename: media.original_filename,
-          annotation: media.default_annotation,
+          annotation: usageAnnotationByMediaId.get(media.id) || media.default_annotation,
           rightsStatus: media.rights_status,
           favorite: media.favorite,
-          src
+          mediaRow: media
         });
       }
 
@@ -1096,24 +1188,35 @@
 
       const thumb = document.createElement('div');
       thumb.className = 'section-order-item__thumb';
-      if (item.src) {
-        const img = document.createElement('img');
-        img.src = item.src;
-        img.alt = '';
-        img.loading = 'lazy';
-        thumb.appendChild(img);
+      const img = document.createElement('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      if (item.mediaRow) {
+        img.style.objectPosition = `${(item.mediaRow.focal_x ?? 0.5) * 100}% ${(item.mediaRow.focal_y ?? 0.5) * 100}%`;
       }
+      attachMediaImage(img, item.mediaRow);
+      thumb.appendChild(img);
       li.appendChild(thumb);
 
+      // Priorité visuelle : numéro, photo, annotation, Changer, "…". Le nom
+      // technique du fichier (souvent inexploitable, ex. IMG_8734.HEIC)
+      // n'est pas l'information principale ; il vit dans "… > Informations".
       const body = document.createElement('div');
       body.className = 'section-order-item__body';
-      const name = document.createElement('strong');
-      name.textContent = item.filename;
-      body.appendChild(name);
       const annotation = document.createElement('p');
       annotation.className = 'section-order-item__annotation';
-      annotation.textContent = item.annotation || '(sans titre)';
+      annotation.textContent = item.annotation || '(sans annotation)';
       body.appendChild(annotation);
+
+      // Avertissement plutôt que troncature silencieuse : un texte trop
+      // long ici risque de déborder une fois affiché sur une vraie carte
+      // postale publique, à l'espace bien plus contraint.
+      if ((item.annotation || '').length > ANNOTATION_WARNING_LENGTH) {
+        const warning = document.createElement('p');
+        warning.className = 'section-order-item__annotation--warning';
+        warning.textContent = 'Texte long : à raccourcir avant publication sur une carte postale.';
+        body.appendChild(warning);
+      }
       li.appendChild(body);
 
       const actions = document.createElement('div');
@@ -1135,6 +1238,11 @@
       moreMenu.appendChild(moreSummary);
       const morePanel = document.createElement('div');
       morePanel.className = 'bulk-menu__panel';
+
+      const infoLine = document.createElement('p');
+      infoLine.className = 'section-order-item__info';
+      infoLine.textContent = item.filename;
+      morePanel.appendChild(infoLine);
 
       const removeButton = document.createElement('button');
       removeButton.type = 'button';
@@ -1182,22 +1290,23 @@
     const [moved] = items.splice(currentIndex, 1);
     items.splice(clamped, 0, moved);
     items.forEach((entry, idx) => { entry.sortOrder = idx * 10; });
-    renderSectionOrderList();
+    renderSectionOrderList(); // affichage optimiste immédiat
 
+    const sectionId = mediaState.activePage;
     const supabase = getSupabase();
     try {
-      for (const entry of items) {
-        const { error } = await supabase
-          .from('l5d2lm_media_sections')
-          .update({ sort_order: entry.sortOrder })
-          .eq('media_id', entry.mediaId)
-          .eq('section_id', entry.sectionId);
-        if (error) throw error;
-      }
+      // Une seule transaction côté base (l5d2lm_reorder_section_media) :
+      // si un élément échoue en cours de route, RIEN n'est enregistré et
+      // l'ordre précédent reste intact (pas d'ordre partiellement modifié).
+      const { error } = await supabase.rpc('l5d2lm_reorder_section_media', {
+        p_section_id: sectionId,
+        p_media_ids: items.map((entry) => entry.mediaId)
+      });
+      if (error) throw error;
       setStatus('Ordre mis à jour.', 'success');
     } catch (error) {
       setStatus(error.message || 'Impossible d’enregistrer le nouvel ordre.', 'error');
-      await loadSectionOrderView(mediaState.activePage);
+      await loadSectionOrderView(sectionId); // resynchronise sur l'ordre réellement en base
     }
   };
 
@@ -1245,8 +1354,8 @@
       setStatus(error.message || 'Impossible de mettre cette photo à la corbeille.', 'error');
       return;
     }
+    mediaState.library.delete(item.mediaId);
     mediaState.importedByFilename.delete(item.filename);
-    mediaState.trashedFilenames.add(item.filename);
     await loadSectionOrderView(item.sectionId);
     await refreshLibraryCounts();
     renderPageNav();
@@ -1290,25 +1399,18 @@
     });
 
     entries.forEach(([filename, info]) => {
-      const catalogEntry = allSiteMedia().find((item) => item.filename === filename);
-      const localUpload = mediaState.localUploads.find((item) => item.filename === filename);
-      const src = catalogEntry?.src || localUpload?.src || '';
-
       const card = document.createElement('article');
       card.className = 'media-item';
       card.addEventListener('click', () => choosePickerMedia(info.id));
 
       const thumb = document.createElement('div');
       thumb.className = 'media-item__thumb';
-      if (src) {
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = '';
-        img.loading = 'lazy';
-        thumb.appendChild(img);
-      } else {
-        thumb.textContent = 'Aperçu indisponible';
-      }
+      const img = document.createElement('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.style.objectPosition = `${(info.focal_x ?? 0.5) * 100}% ${(info.focal_y ?? 0.5) * 100}%`;
+      attachMediaImage(img, info);
+      thumb.appendChild(img);
       card.appendChild(thumb);
 
       const meta = document.createElement('div');
@@ -1342,17 +1444,15 @@
     const supabase = getSupabase();
     try {
       if (mode === 'replace') {
-        const { error: deleteError } = await supabase
-          .from('l5d2lm_media_sections')
-          .delete()
-          .eq('media_id', context.oldMediaId)
-          .eq('section_id', context.sectionId);
-        if (deleteError) throw deleteError;
-
-        const { error: insertError } = await supabase
-          .from('l5d2lm_media_sections')
-          .insert({ media_id: mediaId, section_id: context.sectionId, sort_order: context.sortOrder });
-        if (insertError) throw insertError;
+        // Transaction unique côté base (l5d2lm_replace_section_media) : si
+        // l'insertion de la nouvelle association échoue, l'ancienne n'est
+        // jamais supprimée — la position ne peut pas se perdre en route.
+        const { error: rpcError } = await supabase.rpc('l5d2lm_replace_section_media', {
+          p_section_id: context.sectionId,
+          p_old_media_id: context.oldMediaId,
+          p_new_media_id: mediaId
+        });
+        if (rpcError) throw rpcError;
         setStatus('Photo remplacée — même position, ancienne photo conservée dans la médiathèque.', 'success');
       } else {
         const maxOrder = mediaState.sectionOrderItems.reduce((max, entry) => Math.max(max, entry.sortOrder), -10);
@@ -1688,12 +1788,8 @@
     }
 
     infos.forEach((info) => {
-      for (const [filename, entry] of mediaState.importedByFilename) {
-        if (entry.id === info.id) {
-          mediaState.importedByFilename.delete(filename);
-          mediaState.trashedFilenames.add(filename);
-        }
-      }
+      mediaState.library.delete(info.id);
+      mediaState.importedByFilename.delete(info.original_filename);
       mediaState.selected.delete(info.id);
     });
     renderMediaGrid();
@@ -1705,9 +1801,9 @@
   const loadMediaPanel = async () => {
     if (!mediaGrid) return;
     try {
-      await refreshImportedStatus();
+      await loadMediaLibrary();
     } catch (error) {
-      setStatus(error.message || 'Impossible de charger l’état des photos importées.', 'error');
+      setStatus(error.message || 'Impossible de charger la médiathèque.', 'error');
     }
     mediaState.loaded = true;
     populateFilterSelects();
@@ -1785,7 +1881,7 @@
               original_private_path: storagePath,
               upload_batch_id: batch.id
             })
-            .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
+            .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
             .single();
 
           if (insertError) {
@@ -1793,22 +1889,35 @@
               duplicates += 1;
               const { data: existingRow } = await supabase
                 .from('l5d2lm_media')
-                .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
+                .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
                 .eq('original_sha256', hash)
                 .is('deleted_at', null)
                 .limit(1)
                 .maybeSingle();
-              if (existingRow) mediaState.importedByFilename.set(item.filename, existingRow);
+              if (existingRow) {
+                mediaState.library.set(existingRow.id, existingRow);
+                mediaState.importedByFilename.set(item.filename, existingRow);
+              }
               mediaState.importedFilenames.add(item.filename);
               mediaState.selected.delete(item.id);
+              // La photo est désormais représentée par sa fiche Supabase
+              // (mediaState.library) : l'entrée "en attente d'import" ne
+              // doit plus produire une seconde carte pour le même fichier.
+              if (item.kind === 'upload') {
+                mediaState.localUploads = mediaState.localUploads.filter((entry) => entry.id !== item.id);
+              }
               continue;
             }
             throw insertError;
           }
 
+          mediaState.library.set(insertedRow.id, insertedRow);
           mediaState.importedByFilename.set(item.filename, insertedRow);
           mediaState.importedFilenames.add(item.filename);
           mediaState.selected.delete(item.id);
+          if (item.kind === 'upload') {
+            mediaState.localUploads = mediaState.localUploads.filter((entry) => entry.id !== item.id);
+          }
           imported += 1;
         } catch (itemError) {
           const reason = itemError?.message || itemError?.error_description || String(itemError);

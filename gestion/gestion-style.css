@@ -302,10 +302,12 @@
 
 .gestion-workspace {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .gestion-card {
   display: none;
+  min-width: 0;
   padding: clamp(1rem, 3vw, 1.4rem);
   border-radius: 20px;
   background: rgba(248, 245, 240, 0.72);
@@ -571,6 +573,7 @@
   border: 1px solid rgba(75, 58, 47, 0.12);
   border-radius: 18px;
   background: #fff;
+  min-width: 0;
 }
 
 .media-item.is-selected {
@@ -593,15 +596,22 @@
 }
 
 .media-item__thumb {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 12px;
   background: rgba(248, 245, 240, 0.9);
+  box-sizing: border-box;
 }
 
 .media-item__thumb img {
+  display: block;
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: cover;
 }
 
@@ -900,17 +910,24 @@
 }
 
 .section-order-item__thumb {
-  width: 64px;
-  height: 64px;
+  position: relative;
+  width: 110px;
+  height: 85px;
+  max-width: 110px;
+  max-height: 85px;
   border-radius: 10px;
   overflow: hidden;
   flex: 0 0 auto;
   background: rgba(248, 245, 240, 0.9);
+  box-sizing: border-box;
 }
 
 .section-order-item__thumb img {
+  display: block;
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: cover;
 }
 
@@ -920,15 +937,29 @@
   min-width: 0;
 }
 
+/* Le texte peut s'étirer en hauteur (la carte n'a pas de hauteur fixe) :
+   on préfère le retour à la ligne à une troncature silencieuse. Un
+   avertissement (voir section-order-item__annotation--warning) prévient
+   plutôt de masquer le dépassement. */
 .section-order-item__annotation {
   margin: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
   word-break: break-word;
   color: var(--muted);
   font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.section-order-item__annotation--warning {
+  color: #8d3f2c;
+  font-weight: 700;
+}
+
+.section-order-item__info {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  word-break: break-all;
 }
 
 .section-order-item__actions {
@@ -995,29 +1026,46 @@
     grid-template-columns: 1fr;
   }
 
-  /* En-tête et navigation par page restent visibles, mais pas figés en
-     sticky sur petit écran : évite tout chevauchement quand ça s'empile. */
+  /* La navigation (en-tête + pages) doit rester disponible pendant le
+     défilement, y compris sur mobile : les deux restent sticky, en une
+     seule ligne défilable horizontalement plutôt que de s'empiler en
+     hauteur (ce qui mangerait l'écran et casserait l'offset sticky). */
   .admin-topbar {
-    position: static;
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .account-menu {
-    margin-left: 0;
-  }
-
-  .page-nav {
-    position: static;
+  .admin-topbar__brand {
+    flex: 0 0 auto;
   }
 
   .gestion-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
   }
 
   .gestion-tab {
-    border-radius: 14px;
+    white-space: nowrap;
+  }
+
+  .account-menu {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
+  }
+
+  .page-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .page-nav__item {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-snap-align: start;
   }
 
   .section-order-item {
@@ -1045,7 +1093,7 @@
   }
 }
 
-@media (max-width: 460px) {
+@media (max-width: 360px) {
   .media-grid {
     grid-template-columns: 1fr;
   }

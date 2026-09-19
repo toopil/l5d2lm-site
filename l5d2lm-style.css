@@ -109,8 +109,14 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 .postcard {
   display: block; padding: 9px 9px 26px; background: #fffdf8;
   box-shadow: 0 16px 34px rgba(75, 58, 47, 0.24); border-radius: 5px;
+  overflow: hidden; min-width: 0; box-sizing: border-box;
 }
-.postcard img { width: 100%; display: block; border-radius: 2px; }
+/* La carte fixe le format ; la photo s'y adapte (recadrage, jamais de
+   dépassement ni de hauteur qui varie selon la photo). */
+.postcard img {
+  display: block; width: 100%; aspect-ratio: 4 / 3;
+  object-fit: cover; object-position: 50% 50%; border-radius: 2px;
+}
 .photo-band {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
   gap: 1.8rem 1.3rem; padding: 0.6rem 1rem 3rem;
