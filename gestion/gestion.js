@@ -566,6 +566,11 @@
       if (isImported) {
         const info = mediaState.importedByFilename.get(item.filename);
 
+        const titleEl = document.createElement('p');
+        titleEl.className = 'media-item__title';
+        titleEl.textContent = info.default_annotation || '(sans titre)';
+        meta.appendChild(titleEl);
+
         const rightsRow = document.createElement('div');
         rightsRow.className = 'media-item__rights';
 
@@ -621,6 +626,13 @@
             });
           meta.appendChild(sectionsRow);
         }
+
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'gestion-link-button';
+        editButton.textContent = 'Modifier le titre et les catégories';
+        editButton.addEventListener('click', () => toggleMediaEditPanel(card, info));
+        meta.appendChild(editButton);
       }
 
       card.appendChild(meta);
@@ -679,7 +691,7 @@
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('l5d2lm_media')
-      .select('id, original_filename, rights_status, favorite, publish_status')
+      .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
       .in('original_filename', filenames)
       .is('deleted_at', null);
     if (error) throw error;
@@ -790,6 +802,123 @@
       renderMediaGrid();
     } catch (error) {
       setStatus(error.message || 'Impossible de réordonner cette photo.', 'error');
+    }
+  };
+
+  // Édition individuelle d'une photo déjà importée : titre (annotation) et
+  // catégories propres à cette photo, disponible à tout moment (pas
+  // seulement juste après l'import).
+  const toggleMediaEditPanel = (card, info) => {
+    const existing = card.querySelector('.media-item__edit');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    const panel = document.createElement('div');
+    panel.className = 'media-item__edit';
+
+    const titleLabel = document.createElement('label');
+    titleLabel.textContent = 'Titre';
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.value = info.default_annotation || '';
+    titleInput.placeholder = 'Ex. Et si le terrain de jeu, c’était toi ?';
+    titleLabel.appendChild(titleInput);
+    panel.appendChild(titleLabel);
+
+    const checksWrap = document.createElement('div');
+    checksWrap.className = 'media-category-checks';
+    const assigned = mediaState.mediaSections.get(info.id) || new Map();
+    if (!sectionsState.items.length) {
+      checksWrap.textContent = 'Aucune catégorie créée pour l’instant.';
+    } else {
+      sectionsState.items.forEach((section) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = section.id;
+        input.checked = assigned.has(section.id);
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(section.title));
+        checksWrap.appendChild(label);
+      });
+    }
+    panel.appendChild(checksWrap);
+
+    const actions = document.createElement('div');
+    actions.className = 'gestion-actions-line';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'btn btn-primary';
+    saveButton.textContent = 'Enregistrer';
+    saveButton.addEventListener('click', () => {
+      const checkedSectionIds = Array.from(checksWrap.querySelectorAll('input:checked')).map((el) => el.value);
+      saveMediaEdit(info, titleInput.value.trim(), checkedSectionIds);
+    });
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'btn';
+    cancelButton.textContent = 'Annuler';
+    cancelButton.addEventListener('click', () => panel.remove());
+
+    actions.appendChild(saveButton);
+    actions.appendChild(cancelButton);
+    panel.appendChild(actions);
+
+    card.appendChild(panel);
+    titleInput.focus();
+  };
+
+  const saveMediaEdit = async (info, title, checkedSectionIds) => {
+    const supabase = getSupabase();
+    try {
+      const { error: titleError } = await supabase
+        .from('l5d2lm_media')
+        .update({ default_annotation: title || null })
+        .eq('id', info.id);
+      if (titleError) throw titleError;
+      info.default_annotation = title || null;
+
+      const assigned = mediaState.mediaSections.get(info.id) || new Map();
+      const currentIds = new Set(assigned.keys());
+      const nextIds = new Set(checkedSectionIds);
+      const toAdd = checkedSectionIds.filter((id) => !currentIds.has(id));
+      const toRemove = Array.from(currentIds).filter((id) => !nextIds.has(id));
+
+      if (toAdd.length) {
+        const countInSection = (sectionId) => {
+          let count = 0;
+          mediaState.mediaSections.forEach((sections) => { if (sections.has(sectionId)) count += 1; });
+          return count;
+        };
+        const rows = toAdd.map((sectionId) => ({
+          media_id: info.id,
+          section_id: sectionId,
+          sort_order: countInSection(sectionId) * 10
+        }));
+        const { error } = await supabase
+          .from('l5d2lm_media_sections')
+          .upsert(rows, { onConflict: 'media_id,section_id', ignoreDuplicates: true });
+        if (error) throw error;
+      }
+
+      if (toRemove.length) {
+        const { error } = await supabase
+          .from('l5d2lm_media_sections')
+          .delete()
+          .eq('media_id', info.id)
+          .in('section_id', toRemove);
+        if (error) throw error;
+      }
+
+      await fetchMediaSections(Array.from(mediaState.importedByFilename.values()).map((entry) => entry.id));
+      renderMediaGrid();
+      setStatus('Photo mise à jour.', 'success');
+    } catch (error) {
+      setStatus(error.message || 'Impossible d’enregistrer les modifications.', 'error');
     }
   };
 
@@ -964,7 +1093,7 @@
               original_private_path: storagePath,
               upload_batch_id: batch.id
             })
-            .select('id, original_filename, rights_status, favorite, publish_status')
+            .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
             .single();
 
           if (insertError) {
@@ -972,7 +1101,7 @@
               duplicates += 1;
               const { data: existingRow } = await supabase
                 .from('l5d2lm_media')
-                .select('id, original_filename, rights_status, favorite, publish_status')
+                .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
                 .eq('original_sha256', hash)
                 .is('deleted_at', null)
                 .limit(1)

@@ -435,6 +435,38 @@
   font-size: 0.9rem;
 }
 
+.media-item__title {
+  margin: 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.media-item__edit {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: rgba(201, 214, 223, 0.2);
+  border: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.media-item__edit label:first-child {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.media-item__edit input[type="text"] {
+  min-height: 44px;
+  border: 1px solid rgba(75, 58, 47, 0.18);
+  border-radius: 12px;
+  padding: 0.5rem 0.7rem;
+  background: #fff;
+  color: var(--ink);
+}
+
 .media-item__rights {
   display: flex;
   flex-wrap: wrap;
