@@ -302,6 +302,22 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   background-image: radial-gradient(circle, rgba(75, 58, 47, 0.16) 1.5px, transparent 1.8px);
   background-size: 20px 20px;
 }
+/* Tant qu'aucune photo n'est disponible : le titre de la proposition
+   occupe l'espace plutôt que de le laisser vide, et un repère discret
+   signale qu'une photo est encore à ajouter. */
+.flip-card__media-placeholder-label {
+  position: relative; z-index: 1; height: 100%; margin: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.4rem; text-align: center; padding: 1.2rem;
+}
+.flip-card__media-placeholder-label strong {
+  font-family: Georgia, "Times New Roman", serif; font-weight: 400;
+  font-size: clamp(1.25rem, 3vw, 1.65rem); color: var(--ink);
+}
+.flip-card__media-placeholder-label span {
+  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  font-size: 0.72rem; color: var(--muted);
+}
 .flip-card__content {
   flex: 1 1 auto; padding: clamp(1.3rem, 3vw, 2.1rem);
   display: flex; flex-direction: column; gap: 0.5rem; justify-content: center;
