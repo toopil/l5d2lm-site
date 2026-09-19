@@ -8,10 +8,10 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260919g">
+  <link rel="stylesheet" href="gestion-style.css?v=20260920b">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260919l"></script>
+  <script defer src="gestion.js?v=20260920a"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -22,10 +22,10 @@
   </header>
 
   <main id="contenu" class="gestion-shell">
-    <section class="gestion-hero">
+    <section class="gestion-hero" data-hero>
       <p class="eyebrow">Administration</p>
       <h1>Gestion L5D2LM</h1>
-      <p class="lead">Un espace privé pour préparer l’administration des photos, textes, catégories et cartes postales.</p>
+      <p class="lead">Un espace privé pour administrer les photos, le site et les cartes postales.</p>
     </section>
 
     <section class="gestion-panel" data-view="loading" aria-live="polite">
@@ -136,140 +136,169 @@
       <button class="btn" type="button" data-sign-out>Se déconnecter</button>
     </section>
 
-    <section class="gestion-panel" data-view="admin" hidden>
+    <section class="gestion-panel gestion-panel--admin" data-view="admin" hidden>
       <div class="gestion-admin-top">
-        <div>
-          <p class="eyebrow">Accès sécurisé</p>
-          <h2>Tableau de bord</h2>
-          <p data-admin-summary>Connecté avec double authentification.</p>
-        </div>
-        <button class="btn" type="button" data-sign-out>Se déconnecter</button>
+        <p data-admin-summary>Connexion sécurisée</p>
+        <button class="gestion-link-button" type="button" data-sign-out>Se déconnecter</button>
       </div>
 
       <nav class="gestion-tabs" aria-label="Navigation de gestion">
         <button type="button" class="gestion-tab is-active" data-tab="photos">Photos</button>
-        <button type="button" class="gestion-tab" data-tab="textes">Textes</button>
-        <button type="button" class="gestion-tab" data-tab="categories">Catégories</button>
+        <button type="button" class="gestion-tab" data-tab="site">Site</button>
         <button type="button" class="gestion-tab" data-tab="cartes">Cartes postales</button>
-        <button type="button" class="gestion-tab" data-tab="affichage">Affichage du site</button>
-        <button type="button" class="gestion-tab" data-tab="corbeille">Corbeille</button>
+        <button type="button" class="gestion-tab" data-tab="plus">Plus</button>
       </nav>
 
       <div class="gestion-workspace">
         <article class="gestion-card is-active" data-panel="photos">
-          <div class="media-heading">
-            <div>
-              <h3>Photos</h3>
-              <p>Importez vos propres photos depuis votre téléphone ou votre ordinateur, ou reprenez les images déjà utilisées sur le site. Tout arrive en brouillon, avec les droits à vérifier.</p>
-            </div>
-            <div class="media-counters" aria-label="Résumé de la médiathèque">
-              <span><strong data-media-total>0</strong> photos</span>
-              <span><strong data-media-imported>0</strong> importées</span>
-              <span><strong data-media-selected>0</strong> sélectionnées</span>
-            </div>
-          </div>
-
-          <div class="media-upload-zone">
+          <div class="photos-toolbar-top">
             <label class="btn btn-primary media-upload-button">
-              Importer depuis mon appareil
+              Importer des photos
               <input type="file" data-media-upload-input accept="image/*,.heic,.heif" multiple hidden>
             </label>
-            <p class="media-upload-hint">JPEG, PNG, WEBP, HEIC/HEIF. Plusieurs photos à la fois.</p>
-          </div>
-
-          <div class="media-toolbar" aria-label="Actions sur les photos">
-            <div class="media-filter" data-media-filters></div>
-            <div class="media-filter" data-media-rights-filters aria-label="Filtrer par statut des droits"></div>
-            <div class="media-actions">
-              <button class="btn" type="button" data-media-select-visible>Tout sélectionner</button>
-              <button class="btn" type="button" data-media-clear-selection>Effacer la sélection</button>
-              <button class="btn btn-primary" type="button" data-media-import>Importer la sélection</button>
-            </div>
-          </div>
-
-          <div class="media-import-note">
-            <p><strong>Important :</strong> l’import ne publie rien automatiquement. Les photos arrivent en brouillon, avec les droits à vérifier.</p>
-          </div>
-
-          <div class="media-bulk-panel" data-media-bulk-panel hidden>
-            <p class="media-bulk-title"><strong data-media-bulk-count>0</strong> photo(s) importée(s) sélectionnée(s) — actions groupées</p>
-
-            <div class="media-bulk-group">
-              <span class="media-bulk-label">Droits</span>
-              <div class="media-actions" data-rights-buttons></div>
-            </div>
-
-            <div class="media-bulk-group">
-              <span class="media-bulk-label">Favori</span>
-              <div class="media-actions">
-                <button class="btn" type="button" data-bulk-favorite="true">★ Marquer favori</button>
-                <button class="btn" type="button" data-bulk-favorite="false">☆ Retirer des favoris</button>
+            <input type="search" class="photos-search" data-media-search placeholder="Rechercher…" aria-label="Rechercher une photo par nom, titre ou catégorie">
+            <details class="photos-filters" data-filters-details>
+              <summary>Filtres</summary>
+              <div class="photos-filters__panel">
+                <label>Catégorie
+                  <select data-filter-category></select>
+                </label>
+                <label>Droits
+                  <select data-filter-rights></select>
+                </label>
+                <label>État
+                  <select data-filter-state>
+                    <option value="all">Toutes</option>
+                    <option value="unclassified">Non classées</option>
+                    <option value="favorite">Favorites</option>
+                  </select>
+                </label>
+                <label>Lot d’import
+                  <select data-filter-batch>
+                    <option value="all">Tous</option>
+                    <option value="last">Dernier import</option>
+                  </select>
+                </label>
               </div>
-            </div>
+            </details>
+          </div>
 
-            <div class="media-bulk-group">
-              <span class="media-bulk-label">Catégories</span>
-              <div class="media-category-checks" data-bulk-category-checks></div>
-              <div class="media-actions">
-                <button class="btn btn-primary" type="button" data-bulk-category-apply="add">Ajouter aux sélectionnées</button>
-                <button class="btn" type="button" data-bulk-category-apply="remove">Retirer des sélectionnées</button>
+          <div class="photos-active-filters" data-active-filter-chips></div>
+
+          <p class="photos-summary">
+            <strong data-media-total>0</strong> photos ·
+            <button type="button" class="gestion-link-button" data-media-select-visible>Tout sélectionner</button>
+          </p>
+
+          <div class="media-import-bar" data-media-import-bar hidden>
+            <span><strong data-media-import-count>0</strong> photo(s) à importer — brouillon, droits à vérifier</span>
+            <button class="btn btn-primary" type="button" data-media-import>Importer</button>
+          </div>
+
+          <div class="media-bulk-bar" data-media-bulk-panel hidden>
+            <strong data-media-bulk-count>0</strong> sélectionnées
+
+            <details class="bulk-menu">
+              <summary>Classer</summary>
+              <div class="bulk-menu__panel">
+                <div class="media-category-checks" data-bulk-category-checks></div>
+                <div class="media-actions">
+                  <button class="btn btn-primary" type="button" data-bulk-category-apply="add">Ajouter</button>
+                  <button class="btn" type="button" data-bulk-category-apply="remove">Retirer</button>
+                </div>
               </div>
-            </div>
+            </details>
+
+            <details class="bulk-menu">
+              <summary>Droits</summary>
+              <div class="bulk-menu__panel media-actions" data-rights-buttons></div>
+            </details>
+
+            <button class="btn" type="button" data-bulk-favorite="true">★ Favori</button>
+
+            <details class="bulk-menu">
+              <summary>Plus</summary>
+              <div class="bulk-menu__panel media-actions">
+                <button class="btn" type="button" data-bulk-trash>Mettre à la corbeille</button>
+              </div>
+            </details>
+
+            <button class="gestion-link-button" type="button" data-media-clear-selection>Effacer la sélection</button>
           </div>
 
           <div class="media-grid" data-media-grid aria-live="polite"></div>
         </article>
-        <article class="gestion-card" data-panel="textes">
-          <h3>Textes</h3>
-          <p>Les textes administrables seront structurés par page et par bloc, avec brouillon, aperçu et publication.</p>
-        </article>
-        <article class="gestion-card" data-panel="categories">
-          <div class="media-heading">
-            <div>
-              <h3>Catégories</h3>
-              <p>Créez, ordonnez, publiez ou masquez les propositions du site. Une catégorie masquée disparaît entièrement du site public.</p>
+
+        <article class="gestion-card" data-panel="site">
+          <nav class="subnav" aria-label="Sections du site">
+            <button type="button" class="subnav__tab is-active" data-subtab="structure">Structure</button>
+            <button type="button" class="subnav__tab" data-subtab="textes">Textes</button>
+            <button type="button" class="subnav__tab" data-subtab="publication">Publication</button>
+          </nav>
+
+          <div class="subpanel is-active" data-subpanel="structure">
+            <div class="categories-toolbar">
+              <button class="btn btn-primary" type="button" data-category-new>Créer une catégorie</button>
+              <button class="btn" type="button" data-category-seed>Créer les 6 catégories du site</button>
             </div>
+
+            <form class="gestion-form categories-form" data-category-form hidden>
+              <label>
+                Titre
+                <input type="text" name="title" required placeholder="Ex. Festival">
+              </label>
+              <label>
+                Identifiant (slug)
+                <input type="text" name="slug" required placeholder="ex-festival">
+              </label>
+              <label>
+                Catégorie parente (optionnel)
+                <select name="parent_id" data-category-parent-select>
+                  <option value="">— Aucune (premier niveau) —</option>
+                </select>
+              </label>
+              <div class="gestion-actions-line">
+                <button class="btn btn-primary" type="submit">Enregistrer</button>
+                <button class="btn" type="button" data-category-cancel>Annuler</button>
+              </div>
+            </form>
+
+            <div class="categories-tree" data-categories-tree aria-live="polite"></div>
           </div>
 
-          <div class="categories-toolbar">
-            <button class="btn btn-primary" type="button" data-category-new>Créer une catégorie</button>
-            <button class="btn" type="button" data-category-seed>Créer les 6 catégories du site</button>
+          <div class="subpanel" data-subpanel="textes" hidden>
+            <p class="gestion-soon">Bientôt disponible : édition des textes du site, page par page.</p>
           </div>
 
-          <form class="gestion-form categories-form" data-category-form hidden>
-            <label>
-              Titre
-              <input type="text" name="title" required placeholder="Ex. Festival">
-            </label>
-            <label>
-              Identifiant (slug)
-              <input type="text" name="slug" required placeholder="ex-festival">
-            </label>
-            <label>
-              Catégorie parente (optionnel)
-              <select name="parent_id" data-category-parent-select>
-                <option value="">— Aucune (premier niveau) —</option>
-              </select>
-            </label>
-            <div class="gestion-actions-line">
-              <button class="btn btn-primary" type="submit">Enregistrer</button>
-              <button class="btn" type="button" data-category-cancel>Annuler</button>
-            </div>
-          </form>
-
-          <div class="categories-tree" data-categories-tree aria-live="polite"></div>
+          <div class="subpanel" data-subpanel="publication" hidden>
+            <p class="gestion-soon">Bientôt disponible : aperçu et publication des modifications.</p>
+          </div>
         </article>
+
         <article class="gestion-card" data-panel="cartes">
-          <h3>Cartes postales</h3>
-          <p>Les cartes pourront utiliser des photos fixes, aléatoires ou semi-aléatoires, sans répétition immédiate.</p>
+          <p class="gestion-soon">Bientôt disponible : configuration des cartes postales par catégorie (photos fixes, rotation, annotations).</p>
         </article>
-        <article class="gestion-card" data-panel="affichage">
-          <h3>Affichage du site</h3>
-          <p>Les réglages publiés contrôleront ce qui apparaît publiquement, sans trou dans la mise en page.</p>
-        </article>
-        <article class="gestion-card" data-panel="corbeille">
-          <h3>Corbeille</h3>
-          <p>Les suppressions ordinaires resteront récupérables avant suppression définitive.</p>
+
+        <article class="gestion-card" data-panel="plus">
+          <nav class="subnav" aria-label="Options">
+            <button type="button" class="subnav__tab is-active" data-subtab="corbeille">Corbeille</button>
+            <button type="button" class="subnav__tab" data-subtab="historique">Historique</button>
+            <button type="button" class="subnav__tab" data-subtab="securite">Sécurité</button>
+          </nav>
+
+          <div class="subpanel is-active" data-subpanel="corbeille">
+            <p class="gestion-soon">Bientôt disponible : restaurer ou supprimer définitivement les éléments mis à la corbeille.</p>
+          </div>
+
+          <div class="subpanel" data-subpanel="historique" hidden>
+            <p class="gestion-soon">Bientôt disponible : journal des actions récentes.</p>
+          </div>
+
+          <div class="subpanel" data-subpanel="securite" hidden>
+            <p><strong>Compte</strong></p>
+            <p data-security-email>—</p>
+            <p class="gestion-soon">Gestion détaillée du MFA et des sessions : bientôt disponible ici.</p>
+          </div>
         </article>
       </div>
     </section>

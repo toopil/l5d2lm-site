@@ -26,11 +26,34 @@
   const tabs = Array.from(document.querySelectorAll('[data-tab]'));
   const panels = Array.from(document.querySelectorAll('[data-panel]'));
 
+  const gestionShell = document.querySelector('.gestion-shell');
+
   const showView = (name) => {
     views.forEach((view) => {
       view.hidden = view.dataset.view !== name;
     });
+    if (gestionShell) gestionShell.classList.toggle('is-admin-view', name === 'admin');
   };
+
+  // Sous-navigations génériques (Site > Structure/Textes/Publication,
+  // Plus > Corbeille/Historique/Sécurité) : chaque .subnav ne pilote que
+  // les .subpanel de son propre article[data-panel].
+  document.querySelectorAll('.subnav').forEach((nav) => {
+    const container = nav.closest('[data-panel]');
+    if (!container) return;
+    nav.querySelectorAll('[data-subtab]').forEach((tabButton) => {
+      tabButton.addEventListener('click', () => {
+        nav.querySelectorAll('[data-subtab]').forEach((btn) => {
+          btn.classList.toggle('is-active', btn === tabButton);
+        });
+        container.querySelectorAll('[data-subpanel]').forEach((panel) => {
+          const active = panel.dataset.subpanel === tabButton.dataset.subtab;
+          panel.hidden = !active;
+          panel.classList.toggle('is-active', active);
+        });
+      });
+    });
+  });
 
   const setStatus = (message = '', type = '') => {
     status.textContent = message;
@@ -130,7 +153,9 @@
     }
 
     const email = state.session?.user?.email || 'compte administrateur';
-    adminSummary.textContent = `${email} est connecté avec une session MFA valide.`;
+    adminSummary.textContent = `Les 5 doigts de la main · Gestion — ${email}`;
+    const securityEmail = document.querySelector('[data-security-email]');
+    if (securityEmail) securityEmail.textContent = `${email} · double authentification active`;
     showView('admin');
     setStatus('Accès sécurisé confirmé.', 'success');
     await loadCategoriesPanel();
@@ -329,19 +354,26 @@
   // des images déjà utilisées sur le site public. Tout arrive en brouillon
   // dans l5d2lm_media (rien n'est publié automatiquement).
   const mediaGrid = document.querySelector('[data-media-grid]');
-  const mediaFilters = document.querySelector('[data-media-filters]');
-  const mediaRightsFilters = document.querySelector('[data-media-rights-filters]');
+  const mediaSearchInput = document.querySelector('[data-media-search]');
+  const filtersDetails = document.querySelector('[data-filters-details]');
+  const filterCategorySelect = document.querySelector('[data-filter-category]');
+  const filterRightsSelect = document.querySelector('[data-filter-rights]');
+  const filterStateSelect = document.querySelector('[data-filter-state]');
+  const filterBatchSelect = document.querySelector('[data-filter-batch]');
+  const activeFilterChipsEl = document.querySelector('[data-active-filter-chips]');
   const mediaTotalEl = document.querySelector('[data-media-total]');
-  const mediaImportedEl = document.querySelector('[data-media-imported]');
   const mediaSelectedEl = document.querySelector('[data-media-selected]');
   const mediaSelectVisibleButton = document.querySelector('[data-media-select-visible]');
   const mediaClearSelectionButton = document.querySelector('[data-media-clear-selection]');
+  const mediaImportBar = document.querySelector('[data-media-import-bar]');
+  const mediaImportCountEl = document.querySelector('[data-media-import-count]');
   const mediaImportButton = document.querySelector('[data-media-import]');
   const mediaUploadInput = document.querySelector('[data-media-upload-input]');
   const mediaBulkPanel = document.querySelector('[data-media-bulk-panel]');
   const mediaBulkCountEl = document.querySelector('[data-media-bulk-count]');
   const rightsButtonsContainer = document.querySelector('[data-rights-buttons]');
   const bulkCategoryChecks = document.querySelector('[data-bulk-category-checks]');
+  const bulkTrashButton = document.querySelector('[data-bulk-trash]');
 
   // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
   const categoriesTree = document.querySelector('[data-categories-tree]');
@@ -376,8 +408,13 @@
     importedByFilename: new Map(),
     mediaSections: new Map(),
     localUploads: [],
-    activeFilter: 'all',
+    categoryFilter: 'all',
     rightsFilter: 'all',
+    stateFilter: 'all',
+    batchFilter: 'all',
+    searchQuery: '',
+    lastBatchId: null,
+    trashedFilenames: new Set(),
     loaded: false,
     uploadCounter: 0
   };
@@ -419,12 +456,21 @@
 
   const allSiteMedia = () => window.L5D2LM_SITE_MEDIA || [];
   const allSections = () => window.L5D2LM_SECTIONS || [];
-  const allMedia = () => [...mediaState.localUploads, ...allSiteMedia()];
+  const allMedia = () => [...mediaState.localUploads, ...allSiteMedia()].filter(
+    (item) => !mediaState.trashedFilenames.has(item.filename)
+  );
 
   const visibleMedia = () => {
     let items = allMedia();
-    if (mediaState.activeFilter === 'new-upload') items = items.filter((item) => item.kind === 'upload');
-    else if (mediaState.activeFilter !== 'all') items = items.filter((item) => item.sectionSlug === mediaState.activeFilter);
+
+    if (mediaState.categoryFilter !== 'all') {
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        if (!info) return false;
+        const assigned = mediaState.mediaSections.get(info.id);
+        return assigned && assigned.has(mediaState.categoryFilter);
+      });
+    }
 
     if (mediaState.rightsFilter !== 'all') {
       items = items.filter((item) => {
@@ -432,6 +478,44 @@
         return info && info.rights_status === mediaState.rightsFilter;
       });
     }
+
+    if (mediaState.stateFilter === 'unclassified') {
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        if (!info) return true; // pas encore importée = non classée par définition
+        const assigned = mediaState.mediaSections.get(info.id);
+        return !assigned || assigned.size === 0;
+      });
+    } else if (mediaState.stateFilter === 'favorite') {
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        return info && info.favorite;
+      });
+    }
+
+    if (mediaState.batchFilter === 'last' && mediaState.lastBatchId) {
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        return info && info.upload_batch_id === mediaState.lastBatchId;
+      });
+    }
+
+    if (mediaState.searchQuery) {
+      const query = mediaState.searchQuery.toLowerCase();
+      items = items.filter((item) => {
+        const info = mediaState.importedByFilename.get(item.filename);
+        const title = info?.default_annotation || '';
+        const assigned = info ? mediaState.mediaSections.get(info.id) : null;
+        const categoryNames = assigned
+          ? Array.from(assigned.keys())
+              .map((id) => sectionsState.items.find((section) => section.id === id)?.title || '')
+              .join(' ')
+          : '';
+        const haystack = `${item.filename} ${title} ${categoryNames}`.toLowerCase();
+        return haystack.includes(query);
+      });
+    }
+
     return items;
   };
 
@@ -451,53 +535,109 @@
     const count = selectedImportedInfos().length;
     if (mediaBulkCountEl) mediaBulkCountEl.textContent = String(count);
     if (mediaBulkPanel) mediaBulkPanel.hidden = count === 0;
+
+    const pendingCount = allMedia().filter(
+      (item) => mediaState.selected.has(item.id) && !isItemImported(item)
+    ).length;
+    if (mediaImportCountEl) mediaImportCountEl.textContent = String(pendingCount);
+    if (mediaImportBar) mediaImportBar.hidden = pendingCount === 0;
   };
 
   const updateMediaCounters = () => {
     if (mediaTotalEl) mediaTotalEl.textContent = String(allMedia().length);
-    if (mediaImportedEl) mediaImportedEl.textContent = String(mediaState.importedByFilename.size);
     if (mediaSelectedEl) mediaSelectedEl.textContent = String(mediaState.selected.size);
     updateBulkPanel();
   };
 
-  const renderMediaFilters = () => {
-    if (!mediaFilters) return;
-    const options = [{ slug: 'all', title: 'Toutes les pages' }];
-    if (mediaState.localUploads.length) options.push({ slug: 'new-upload', title: 'Mes nouveaux imports' });
-    options.push(...allSections());
+  // Filtres repliés dans "Filtres ▾" (des <select> plutôt que des rangées
+  // de boutons) + pastilles pour les filtres actifs, comme demandé.
+  const populateFilterSelects = () => {
+    if (filterCategorySelect) {
+      const current = filterCategorySelect.value || 'all';
+      filterCategorySelect.innerHTML = '<option value="all">Toutes</option>';
+      sectionsState.items.forEach((section) => {
+        const option = document.createElement('option');
+        option.value = section.id;
+        option.textContent = section.title;
+        filterCategorySelect.appendChild(option);
+      });
+      filterCategorySelect.value = sectionsState.items.some((s) => s.id === current) ? current : 'all';
+    }
+    if (filterRightsSelect && !filterRightsSelect.options.length) {
+      filterRightsSelect.innerHTML = '<option value="all">Tous</option>';
+      RIGHTS_STATUSES.forEach(({ value, label }) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        filterRightsSelect.appendChild(option);
+      });
+    }
+  };
 
-    mediaFilters.innerHTML = '';
-    options.forEach(({ slug, title }) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = title;
-      button.classList.toggle('is-active', mediaState.activeFilter === slug);
-      button.addEventListener('click', () => {
-        mediaState.activeFilter = slug;
-        renderMediaFilters();
+  const syncFilterSelects = () => {
+    if (filterCategorySelect) filterCategorySelect.value = mediaState.categoryFilter;
+    if (filterRightsSelect) filterRightsSelect.value = mediaState.rightsFilter;
+    if (filterStateSelect) filterStateSelect.value = mediaState.stateFilter;
+    if (filterBatchSelect) filterBatchSelect.value = mediaState.batchFilter;
+  };
+
+  const renderActiveFilterChips = () => {
+    if (!activeFilterChipsEl) return;
+    activeFilterChipsEl.innerHTML = '';
+    const chips = [];
+
+    if (mediaState.categoryFilter !== 'all') {
+      const section = sectionsState.items.find((entry) => entry.id === mediaState.categoryFilter);
+      chips.push({ label: section ? section.title : 'Catégorie', reset: () => { mediaState.categoryFilter = 'all'; } });
+    }
+    if (mediaState.rightsFilter !== 'all') {
+      const def = RIGHTS_STATUSES.find((entry) => entry.value === mediaState.rightsFilter);
+      chips.push({ label: def ? def.label : mediaState.rightsFilter, reset: () => { mediaState.rightsFilter = 'all'; } });
+    }
+    if (mediaState.stateFilter !== 'all') {
+      const labels = { unclassified: 'Non classées', favorite: 'Favorites' };
+      chips.push({ label: labels[mediaState.stateFilter] || mediaState.stateFilter, reset: () => { mediaState.stateFilter = 'all'; } });
+    }
+    if (mediaState.batchFilter !== 'all') {
+      chips.push({ label: 'Dernier import', reset: () => { mediaState.batchFilter = 'all'; } });
+    }
+
+    chips.forEach(({ label, reset }) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'filter-chip';
+      chip.textContent = `${label} ×`;
+      chip.addEventListener('click', () => {
+        reset();
+        syncFilterSelects();
+        renderActiveFilterChips();
         renderMediaGrid();
       });
-      mediaFilters.appendChild(button);
+      activeFilterChipsEl.appendChild(chip);
     });
   };
 
-  const renderRightsFilters = () => {
-    if (!mediaRightsFilters) return;
-    const options = [{ value: 'all', label: 'Tous les droits' }, ...RIGHTS_STATUSES];
-    mediaRightsFilters.innerHTML = '';
-    options.forEach(({ value, label }) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = label;
-      button.classList.toggle('is-active', mediaState.rightsFilter === value);
-      button.addEventListener('click', () => {
-        mediaState.rightsFilter = value;
-        renderRightsFilters();
-        renderMediaGrid();
-      });
-      mediaRightsFilters.appendChild(button);
-    });
+  const onFilterChange = () => {
+    if (filtersDetails) filtersDetails.open = false;
+    renderActiveFilterChips();
+    renderMediaGrid();
   };
+
+  if (filterCategorySelect) filterCategorySelect.addEventListener('change', () => { mediaState.categoryFilter = filterCategorySelect.value; onFilterChange(); });
+  if (filterRightsSelect) filterRightsSelect.addEventListener('change', () => { mediaState.rightsFilter = filterRightsSelect.value; onFilterChange(); });
+  if (filterStateSelect) filterStateSelect.addEventListener('change', () => { mediaState.stateFilter = filterStateSelect.value; onFilterChange(); });
+  if (filterBatchSelect) filterBatchSelect.addEventListener('change', () => { mediaState.batchFilter = filterBatchSelect.value; onFilterChange(); });
+
+  if (mediaSearchInput) {
+    let searchTimer;
+    mediaSearchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        mediaState.searchQuery = mediaSearchInput.value.trim();
+        renderMediaGrid();
+      }, 200);
+    });
+  }
 
   const renderMediaGrid = () => {
     if (!mediaGrid) return;
@@ -545,23 +685,15 @@
       name.textContent = item.filename;
       meta.appendChild(name);
 
-      const badges = document.createElement('div');
-      badges.className = 'media-badges';
-      const originBadge = document.createElement('span');
-      if (isUpload) {
-        originBadge.className = 'media-badge media-badge--new';
-        originBadge.textContent = 'Nouvel import';
-      } else {
-        const section = allSections().find((entry) => entry.slug === item.sectionSlug);
-        originBadge.className = 'media-badge';
-        originBadge.textContent = section ? section.title : item.sectionSlug;
+      if (!isImported) {
+        const badges = document.createElement('div');
+        badges.className = 'media-badges';
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'media-badge media-badge--pending';
+        statusBadge.textContent = 'À importer';
+        badges.appendChild(statusBadge);
+        meta.appendChild(badges);
       }
-      badges.appendChild(originBadge);
-      const statusBadge = document.createElement('span');
-      statusBadge.className = `media-badge ${isImported ? 'media-badge--imported' : 'media-badge--pending'}`;
-      statusBadge.textContent = isImported ? 'Importée' : 'À importer';
-      badges.appendChild(statusBadge);
-      meta.appendChild(badges);
 
       if (isImported) {
         const info = mediaState.importedByFilename.get(item.filename);
@@ -594,36 +726,26 @@
         if (assignments.size) {
           const sectionsRow = document.createElement('div');
           sectionsRow.className = 'media-item__sections';
-          Array.from(assignments.entries())
-            .sort((a, b) => a[1] - b[1])
-            .forEach(([sectionId, order]) => {
-              const section = sectionsState.items.find((entry) => entry.id === sectionId);
-              if (!section) return;
-              const chip = document.createElement('span');
-              chip.className = 'media-badge media-item__section-chip';
+          const ordered = Array.from(assignments.entries()).sort((a, b) => a[1] - b[1]);
+          const visible = ordered.slice(0, 2);
+          const remaining = ordered.length - visible.length;
 
-              const label = document.createElement('span');
-              label.textContent = `${section.title} · ordre ${order}`;
-              chip.appendChild(label);
+          visible.forEach(([sectionId]) => {
+            const section = sectionsState.items.find((entry) => entry.id === sectionId);
+            if (!section) return;
+            const chip = document.createElement('span');
+            chip.className = 'media-badge';
+            chip.textContent = section.title;
+            sectionsRow.appendChild(chip);
+          });
 
-              const upButton = document.createElement('button');
-              upButton.type = 'button';
-              upButton.className = 'media-item__chip-move';
-              upButton.textContent = '▲';
-              upButton.setAttribute('aria-label', `Faire remonter dans ${section.title}`);
-              upButton.addEventListener('click', () => moveMediaInSection(info.id, sectionId, -1));
-              chip.appendChild(upButton);
+          if (remaining > 0) {
+            const more = document.createElement('span');
+            more.className = 'media-badge';
+            more.textContent = `+${remaining}`;
+            sectionsRow.appendChild(more);
+          }
 
-              const downButton = document.createElement('button');
-              downButton.type = 'button';
-              downButton.className = 'media-item__chip-move';
-              downButton.textContent = '▼';
-              downButton.setAttribute('aria-label', `Faire descendre dans ${section.title}`);
-              downButton.addEventListener('click', () => moveMediaInSection(info.id, sectionId, 1));
-              chip.appendChild(downButton);
-
-              sectionsRow.appendChild(chip);
-            });
           meta.appendChild(sectionsRow);
         }
 
@@ -659,8 +781,9 @@
     files.forEach((file) => {
       mediaState.uploadCounter += 1;
       const heic = isHeicFile(file);
+      const id = `upload-${Date.now()}-${mediaState.uploadCounter}`;
       mediaState.localUploads.unshift({
-        id: `upload-${Date.now()}-${mediaState.uploadCounter}`,
+        id,
         kind: 'upload',
         filename: file.name,
         file,
@@ -669,12 +792,21 @@
         mimeType: file.type,
         bytes: file.size
       });
+      mediaState.selected.add(id); // prêtes à être importées d'un clic
     });
 
-    mediaState.activeFilter = 'new-upload';
-    renderMediaFilters();
+    // Les fichiers qu'on vient d'ajouter doivent rester visibles même si un
+    // filtre était actif juste avant.
+    mediaState.categoryFilter = 'all';
+    mediaState.rightsFilter = 'all';
+    mediaState.stateFilter = 'all';
+    mediaState.batchFilter = 'all';
+    mediaState.searchQuery = '';
+    if (mediaSearchInput) mediaSearchInput.value = '';
+    syncFilterSelects();
+    renderActiveFilterChips();
     renderMediaGrid();
-    setStatus(`${files.length} photo(s) ajoutée(s) à la sélection. Cochez-les puis importez-les.`, 'success');
+    setStatus(`${files.length} photo(s) prête(s) à importer.`, 'success');
   };
 
   const removeLocalUpload = (id) => {
@@ -691,7 +823,7 @@
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('l5d2lm_media')
-      .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
+      .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
       .in('original_filename', filenames)
       .is('deleted_at', null);
     if (error) throw error;
@@ -1013,6 +1145,40 @@
     setStatus(`Catégories ${mode === 'add' ? 'ajoutées' : 'retirées'} pour ${infos.length} photo(s).`, 'success');
   };
 
+  // Suppression douce (deleted_at) : récupérable depuis Plus > Corbeille
+  // une fois cet écran construit. Pas de suppression définitive ici.
+  const handleBulkTrash = async () => {
+    const infos = selectedImportedInfos();
+    if (!infos.length) {
+      setStatus('Sélectionnez au moins une photo déjà importée.', 'error');
+      return;
+    }
+    const confirmed = window.confirm(`Mettre ${infos.length} photo(s) à la corbeille ?`);
+    if (!confirmed) return;
+
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('l5d2lm_media')
+      .update({ deleted_at: new Date().toISOString() })
+      .in('id', infos.map((info) => info.id));
+    if (error) {
+      setStatus(error.message || 'Impossible de mettre ces photos à la corbeille.', 'error');
+      return;
+    }
+
+    infos.forEach((info) => {
+      for (const [filename, entry] of mediaState.importedByFilename) {
+        if (entry.id === info.id) {
+          mediaState.importedByFilename.delete(filename);
+          mediaState.trashedFilenames.add(filename);
+        }
+      }
+      mediaState.selected.delete(info.id);
+    });
+    renderMediaGrid();
+    setStatus(`${infos.length} photo(s) mise(s) à la corbeille.`, 'success');
+  };
+
   const loadMediaPanel = async () => {
     if (!mediaGrid) return;
     try {
@@ -1021,8 +1187,9 @@
       setStatus(error.message || 'Impossible de charger l’état des photos importées.', 'error');
     }
     mediaState.loaded = true;
-    renderMediaFilters();
-    renderRightsFilters();
+    populateFilterSelects();
+    syncFilterSelects();
+    renderActiveFilterChips();
     renderMediaGrid();
   };
 
@@ -1062,6 +1229,7 @@
         .select()
         .single();
       if (batchError) throw batchError;
+      mediaState.lastBatchId = batch.id;
 
       for (const item of items) {
         try {
@@ -1093,7 +1261,7 @@
               original_private_path: storagePath,
               upload_batch_id: batch.id
             })
-            .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
+            .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
             .single();
 
           if (insertError) {
@@ -1101,7 +1269,7 @@
               duplicates += 1;
               const { data: existingRow } = await supabase
                 .from('l5d2lm_media')
-                .select('id, original_filename, rights_status, favorite, publish_status, default_annotation')
+                .select('id, original_filename, rights_status, favorite, publish_status, default_annotation, upload_batch_id')
                 .eq('original_sha256', hash)
                 .is('deleted_at', null)
                 .limit(1)
@@ -1161,11 +1329,18 @@
     });
   }
   document.querySelectorAll('[data-bulk-favorite]').forEach((button) => {
-    button.addEventListener('click', () => handleBulkFavorite(button.dataset.bulkFavorite === 'true'));
+    // Un seul bouton bascule : si tout ce qui est sélectionné est déjà
+    // favori, on retire ; sinon on marque tout favori.
+    button.addEventListener('click', () => {
+      const infos = selectedImportedInfos();
+      const allFavorite = infos.length > 0 && infos.every((info) => info.favorite);
+      handleBulkFavorite(!allFavorite);
+    });
   });
   document.querySelectorAll('[data-bulk-category-apply]').forEach((button) => {
     button.addEventListener('click', () => handleBulkCategoryApply(button.dataset.bulkCategoryApply));
   });
+  if (bulkTrashButton) bulkTrashButton.addEventListener('click', handleBulkTrash);
 
   // Onglet Catégories : créer/modifier/ordonner/publier-masquer/supprimer
   // les propositions (l5d2lm_sections), jusqu'à ~3 niveaux via parent_id.
@@ -1426,6 +1601,7 @@
     renderCategoryParentOptions();
     await renderCategoryTree();
     renderBulkCategoryChecks();
+    populateFilterSelects();
   };
 
   if (categoryNewButton) {
