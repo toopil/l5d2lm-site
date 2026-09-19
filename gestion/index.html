@@ -8,10 +8,10 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260921c">
+  <link rel="stylesheet" href="gestion-style.css?v=20260921d">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921c"></script>
+  <script defer src="gestion.js?v=20260921d"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -162,6 +162,7 @@
               Importer des photos
               <input type="file" data-media-upload-input accept="image/*,.heic,.heif" multiple hidden>
             </label>
+            <button type="button" class="gestion-link-button" data-backfill-catalog-sections title="Associe automatiquement chaque photo migrée à la page du site où elle apparaît déjà, d’après le catalogue historique.">Classer les photos migrées sur leur page d’origine</button>
             <input type="search" class="photos-search" data-media-search placeholder="Rechercher…" aria-label="Rechercher une photo par nom, titre ou catégorie">
             <details class="photos-filters" data-filters-details>
               <summary>Filtres</summary>

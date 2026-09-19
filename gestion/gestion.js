@@ -921,6 +921,16 @@
     sectionsState.items = data || [];
   };
 
+  const findSectionIdBySlug = (slug) => sectionsState.items.find((section) => section.slug === slug)?.id || null;
+
+  // Combien de photos sont déjà dans cette catégorie (toutes médias
+  // confondus) : sert à placer une nouvelle association en fin de page.
+  const countMediaInSection = (sectionId) => {
+    let count = 0;
+    mediaState.mediaSections.forEach((sections) => { if (sections.has(sectionId)) count += 1; });
+    return count;
+  };
+
   // Compte réel par catégorie (et total médiathèque), en excluant les
   // photos à la corbeille. Utilisé par l'onglet Catégories ET par la
   // navigation par page dans Photos — une seule source de vérité.
@@ -1918,6 +1928,22 @@
           if (item.kind === 'upload') {
             mediaState.localUploads = mediaState.localUploads.filter((entry) => entry.id !== item.id);
           }
+
+          // Une photo migrée depuis le catalogue historique apparaît déjà
+          // réellement sur une page du site public : on la classe tout de
+          // suite dans cette page, pas besoin de la reclasser à la main.
+          if (item.kind === 'catalog' && item.sectionSlug) {
+            const sectionId = findSectionIdBySlug(item.sectionSlug);
+            if (sectionId) {
+              const { error: assocError } = await supabase
+                .from('l5d2lm_media_sections')
+                .insert({ media_id: insertedRow.id, section_id: sectionId, sort_order: countMediaInSection(sectionId) * 10 });
+              if (!assocError) {
+                if (!mediaState.mediaSections.has(insertedRow.id)) mediaState.mediaSections.set(insertedRow.id, new Map());
+                mediaState.mediaSections.get(insertedRow.id).set(sectionId, countMediaInSection(sectionId) * 10);
+              }
+            }
+          }
           imported += 1;
         } catch (itemError) {
           const reason = itemError?.message || itemError?.error_description || String(itemError);
@@ -1943,6 +1969,52 @@
       setBusy(mediaImportButton, false);
     }
   };
+
+  // Rattrapage pour les photos migrées AVANT que l'import n'associe
+  // automatiquement une page depuis le catalogue historique (voir plus
+  // haut dans handleImportSelection) : classe chaque photo déjà en
+  // médiathèque, dont le nom correspond à une photo du catalogue, sur la
+  // page où elle apparaît réellement — sans toucher aux photos déjà
+  // classées ailleurs (jamais de reclassement forcé).
+  const handleBackfillCatalogSections = async () => {
+    const supabase = getSupabase();
+    let classified = 0;
+    let skippedAlreadyClassified = 0;
+    let skippedNoSection = 0;
+
+    for (const row of mediaState.library.values()) {
+      const catalogEntry = allSiteMedia().find((item) => item.filename === row.original_filename);
+      if (!catalogEntry?.sectionSlug) continue;
+
+      const sectionId = findSectionIdBySlug(catalogEntry.sectionSlug);
+      if (!sectionId) { skippedNoSection += 1; continue; }
+
+      const alreadyAssigned = mediaState.mediaSections.get(row.id)?.has(sectionId);
+      if (alreadyAssigned) { skippedAlreadyClassified += 1; continue; }
+
+      const { error } = await supabase
+        .from('l5d2lm_media_sections')
+        .insert({ media_id: row.id, section_id: sectionId, sort_order: countMediaInSection(sectionId) * 10 });
+      if (error) continue; // ex. déjà présente (course avec un autre onglet) : sans gravité, on continue
+
+      if (!mediaState.mediaSections.has(row.id)) mediaState.mediaSections.set(row.id, new Map());
+      mediaState.mediaSections.get(row.id).set(sectionId, countMediaInSection(sectionId) * 10);
+      classified += 1;
+    }
+
+    renderMediaGrid();
+    await refreshLibraryCounts();
+    renderPageNav();
+
+    const parts = [];
+    if (classified) parts.push(`${classified} photo(s) classée(s) sur leur page d’origine`);
+    if (skippedAlreadyClassified) parts.push(`${skippedAlreadyClassified} déjà classée(s)`);
+    if (skippedNoSection) parts.push(`${skippedNoSection} page(s) du catalogue introuvable(s) — utilisez « Créer les 6 catégories du site » dans Site > Structure`);
+    setStatus(parts.join(' — ') || 'Aucune photo du catalogue à classer.', 'success');
+  };
+
+  const backfillCatalogSectionsButton = document.querySelector('[data-backfill-catalog-sections]');
+  if (backfillCatalogSectionsButton) backfillCatalogSectionsButton.addEventListener('click', handleBackfillCatalogSections);
 
   if (mediaSelectVisibleButton) mediaSelectVisibleButton.addEventListener('click', handleSelectVisible);
   if (mediaClearSelectionButton) mediaClearSelectionButton.addEventListener('click', handleClearSelection);
