@@ -65,10 +65,14 @@ def fetch_published_slots() -> dict:
     return published
 
 
-def render_slot(slot: dict, media: dict | None) -> str:
+def _slot_image_src(media: dict) -> str:
+    return f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_PUBLIC_MEDIA_BUCKET}/{media["public_path"]}'
+
+
+def render_proposition_slot(slot: dict, media: dict | None) -> str:
     band = f'<span class="flip-card__band-number" aria-hidden="true">{slot["band_number"]}</span>'
     if media:
-        src = f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_PUBLIC_MEDIA_BUCKET}/{media["public_path"]}'
+        src = _slot_image_src(media)
         alt = html.escape(media.get("alt_text") or "", quote=True)
         return (
             '<div class="flip-card__media">\n'
@@ -99,6 +103,26 @@ def render_slot(slot: dict, media: dict | None) -> str:
         '                  </p>\n'
         '                </div>'
     )
+
+
+def render_postcard_slot(slot: dict, media: dict | None) -> str:
+    if media:
+        src = html.escape(_slot_image_src(media), quote=True)
+        alt = html.escape(media.get("alt_text") or "", quote=True)
+        return f'<div class="postcard"><img src="{src}" alt="{alt}"></div>'
+    fallback = slot.get("fallback")
+    if fallback:
+        return f'<div class="postcard"><img src="{fallback["src"]}" alt=""></div>'
+    # Pas encore de photo, pas de fallback : mieux vaut ne rien casser
+    # visuellement dans la bande de cartes postales qu'afficher une image
+    # cassée — le prochain emplacement vide utilisera plutôt un fallback.
+    return '<div class="postcard postcard--empty"></div>'
+
+
+def render_slot(slot: dict, media: dict | None) -> str:
+    if slot.get("kind") == "postcard":
+        return render_postcard_slot(slot, media)
+    return render_proposition_slot(slot, media)
 
 
 def substitute_media_slots(content: str, page_slug: str, published: dict) -> str:

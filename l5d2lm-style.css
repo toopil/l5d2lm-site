@@ -111,6 +111,12 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   box-shadow: 0 16px 34px rgba(75, 58, 47, 0.24); border-radius: 5px;
   overflow: hidden; min-width: 0; box-sizing: border-box;
 }
+/* Emplacement sans photo publiée ni photo de repli (cas limite : ne
+   devrait pas arriver en pratique, voir build/slots.py) — un espace
+   discret plutôt qu'une image cassée. */
+.postcard--empty {
+  aspect-ratio: 4 / 3; background: rgba(75, 58, 47, 0.06);
+}
 /* La carte fixe le format ; la photo s'y adapte (recadrage, jamais de
    dépassement ni de hauteur qui varie selon la photo). */
 .postcard img {

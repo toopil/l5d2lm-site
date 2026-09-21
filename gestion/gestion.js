@@ -417,7 +417,29 @@
     { slotKey: 'corps-expression:theatre-improvisation', pageLabel: 'Corps & expression', label: 'Théâtre d’improvisation' },
     { slotKey: 'corps-expression:reveil-du-corps', pageLabel: 'Corps & expression', label: 'Réveil du corps' },
     { slotKey: 'corps-expression:jeux-de-mouvement', pageLabel: 'Corps & expression', label: 'Jeux de mouvement', fallbackFilename: 'l5d2lm-photo-corps-expression-jeux.jpg' },
-    { slotKey: 'corps-expression:a-portee-de-main', pageLabel: 'Corps & expression', label: 'À portée de main', fallbackFilename: 'l5d2lm-photo-corps-expression-4.jpg' }
+    { slotKey: 'corps-expression:a-portee-de-main', pageLabel: 'Corps & expression', label: 'À portée de main', fallbackFilename: 'l5d2lm-photo-corps-expression-4.jpg' },
+
+    { slotKey: 'accueil:postcard-1', pageLabel: 'Accueil', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-index.jpg' },
+    { slotKey: 'accueil:postcard-2', pageLabel: 'Accueil', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-index-2.jpg' },
+
+    { slotKey: 'massage:postcard-1', pageLabel: 'Massage', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-massage-intuitif.jpg' },
+    { slotKey: 'massage:postcard-2', pageLabel: 'Massage', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-massage-2.jpg' },
+    { slotKey: 'massage:postcard-3', pageLabel: 'Massage', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-massage-3.jpg' },
+    { slotKey: 'massage:postcard-4', pageLabel: 'Massage', label: 'Carte postale 4', fallbackFilename: 'l5d2lm-photo-massage-4.jpg' },
+
+    { slotKey: 'colo:postcard-1', pageLabel: 'Colo pour adultes', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-colo.jpg' },
+    { slotKey: 'colo:postcard-2', pageLabel: 'Colo pour adultes', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-colo-2.jpg' },
+    { slotKey: 'colo:postcard-3', pageLabel: 'Colo pour adultes', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-colo-3.jpg' },
+    { slotKey: 'colo:postcard-4', pageLabel: 'Colo pour adultes', label: 'Carte postale 4', fallbackFilename: 'l5d2lm-photo-colo-4.jpg' },
+    { slotKey: 'colo:postcard-5', pageLabel: 'Colo pour adultes', label: 'Carte postale 5', fallbackFilename: 'l5d2lm-photo-colo-5.jpg' },
+
+    { slotKey: 'animation:postcard-1', pageLabel: 'Animation participative', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-animation.jpg' },
+    { slotKey: 'animation:postcard-2', pageLabel: 'Animation participative', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-animation-2.jpg' },
+    { slotKey: 'animation:postcard-3', pageLabel: 'Animation participative', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-animation-3.jpg' },
+
+    { slotKey: 'espaces:postcard-1', pageLabel: 'Espaces à découvrir', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-espaces.jpg' },
+    { slotKey: 'espaces:postcard-2', pageLabel: 'Espaces à découvrir', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-espaces-2.jpg' },
+    { slotKey: 'espaces:postcard-3', pageLabel: 'Espaces à découvrir', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-espaces-3.jpg' }
   ];
   const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
 
@@ -1693,7 +1715,23 @@
     if (!mediaSlotsListEl) return;
     mediaSlotsListEl.innerHTML = '';
 
+    // Regroupé par page : une longue liste plate de 20+ emplacements
+    // devient vite illisible une fois qu'on dépasse une seule page.
+    let currentPageLabel = null;
+    let currentGroup = null;
+
     SLOT_DEFINITIONS.forEach((slot) => {
+      if (slot.pageLabel !== currentPageLabel) {
+        currentPageLabel = slot.pageLabel;
+        const heading = document.createElement('h3');
+        heading.className = 'media-slots-group-heading';
+        heading.textContent = currentPageLabel;
+        mediaSlotsListEl.appendChild(heading);
+        currentGroup = document.createElement('div');
+        currentGroup.className = 'media-slots-group';
+        mediaSlotsListEl.appendChild(currentGroup);
+      }
+
       const media = mediaState.slotAssignments.get(slot.slotKey);
       // Une photo déjà en place avant ce mécanisme (import initial du site)
       // et jamais republiée depuis l'admin : le site public l'affiche déjà
@@ -1735,11 +1773,11 @@
       const status = document.createElement('span');
       status.className = media || fallbackEntry ? 'media-slot-item__status' : 'media-slot-item__status--empty';
       if (media) {
-        status.textContent = `${slot.pageLabel} · photo publiée`;
+        status.textContent = 'Photo publiée';
       } else if (fallbackEntry) {
-        status.textContent = `${slot.pageLabel} · photo déjà en ligne, pas encore gérée ici`;
+        status.textContent = 'Photo déjà en ligne, pas encore gérée ici';
       } else {
-        status.textContent = `${slot.pageLabel} · aucune photo publiée`;
+        status.textContent = 'Aucune photo publiée';
       }
       body.appendChild(status);
       row.appendChild(body);
@@ -1751,7 +1789,7 @@
       chooseButton.addEventListener('click', () => openMediaPicker('slot', { slotKey: slot.slotKey }));
       row.appendChild(chooseButton);
 
-      mediaSlotsListEl.appendChild(row);
+      currentGroup.appendChild(row);
     });
   };
 
@@ -1938,18 +1976,26 @@
   // catégories, en plein écran (pas un tiroir dans la carte) avec
   // Précédente/Suivante pour enchaîner plusieurs photos sans revenir à la
   // grille à chaque fois.
-  const openMediaEditOverlay = (info) => {
+  // overrideList : utilisé juste après un import (voir handleImportSelection)
+  // pour n'enchaîner Précédente/Suivante que sur les photos qui viennent
+  // d'être importées, plutôt que sur toute la grille actuellement affichée.
+  const openMediaEditOverlay = (info, overrideList) => {
     if (!mediaEditOverlay) return;
-    // Même ensemble que la grille actuellement affichée (filtres/recherche
-    // compris), pour que Précédente/Suivante corresponde à ce qui est visible.
-    mediaState.editList = visibleMedia()
-      .filter((item) => isItemImported(item))
-      .map((item) => mediaState.importedByFilename.get(item.filename))
-      .filter(Boolean);
-    mediaState.editIndex = mediaState.editList.findIndex((entry) => entry.id === info.id);
-    if (mediaState.editIndex === -1) {
-      mediaState.editList = [info];
-      mediaState.editIndex = 0;
+    if (overrideList && overrideList.length) {
+      mediaState.editList = overrideList;
+      mediaState.editIndex = Math.max(0, overrideList.findIndex((entry) => entry.id === info.id));
+    } else {
+      // Même ensemble que la grille actuellement affichée (filtres/recherche
+      // compris), pour que Précédente/Suivante corresponde à ce qui est visible.
+      mediaState.editList = visibleMedia()
+        .filter((item) => isItemImported(item))
+        .map((item) => mediaState.importedByFilename.get(item.filename))
+        .filter(Boolean);
+      mediaState.editIndex = mediaState.editList.findIndex((entry) => entry.id === info.id);
+      if (mediaState.editIndex === -1) {
+        mediaState.editList = [info];
+        mediaState.editIndex = 0;
+      }
     }
     mediaEditOverlay.hidden = false;
     renderMediaEditOverlay();
@@ -2243,6 +2289,10 @@
     let imported = 0;
     let duplicates = 0;
     const failedItems = [];
+    // Uniquement les photos envoyées depuis l'appareil (pas une migration
+    // en masse du catalogue historique) : ce sont celles où l'admin a
+    // vraiment besoin de saisir titre/catégories tout de suite.
+    const newlyUploadedRows = [];
 
     try {
       const { data: batch, error: batchError } = await supabase
@@ -2299,6 +2349,7 @@
               if (existingRow) {
                 mediaState.library.set(existingRow.id, existingRow);
                 mediaState.importedByFilename.set(item.filename, existingRow);
+                if (item.kind === 'upload') newlyUploadedRows.push(existingRow);
               }
               mediaState.importedFilenames.add(item.filename);
               mediaState.selected.delete(item.id);
@@ -2319,6 +2370,7 @@
           mediaState.selected.delete(item.id);
           if (item.kind === 'upload') {
             mediaState.localUploads = mediaState.localUploads.filter((entry) => entry.id !== item.id);
+            newlyUploadedRows.push(insertedRow);
           }
 
           // Une photo migrée depuis le catalogue historique apparaît déjà
@@ -2347,6 +2399,14 @@
       renderMediaGrid();
       await refreshLibraryCounts();
       renderPageNav();
+
+      // Photo(s) envoyée(s) depuis l'appareil : autant saisir titre et
+      // catégories tout de suite plutôt que devoir rouvrir chaque carte
+      // séparément ensuite.
+      if (newlyUploadedRows.length) {
+        openMediaEditOverlay(newlyUploadedRows[0], newlyUploadedRows);
+      }
+
       const parts = [];
       if (imported) parts.push(`${imported} photo(s) importée(s) en brouillon, droits à vérifier`);
       if (duplicates) parts.push(`${duplicates} déjà présente(s) (contenu identique)`);

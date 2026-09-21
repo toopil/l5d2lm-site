@@ -314,6 +314,23 @@
 
 .media-slots-list {
   display: grid;
+  gap: 1.6rem;
+}
+
+.media-slots-group-heading {
+  margin: 0 0 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(75, 58, 47, 0.1);
+  font-size: 1rem;
+}
+
+.media-slots-list > .media-slots-group-heading:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.media-slots-group {
+  display: grid;
   gap: 0.7rem;
 }
 
