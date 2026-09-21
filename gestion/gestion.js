@@ -731,14 +731,27 @@
       label.appendChild(document.createTextNode('Sélectionner'));
       card.appendChild(label);
 
+      const info = isImported ? mediaState.importedByFilename.get(item.filename) : null;
+
+      // Le titre (une fois personnalisé) remplace le nom technique du
+      // fichier, et vient au-dessus de la photo plutôt qu'en dessous.
+      const heading = document.createElement('p');
+      heading.className = 'media-item__heading';
+      heading.textContent = info?.default_annotation || item.filename;
+      card.appendChild(heading);
+
       const thumb = document.createElement('div');
       thumb.className = 'media-item__thumb';
       if (isUpload && item.isHeic) {
         thumb.textContent = 'HEIC — aperçu indisponible, fichier conservé tel quel';
       } else {
         const img = document.createElement('img');
-        img.alt = '';
         img.loading = 'lazy';
+        // L'annotation sert d'infobulle au survol (et de vrai texte
+        // alternatif quand elle est renseignée) plutôt que de rester
+        // cachée dans le panneau d'édition.
+        img.alt = info?.alt_text || '';
+        if (info?.alt_text) img.title = info.alt_text;
         if (item.kind === 'library') {
           const row = mediaState.library.get(item.id);
           if (row) img.style.objectPosition = `${(row.focal_x ?? 0.5) * 100}% ${(row.focal_y ?? 0.5) * 100}%`;
@@ -750,30 +763,19 @@
       }
       card.appendChild(thumb);
 
-      const meta = document.createElement('div');
-      meta.className = 'media-item__meta';
-      const info = isImported ? mediaState.importedByFilename.get(item.filename) : null;
-      // Une fois un titre personnalisé enregistré, il remplace le nom
-      // technique du fichier comme texte principal — jamais les deux à
-      // la fois (le nom de fichier reste consultable via "Modifier...").
-      const name = document.createElement('strong');
-      name.textContent = info?.default_annotation || item.filename;
-      meta.appendChild(name);
+      // Une seule rangée compacte pour tout le statut (droits à traiter,
+      // favori, catégories) plutôt que plusieurs lignes empilées.
+      const statusRow = document.createElement('div');
+      statusRow.className = 'media-item__status-row';
 
       if (!isImported) {
-        const badges = document.createElement('div');
-        badges.className = 'media-badges';
         const statusBadge = document.createElement('span');
         statusBadge.className = 'media-badge media-badge--pending';
         statusBadge.textContent = 'À importer';
-        badges.appendChild(statusBadge);
-        meta.appendChild(badges);
+        statusRow.appendChild(statusBadge);
       }
 
       if (isImported) {
-        const rightsRow = document.createElement('div');
-        rightsRow.className = 'media-item__rights';
-
         // "Autorisation OK" est l'état validé : l'afficher sur chaque carte
         // n'apporte rien une fois que c'est fait — seuls les statuts qui
         // demandent encore une action restent visibles.
@@ -782,23 +784,11 @@
           const rightsDef = RIGHTS_STATUSES.find((entry) => entry.value === info.rights_status);
           rightsBadge.className = `media-badge media-badge--rights-${info.rights_status}`;
           rightsBadge.textContent = rightsDef ? rightsDef.label : info.rights_status;
-          rightsRow.appendChild(rightsBadge);
+          statusRow.appendChild(rightsBadge);
         }
-
-        const favoriteButton = document.createElement('button');
-        favoriteButton.type = 'button';
-        favoriteButton.className = 'media-item__favorite';
-        favoriteButton.textContent = info.favorite ? '★' : '☆';
-        favoriteButton.setAttribute('aria-label', info.favorite ? 'Retirer des favoris' : 'Marquer comme favori');
-        favoriteButton.addEventListener('click', () => toggleFavorite(info));
-        rightsRow.appendChild(favoriteButton);
-
-        meta.appendChild(rightsRow);
 
         const assignments = mediaState.mediaSections.get(info.id) || new Map();
         if (assignments.size) {
-          const sectionsRow = document.createElement('div');
-          sectionsRow.className = 'media-item__sections';
           const ordered = Array.from(assignments.entries()).sort((a, b) => a[1] - b[1]);
           const visible = ordered.slice(0, 2);
           const remaining = ordered.length - visible.length;
@@ -809,28 +799,31 @@
             const chip = document.createElement('span');
             chip.className = 'media-badge';
             chip.textContent = section.title;
-            sectionsRow.appendChild(chip);
+            statusRow.appendChild(chip);
           });
 
           if (remaining > 0) {
             const more = document.createElement('span');
             more.className = 'media-badge';
             more.textContent = `+${remaining}`;
-            sectionsRow.appendChild(more);
+            statusRow.appendChild(more);
           }
-
-          meta.appendChild(sectionsRow);
         }
 
-        const editButton = document.createElement('button');
-        editButton.type = 'button';
-        editButton.className = 'gestion-link-button';
-        editButton.textContent = 'Modifier le titre et les catégories';
-        editButton.addEventListener('click', () => toggleMediaEditPanel(card, info));
-        meta.appendChild(editButton);
+        const favoriteButton = document.createElement('button');
+        favoriteButton.type = 'button';
+        favoriteButton.className = 'media-item__favorite';
+        favoriteButton.textContent = info.favorite ? '★' : '☆';
+        favoriteButton.setAttribute('aria-label', info.favorite ? 'Retirer des favoris' : 'Marquer comme favori');
+        favoriteButton.addEventListener('click', () => toggleFavorite(info));
+        statusRow.appendChild(favoriteButton);
       }
 
-      card.appendChild(meta);
+      card.appendChild(statusRow);
+
+      if (isImported) {
+        card.appendChild(buildMediaEditMenu(info));
+      }
 
       if (isUpload && !isImported) {
         const removeButton = document.createElement('button');
@@ -1841,12 +1834,15 @@
   // Édition individuelle d'une photo déjà importée : titre (annotation) et
   // catégories propres à cette photo, disponible à tout moment (pas
   // seulement juste après l'import).
-  const toggleMediaEditPanel = (card, info) => {
-    const existing = card.querySelector('.media-item__edit');
-    if (existing) {
-      existing.remove();
-      return;
-    }
+  // Menu déroulant natif (<details>) plutôt qu'un panneau ajouté/retiré à
+  // la main : reste dans le flux normal de la carte (ne recouvre jamais
+  // la carte voisine), et se ferme tout seul sur "Annuler".
+  const buildMediaEditMenu = (info) => {
+    const details = document.createElement('details');
+    details.className = 'media-item__edit-menu';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Modifier';
+    details.appendChild(summary);
 
     const panel = document.createElement('div');
     panel.className = 'media-item__edit';
@@ -1859,6 +1855,15 @@
     titleInput.placeholder = 'Ex. Et si le terrain de jeu, c’était toi ?';
     titleLabel.appendChild(titleInput);
     panel.appendChild(titleLabel);
+
+    const annotationLabel = document.createElement('label');
+    annotationLabel.textContent = 'Annotation (affichée au survol de la photo)';
+    const annotationInput = document.createElement('textarea');
+    annotationInput.rows = 2;
+    annotationInput.value = info.alt_text || '';
+    annotationInput.placeholder = 'Ex. Deux personnes dansent, mains jointes.';
+    annotationLabel.appendChild(annotationInput);
+    panel.appendChild(annotationLabel);
 
     const checksWrap = document.createElement('div');
     checksWrap.className = 'media-category-checks';
@@ -1888,32 +1893,33 @@
     saveButton.textContent = 'Enregistrer';
     saveButton.addEventListener('click', () => {
       const checkedSectionIds = Array.from(checksWrap.querySelectorAll('input:checked')).map((el) => el.value);
-      saveMediaEdit(info, titleInput.value.trim(), checkedSectionIds);
+      saveMediaEdit(info, titleInput.value.trim(), annotationInput.value.trim(), checkedSectionIds);
     });
 
     const cancelButton = document.createElement('button');
     cancelButton.type = 'button';
     cancelButton.className = 'btn';
     cancelButton.textContent = 'Annuler';
-    cancelButton.addEventListener('click', () => panel.remove());
+    cancelButton.addEventListener('click', () => { details.open = false; });
 
     actions.appendChild(saveButton);
     actions.appendChild(cancelButton);
     panel.appendChild(actions);
 
-    card.appendChild(panel);
-    titleInput.focus();
+    details.appendChild(panel);
+    return details;
   };
 
-  const saveMediaEdit = async (info, title, checkedSectionIds) => {
+  const saveMediaEdit = async (info, title, annotation, checkedSectionIds) => {
     const supabase = getSupabase();
     try {
       const { error: titleError } = await supabase
         .from('l5d2lm_media')
-        .update({ default_annotation: title || null })
+        .update({ default_annotation: title || null, alt_text: annotation || null })
         .eq('id', info.id);
       if (titleError) throw titleError;
       info.default_annotation = title || null;
+      info.alt_text = annotation || null;
 
       const assigned = mediaState.mediaSections.get(info.id) || new Map();
       const currentIds = new Set(assigned.keys());

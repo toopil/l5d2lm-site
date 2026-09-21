@@ -683,19 +683,17 @@
   object-fit: cover;
 }
 
-.media-item__meta {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.media-item__meta strong {
-  font-size: 0.9rem;
+.media-item__heading {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.media-badges {
+.media-item__status-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.35rem;
 }
 
@@ -745,6 +743,32 @@
   color: var(--muted);
 }
 
+/* Menu déroulant natif "Modifier" : reste dans le flux de la carte,
+   pousse le reste vers le bas plutôt que de flotter par-dessus les
+   cartes voisines (ce qui causait un vrai débordement visuel ailleurs). */
+.media-item__edit-menu {
+  margin-top: 0.2rem;
+}
+
+.media-item__edit-menu summary {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(75, 58, 47, 0.14);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--earth-link);
+  list-style: none;
+}
+
+.media-item__edit-menu summary::-webkit-details-marker {
+  display: none;
+}
+
 .media-item__edit {
   display: grid;
   gap: 0.7rem;
@@ -755,27 +779,24 @@
   border: 1px solid rgba(75, 58, 47, 0.1);
 }
 
-.media-item__edit label:first-child {
+.media-item__edit label {
   display: grid;
   gap: 0.3rem;
   font-weight: 700;
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
-.media-item__edit input[type="text"] {
+.media-item__edit input[type="text"],
+.media-item__edit textarea {
   min-height: 44px;
   border: 1px solid rgba(75, 58, 47, 0.18);
   border-radius: 12px;
   padding: 0.5rem 0.7rem;
   background: #fff;
   color: var(--ink);
-}
-
-.media-item__rights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
+  font: inherit;
+  resize: vertical;
 }
 
 .media-item__favorite {
@@ -785,28 +806,6 @@
   font-size: 1.15rem;
   line-height: 1;
   padding: 0.1rem;
-}
-
-.media-item__sections {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.media-item__section-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.media-item__chip-move {
-  border: 0;
-  background: none;
-  padding: 0 0.15rem;
-  cursor: pointer;
-  font-size: 0.75rem;
-  line-height: 1;
-  color: var(--muted);
 }
 
 .media-badge--rights-authorized { background: rgba(183, 215, 176, 0.55); color: var(--ink); }
