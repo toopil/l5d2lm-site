@@ -394,6 +394,20 @@
   const mediaPickerCloseButton = document.querySelector('[data-media-picker-close]');
   const mediaPickerUploadInput = document.querySelector('[data-media-picker-upload-input]');
 
+  // Édition plein écran d'une photo (Titre/Annotation/Catégories), avec
+  // navigation Précédente/Suivante.
+  const mediaEditOverlay = document.querySelector('[data-media-edit-overlay]');
+  const mediaEditPhoto = document.querySelector('[data-media-edit-photo]');
+  const mediaEditTitleInput = document.querySelector('[data-media-edit-title]');
+  const mediaEditAnnotationInput = document.querySelector('[data-media-edit-annotation]');
+  const mediaEditCategories = document.querySelector('[data-media-edit-categories]');
+  const mediaEditPosition = document.querySelector('[data-media-edit-position]');
+  const mediaEditPrevButton = document.querySelector('[data-media-edit-prev]');
+  const mediaEditNextButton = document.querySelector('[data-media-edit-next]');
+  const mediaEditCloseButton = document.querySelector('[data-media-edit-close]');
+  const mediaEditCancelButton = document.querySelector('[data-media-edit-cancel]');
+  const mediaEditSaveButton = document.querySelector('[data-media-edit-save]');
+
   // Emplacements photo fixes du site public (Site > Emplacements). Doit
   // rester synchronisé avec build/slots.py — un slot_key ajouté ici sans
   // marqueur MEDIA_SLOT correspondant dans un fragment content/*.html
@@ -460,6 +474,9 @@
     sectionOrderItems: [],
     slotAssignments: new Map(),
     signedUrlCache: new Map(),
+    heicPreviewCache: new Map(),
+    editList: [],
+    editIndex: -1,
     dragMediaId: null,
     pickerMode: null,
     pickerContext: null,
@@ -501,6 +518,29 @@
     const type = String(file.type || '').toLowerCase();
     const name = String(file.name || '').toLowerCase();
     return type.includes('heic') || type.includes('heif') || name.endsWith('.heic') || name.endsWith('.heif');
+  };
+
+  // Même détection que isHeicFile, mais sur une fiche l5d2lm_media (déjà
+  // en base) plutôt que sur un File brut sélectionné localement.
+  const isHeicMediaRow = (row) => {
+    const type = String(row?.original_mime_type || '').toLowerCase();
+    const name = String(row?.original_filename || '').toLowerCase();
+    return type.includes('heic') || type.includes('heif') || name.endsWith('.heic') || name.endsWith('.heif');
+  };
+
+  // La plupart des navigateurs (Safari excepté) ne savent pas afficher un
+  // .heic dans une balise <img> : on convertit une fois en JPEG pour
+  // l'aperçu (le fichier original stocké n'est jamais modifié).
+  const convertHeicBlobForPreview = async (blob) => {
+    if (!window.heic2any) return '';
+    try {
+      const converted = await window.heic2any({ blob, toType: 'image/jpeg', quality: 0.85 });
+      const outBlob = Array.isArray(converted) ? converted[0] : converted;
+      return URL.createObjectURL(outBlob);
+    } catch (error) {
+      console.error('Conversion HEIC impossible :', error);
+      return '';
+    }
   };
 
   const allSiteMedia = () => window.L5D2LM_SITE_MEDIA || [];
@@ -710,7 +750,9 @@
       const isUpload = item.kind === 'upload';
 
       const card = document.createElement('article');
-      card.className = `media-item${isUpload && item.isHeic ? ' media-item--heic' : ''}`;
+      // La mise en page "placeholder" (texte centré) ne doit s'appliquer
+      // que tant que la conversion HEIC n'a pas encore produit d'aperçu.
+      card.className = `media-item${isUpload && item.isHeic && !item.src ? ' media-item--heic' : ''}`;
       card.classList.toggle('is-selected', mediaState.selected.has(item.id));
 
       const label = document.createElement('label');
@@ -742,8 +784,10 @@
 
       const thumb = document.createElement('div');
       thumb.className = 'media-item__thumb';
-      if (isUpload && item.isHeic) {
-        thumb.textContent = 'HEIC — aperçu indisponible, fichier conservé tel quel';
+      if (isUpload && item.isHeic && !item.src) {
+        // Conversion en cours (voir handleFilesSelected) : le fichier HEIC
+        // original part tel quel à l'import, seul cet aperçu est temporaire.
+        thumb.textContent = 'Conversion de l’aperçu…';
       } else {
         const img = document.createElement('img');
         img.loading = 'lazy';
@@ -822,7 +866,12 @@
       card.appendChild(statusRow);
 
       if (isImported) {
-        card.appendChild(buildMediaEditMenu(info));
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn media-item__edit-open';
+        editButton.textContent = 'Modifier';
+        editButton.addEventListener('click', () => openMediaEditOverlay(info));
+        card.appendChild(editButton);
       }
 
       if (isUpload && !isImported) {
@@ -848,7 +897,7 @@
       mediaState.uploadCounter += 1;
       const heic = isHeicFile(file);
       const id = `upload-${Date.now()}-${mediaState.uploadCounter}`;
-      mediaState.localUploads.unshift({
+      const upload = {
         id,
         kind: 'upload',
         filename: file.name,
@@ -857,8 +906,19 @@
         isHeic: heic,
         mimeType: file.type,
         bytes: file.size
-      });
+      };
+      mediaState.localUploads.unshift(upload);
       mediaState.selected.add(id); // prêtes à être importées d'un clic
+
+      // L'original HEIC part tel quel à l'import (voir plus bas) : cette
+      // conversion ne sert qu'à afficher un aperçu dans l'admin.
+      if (heic) {
+        convertHeicBlobForPreview(file).then((previewUrl) => {
+          if (!previewUrl) return;
+          upload.src = previewUrl;
+          renderMediaGrid();
+        });
+      }
     });
 
     // Les fichiers qu'on vient d'ajouter doivent rester visibles même si un
@@ -1010,6 +1070,25 @@
     if (catalogEntry?.src) return catalogEntry.src;
 
     if (mediaRow.public_path) return mediaRow.public_path;
+
+    // Bucket privé, fichier HEIC : la plupart des navigateurs ne peuvent
+    // pas l'afficher tel quel, on récupère les octets et on convertit en
+    // JPEG une seule fois (résultat mis en cache par média).
+    if (isHeicMediaRow(mediaRow)) {
+      if (mediaState.heicPreviewCache.has(mediaRow.id)) return mediaState.heicPreviewCache.get(mediaRow.id);
+      const signedUrl = await getSignedMediaUrl(mediaRow);
+      if (!signedUrl) return '';
+      try {
+        const response = await fetch(signedUrl);
+        if (!response.ok) return signedUrl;
+        const blob = await response.blob();
+        const previewUrl = await convertHeicBlobForPreview(blob);
+        if (previewUrl) mediaState.heicPreviewCache.set(mediaRow.id, previewUrl);
+        return previewUrl || signedUrl;
+      } catch (error) {
+        return signedUrl;
+      }
+    }
 
     return getSignedMediaUrl(mediaRow);
   };
@@ -1831,84 +1910,95 @@
     }
   };
 
-  // Édition individuelle d'une photo déjà importée : titre (annotation) et
-  // catégories propres à cette photo, disponible à tout moment (pas
-  // seulement juste après l'import).
-  // Menu déroulant natif (<details>) plutôt qu'un panneau ajouté/retiré à
-  // la main : reste dans le flux normal de la carte (ne recouvre jamais
-  // la carte voisine), et se ferme tout seul sur "Annuler".
-  const buildMediaEditMenu = (info) => {
-    const details = document.createElement('details');
-    details.className = 'media-item__edit-menu';
-    const summary = document.createElement('summary');
-    summary.textContent = 'Modifier';
-    details.appendChild(summary);
-
-    const panel = document.createElement('div');
-    panel.className = 'media-item__edit';
-
-    const titleLabel = document.createElement('label');
-    titleLabel.textContent = 'Titre';
-    const titleInput = document.createElement('input');
-    titleInput.type = 'text';
-    titleInput.value = info.default_annotation || '';
-    titleInput.placeholder = 'Ex. Et si le terrain de jeu, c’était toi ?';
-    titleLabel.appendChild(titleInput);
-    panel.appendChild(titleLabel);
-
-    const annotationLabel = document.createElement('label');
-    annotationLabel.textContent = 'Annotation (affichée au survol de la photo)';
-    const annotationInput = document.createElement('textarea');
-    annotationInput.rows = 2;
-    annotationInput.value = info.alt_text || '';
-    annotationInput.placeholder = 'Ex. Deux personnes dansent, mains jointes.';
-    annotationLabel.appendChild(annotationInput);
-    panel.appendChild(annotationLabel);
-
-    const checksWrap = document.createElement('div');
-    checksWrap.className = 'media-category-checks';
-    const assigned = mediaState.mediaSections.get(info.id) || new Map();
-    if (!sectionsState.items.length) {
-      checksWrap.textContent = 'Aucune catégorie créée pour l’instant.';
-    } else {
-      sectionsState.items.forEach((section) => {
-        const label = document.createElement('label');
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = section.id;
-        input.checked = assigned.has(section.id);
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(section.title));
-        checksWrap.appendChild(label);
-      });
+  // Édition individuelle d'une photo déjà importée : titre, annotation et
+  // catégories, en plein écran (pas un tiroir dans la carte) avec
+  // Précédente/Suivante pour enchaîner plusieurs photos sans revenir à la
+  // grille à chaque fois.
+  const openMediaEditOverlay = (info) => {
+    if (!mediaEditOverlay) return;
+    // Même ensemble que la grille actuellement affichée (filtres/recherche
+    // compris), pour que Précédente/Suivante corresponde à ce qui est visible.
+    mediaState.editList = visibleMedia()
+      .filter((item) => isItemImported(item))
+      .map((item) => mediaState.importedByFilename.get(item.filename))
+      .filter(Boolean);
+    mediaState.editIndex = mediaState.editList.findIndex((entry) => entry.id === info.id);
+    if (mediaState.editIndex === -1) {
+      mediaState.editList = [info];
+      mediaState.editIndex = 0;
     }
-    panel.appendChild(checksWrap);
-
-    const actions = document.createElement('div');
-    actions.className = 'gestion-actions-line';
-
-    const saveButton = document.createElement('button');
-    saveButton.type = 'button';
-    saveButton.className = 'btn btn-primary';
-    saveButton.textContent = 'Enregistrer';
-    saveButton.addEventListener('click', () => {
-      const checkedSectionIds = Array.from(checksWrap.querySelectorAll('input:checked')).map((el) => el.value);
-      saveMediaEdit(info, titleInput.value.trim(), annotationInput.value.trim(), checkedSectionIds);
-    });
-
-    const cancelButton = document.createElement('button');
-    cancelButton.type = 'button';
-    cancelButton.className = 'btn';
-    cancelButton.textContent = 'Annuler';
-    cancelButton.addEventListener('click', () => { details.open = false; });
-
-    actions.appendChild(saveButton);
-    actions.appendChild(cancelButton);
-    panel.appendChild(actions);
-
-    details.appendChild(panel);
-    return details;
+    mediaEditOverlay.hidden = false;
+    renderMediaEditOverlay();
   };
+
+  const closeMediaEditOverlay = () => {
+    if (!mediaEditOverlay) return;
+    mediaEditOverlay.hidden = true;
+    mediaState.editList = [];
+    mediaState.editIndex = -1;
+  };
+
+  const renderMediaEditOverlay = () => {
+    const info = mediaState.editList[mediaState.editIndex];
+    if (!info) { closeMediaEditOverlay(); return; }
+
+    if (mediaEditPosition) mediaEditPosition.textContent = `${mediaState.editIndex + 1} / ${mediaState.editList.length}`;
+    if (mediaEditPrevButton) mediaEditPrevButton.disabled = mediaState.editIndex === 0;
+    if (mediaEditNextButton) mediaEditNextButton.disabled = mediaState.editIndex === mediaState.editList.length - 1;
+
+    if (mediaEditPhoto) {
+      mediaEditPhoto.innerHTML = '';
+      const img = document.createElement('img');
+      img.alt = info.alt_text || '';
+      img.style.objectPosition = `${(info.focal_x ?? 0.5) * 100}% ${(info.focal_y ?? 0.5) * 100}%`;
+      attachMediaImage(img, info);
+      mediaEditPhoto.appendChild(img);
+    }
+
+    if (mediaEditTitleInput) mediaEditTitleInput.value = info.default_annotation || '';
+    if (mediaEditAnnotationInput) mediaEditAnnotationInput.value = info.alt_text || '';
+
+    if (mediaEditCategories) {
+      mediaEditCategories.innerHTML = '';
+      const assigned = mediaState.mediaSections.get(info.id) || new Map();
+      if (!sectionsState.items.length) {
+        mediaEditCategories.textContent = 'Aucune catégorie créée pour l’instant.';
+      } else {
+        sectionsState.items.forEach((section) => {
+          const label = document.createElement('label');
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = section.id;
+          input.checked = assigned.has(section.id);
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(section.title));
+          mediaEditCategories.appendChild(label);
+        });
+      }
+    }
+  };
+
+  const goToMediaEditIndex = (nextIndex) => {
+    if (nextIndex < 0 || nextIndex >= mediaState.editList.length) return;
+    mediaState.editIndex = nextIndex;
+    renderMediaEditOverlay();
+  };
+
+  if (mediaEditPrevButton) mediaEditPrevButton.addEventListener('click', () => goToMediaEditIndex(mediaState.editIndex - 1));
+  if (mediaEditNextButton) mediaEditNextButton.addEventListener('click', () => goToMediaEditIndex(mediaState.editIndex + 1));
+  if (mediaEditCloseButton) mediaEditCloseButton.addEventListener('click', closeMediaEditOverlay);
+  if (mediaEditCancelButton) mediaEditCancelButton.addEventListener('click', closeMediaEditOverlay);
+  if (mediaEditSaveButton) {
+    mediaEditSaveButton.addEventListener('click', async () => {
+      const info = mediaState.editList[mediaState.editIndex];
+      if (!info) return;
+      const checkedSectionIds = mediaEditCategories
+        ? Array.from(mediaEditCategories.querySelectorAll('input:checked')).map((el) => el.value)
+        : [];
+      await saveMediaEdit(info, mediaEditTitleInput.value.trim(), mediaEditAnnotationInput.value.trim(), checkedSectionIds);
+      renderMediaEditOverlay();
+    });
+  }
 
   const saveMediaEdit = async (info, title, annotation, checkedSectionIds) => {
     const supabase = getSupabase();

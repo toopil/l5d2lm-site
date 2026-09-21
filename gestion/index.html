@@ -8,10 +8,11 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260921k">
+  <link rel="stylesheet" href="gestion-style.css?v=20260921l">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921l"></script>
+  <script defer src="gestion.js?v=20260921n"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -343,6 +344,38 @@
             </label>
           </div>
           <div class="media-grid media-grid--picker" data-media-picker-grid aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- Édition d'une photo : toute la page plutôt qu'un tiroir dans la
+           carte, avec navigation Précédente/Suivante pour enchaîner sans
+           revenir à la grille à chaque fois. -->
+      <div class="media-edit-overlay" data-media-edit-overlay hidden>
+        <div class="media-edit-overlay__panel">
+          <div class="media-edit-overlay__heading">
+            <button type="button" class="gestion-link-button" data-media-edit-prev>◀ Précédente</button>
+            <span data-media-edit-position></span>
+            <button type="button" class="gestion-link-button" data-media-edit-next>Suivante ▶</button>
+            <button type="button" class="gestion-link-button" data-media-edit-close>Fermer</button>
+          </div>
+          <div class="media-edit-overlay__body">
+            <div class="media-edit-overlay__photo" data-media-edit-photo></div>
+            <div class="media-edit-overlay__form">
+              <label>
+                Titre
+                <input type="text" data-media-edit-title placeholder="Ex. Et si le terrain de jeu, c’était toi ?">
+              </label>
+              <label>
+                Annotation (affichée au survol de la photo)
+                <textarea data-media-edit-annotation rows="3" placeholder="Ex. Deux personnes dansent, mains jointes."></textarea>
+              </label>
+              <div class="media-category-checks" data-media-edit-categories></div>
+              <div class="gestion-actions-line">
+                <button class="btn btn-primary" type="button" data-media-edit-save>Enregistrer</button>
+                <button class="btn" type="button" data-media-edit-cancel>Annuler</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
