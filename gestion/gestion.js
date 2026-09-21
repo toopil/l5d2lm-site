@@ -1875,24 +1875,47 @@
 
     mediaState.slotAssignments.set(slotKey, media);
     renderSlotsList();
-    setStatus('Photo publiée pour cet emplacement — le site public se mettra à jour automatiquement.', 'success');
+
+    // Déclenchement immédiat plutôt que d'attendre le prochain passage
+    // programmé (toutes les 3h, un simple filet de sécurité) : silencieux
+    // tant que la fonction Edge "trigger-publish" n'est pas configurée,
+    // pour ne pas inquiéter avec une erreur avant que ce soit fait.
+    const published = await triggerPublishNow({ silent: true });
+    setStatus(
+      published
+        ? 'Photo publiée pour cet emplacement — publication du site en cours.'
+        : 'Photo publiée pour cet emplacement — le site public se mettra à jour automatiquement (sous 3h maximum).',
+      'success'
+    );
   };
 
   // Déclenche le workflow GitHub Actions tout de suite plutôt que d'attendre
-  // son prochain passage programmé (toutes les 15 min) : appelle une
-  // fonction Edge Supabase qui détient le jeton GitHub nécessaire (jamais
-  // exposé côté navigateur). Nécessite que cette fonction ("trigger-publish",
-  // voir supabase/functions/trigger-publish/index.ts) soit déployée.
+  // son prochain passage programmé : appelle une fonction Edge Supabase qui
+  // détient le jeton GitHub nécessaire (jamais exposé côté navigateur).
+  // Nécessite que cette fonction ("trigger-publish", voir
+  // supabase/functions/trigger-publish/index.ts) soit déployée — sinon
+  // échoue silencieusement en mode { silent: true } (ex. juste après
+  // avoir publié une photo, avant que l'admin ait configuré la fonction).
+  const triggerPublishNow = async ({ silent = false } = {}) => {
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase.functions.invoke('trigger-publish');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return true;
+    } catch (error) {
+      if (!silent) throw error;
+      return false;
+    }
+  };
+
   const publishNowButton = document.querySelector('[data-publish-now]');
   if (publishNowButton) {
     publishNowButton.addEventListener('click', async () => {
       setBusy(publishNowButton, true);
       setStatus('Déclenchement de la publication...');
       try {
-        const supabase = getSupabase();
-        const { data, error } = await supabase.functions.invoke('trigger-publish');
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+        await triggerPublishNow();
         setStatus('Publication déclenchée — le site public sera à jour dans une à deux minutes.', 'success');
       } catch (error) {
         setStatus(error.message || 'Impossible de déclencher la publication.', 'error');

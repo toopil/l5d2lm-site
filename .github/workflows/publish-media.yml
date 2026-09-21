@@ -5,9 +5,15 @@ name: Publier les emplacements photo
 # Aucun secret nécessaire : build/build.py ne lit que des données déjà
 # publiques (clé publishable, RLS dédiée aux médias publiés) et commit
 # avec le GITHUB_TOKEN fourni automatiquement à chaque exécution.
+#
+# Ce passage programmé n'est qu'un filet de sécurité : publier une photo
+# depuis /gestion déclenche déjà une publication immédiate (si la fonction
+# Edge "trigger-publish" est configurée, voir son fichier). Fréquence basse
+# exprès pour limiter les exécutions inutiles (la plupart du temps, rien
+# n'a changé) — pas besoin d'attendre ce passage pour voir un changement.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch: {}
 
 permissions:
