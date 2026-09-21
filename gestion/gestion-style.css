@@ -393,6 +393,77 @@
   font-weight: 700;
 }
 
+/* Cartes postales (rotation aléatoire par catégorie) */
+.postcards-list {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.postcard-config {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.postcard-config__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.postcard-config__header h3 {
+  margin: 0;
+}
+
+.postcard-config__visible-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.postcard-config__visible-count input {
+  width: 4.5rem;
+}
+
+.postcard-pool {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.postcard-pool-item {
+  display: grid;
+  grid-template-columns: 72px 1fr auto auto auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 14px;
+  background: rgba(248, 245, 240, 0.7);
+}
+
+.postcard-pool-item__thumb {
+  width: 72px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(75, 58, 47, 0.08);
+}
+
+.postcard-pool-item__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.postcard-pool-item__annotation {
+  min-width: 0;
+}
+
 .gestion-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

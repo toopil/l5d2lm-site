@@ -22,11 +22,11 @@ from string import Template
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pages import PAGES, BASE_URL  # noqa: E402
-from slots import SLOTS  # noqa: E402
+from slots import SLOTS, POSTCARD_CATEGORY_SECTION_SLUGS  # noqa: E402
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20260921a"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20260922a"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
@@ -104,6 +104,74 @@ def fetch_published_activity_slugs() -> set[str] | None:
     return _fetch_section_visibility("kind=eq.proposal", "activités publiées")
 
 
+def fetch_enabled_postcard_categories() -> dict:
+    """{section_slug: visible_count} pour les catégories où la rotation
+    aléatoire de cartes postales est activée (/gestion > Cartes postales).
+    En cas d'erreur réseau/API, ou si aucune catégorie n'est activée
+    (état par défaut aujourd'hui), renvoie {} : chaque page garde alors son
+    rendu Emplacements actuel (photos fixes par slot_key), inchangé."""
+    url = (
+        f"{SUPABASE_URL}/rest/v1/l5d2lm_postcard_configs"
+        f"?enabled=eq.true&select=visible_count,section:l5d2lm_sections(slug)"
+    )
+    req = urllib.request.Request(url, headers={
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"Avertissement : catégories de cartes postales non récupérées ({exc}) — Emplacements conservé.")
+        return {}
+
+    enabled = {}
+    for row in rows:
+        section = row.get("section")
+        if section and section.get("slug"):
+            enabled[section["slug"]] = row.get("visible_count") or 1
+    return enabled
+
+
+def fetch_postcard_pools(section_slugs: list) -> dict:
+    """{section_slug: [{src, alt, annotation}, ...]} pour les catégories
+    passées, triés par sort_order. N'est appelé que si des catégories sont
+    activées (voir fetch_enabled_postcard_categories)."""
+    if not section_slugs:
+        return {}
+    url = (
+        f"{SUPABASE_URL}/rest/v1/l5d2lm_media_usages"
+        f"?role=eq.postcard&active=eq.true&order=sort_order.asc"
+        f"&select=sort_order,annotation_override,alt_override,"
+        f"section:l5d2lm_sections(slug),"
+        f"media:l5d2lm_media(public_path,alt_text,default_annotation)"
+    )
+    req = urllib.request.Request(url, headers={
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"Avertissement : pool de cartes postales non récupéré ({exc}) — Emplacements conservé.")
+        return {}
+
+    pools: dict = {}
+    slugs = set(section_slugs)
+    for row in rows:
+        section = row.get("section")
+        media = row.get("media")
+        if not section or not media or section.get("slug") not in slugs or not media.get("public_path"):
+            continue
+        pools.setdefault(section["slug"], []).append({
+            "src": _slot_image_src(media),
+            "alt": row.get("alt_override") or media.get("alt_text") or "",
+            "annotation": row.get("annotation_override") or media.get("default_annotation") or "",
+        })
+    return pools
+
+
 def _slot_image_src(media: dict) -> str:
     return f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_PUBLIC_MEDIA_BUCKET}/{media["public_path"]}'
 
@@ -175,6 +243,53 @@ def substitute_media_slots(content: str, page_slug: str, published: dict) -> str
     return content
 
 
+PHOTO_BAND_RE = re.compile(r'<div class="photo-band">.*?</div>\n?', re.DOTALL)
+
+
+def render_postcard_band(section_slug: str, visible_count: int, pool: list) -> str:
+    shown = pool[:visible_count]
+    cards = "\n".join(
+        '      <div class="postcard"><img src="{src}" alt="{alt}" title="{title}"></div>'.format(
+            src=html.escape(item["src"], quote=True),
+            alt=html.escape(item["alt"], quote=True),
+            title=html.escape(item["annotation"], quote=True),
+        )
+        for item in shown
+    )
+    # Le pool complet est embarqué en JSON pour le tirage aléatoire côté
+    # navigateur (voir l5d2lm-script.js) ; les cartes ci-dessus servent de
+    # rendu de repli tant que le script n'a pas encore tourné (et pour les
+    # visiteurs sans JavaScript).
+    payload = json.dumps(pool, ensure_ascii=False).replace("</script", "<\\/script")
+    return (
+        f'<div class="photo-band" data-postcard-band="{html.escape(section_slug, quote=True)}" '
+        f'data-visible-count="{visible_count}">\n'
+        f"{cards}\n"
+        "    </div>\n"
+        f'    <script type="application/json" data-postcard-pool="{html.escape(section_slug, quote=True)}">'
+        f"{payload}</script>\n"
+    )
+
+
+def substitute_postcard_band(
+    content: str, page_slug: str, enabled_categories: dict, postcard_pools: dict
+) -> str:
+    """Remplace toute la bande <div class="photo-band">...</div> par le
+    pool de rotation d'une catégorie si elle a activé la rotation
+    aléatoire (/gestion > Cartes postales). Sinon, laisse le contenu
+    inchangé : chaque bande garde son rendu Emplacements (slot_key fixes,
+    voir substitute_media_slots) — c'est l'état par défaut aujourd'hui."""
+    section_slug = POSTCARD_CATEGORY_SECTION_SLUGS.get(page_slug)
+    if not section_slug or section_slug not in enabled_categories:
+        return content
+    visible_count = enabled_categories[section_slug]
+    pool = postcard_pools.get(section_slug, [])
+    if not pool:
+        return content
+    replacement = render_postcard_band(section_slug, visible_count, pool)
+    return PHOTO_BAND_RE.sub(replacement, content, count=1)
+
+
 NAV_ITEM_RE = re.compile(
     r"<!-- NAV_ITEM:([\w-]+) -->.*?<!-- /NAV_ITEM -->\n?", re.DOTALL
 )
@@ -240,12 +355,15 @@ def build_page(
     chrome: str,
     published_activity_slugs: set[str] | None,
     published_section_slugs: set[str] | None,
+    enabled_postcard_categories: dict,
+    postcard_pools: dict,
 ) -> None:
     head = render_head(page, published_section_slugs)
     footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
     content = substitute_media_slots(content, page["slug"], published_slots)
     content = substitute_activity_blocks(content, published_activity_slugs)
+    content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
     page_html = (
         "<!doctype html>\n"
         '<html lang="fr">\n'
@@ -286,10 +404,20 @@ def main() -> None:
     published_slots = fetch_published_slots()
     published_section_slugs = fetch_published_section_slugs()
     published_activity_slugs = fetch_published_activity_slugs()
+    enabled_postcard_categories = fetch_enabled_postcard_categories()
+    postcard_pools = fetch_postcard_pools(list(enabled_postcard_categories.keys()))
     chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
     chrome = substitute_nav_visibility(chrome, published_section_slugs)
     for page in PAGES:
-        build_page(page, published_slots, chrome, published_activity_slugs, published_section_slugs)
+        build_page(
+            page,
+            published_slots,
+            chrome,
+            published_activity_slugs,
+            published_section_slugs,
+            enabled_postcard_categories,
+            postcard_pools,
+        )
     build_sitemap(published_section_slugs)
     print(f"{len(PAGES)} pages générées + sitemap.xml")
 

@@ -84,3 +84,17 @@ SLOTS = [
     dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:postcard-2", kind="postcard", title="Espaces à découvrir — carte postale 2", fallback=dict(src="l5d2lm-photo-espaces-2.jpg")),
     dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:postcard-3", kind="postcard", title="Espaces à découvrir — carte postale 3", fallback=dict(src="l5d2lm-photo-espaces-3.jpg")),
 ]
+
+# Pages avec une bande de cartes postales -> slug l5d2lm_sections de la
+# catégorie correspondante. Utilisé par le mécanisme optionnel de
+# rotation aléatoire par catégorie (voir /gestion > Cartes postales) :
+# quand la catégorie a une configuration l5d2lm_postcard_configs activée,
+# build.py remplace toute la bande "postcard-N" ci-dessus par un pool
+# plus large piocher côté navigateur, au lieu des slot_key fixes.
+POSTCARD_CATEGORY_SECTION_SLUGS = {
+    "l5d2lm-index": "accueil",
+    "l5d2lm-massage-intuitif-reveil-energetique": "massage",
+    "l5d2lm-colos-sejours": "colo-pour-adultes",
+    "l5d2lm-animations-participatives": "animations-participatives",
+    "l5d2lm-espaces-a-decouvrir": "espaces-a-decouvrir",
+}

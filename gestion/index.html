@@ -8,11 +8,11 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260921q">
+  <link rel="stylesheet" href="gestion-style.css?v=20260922a">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921t"></script>
+  <script defer src="gestion.js?v=20260922a"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -304,7 +304,8 @@
         </article>
 
         <article class="gestion-card" data-panel="cartes">
-          <p class="gestion-soon">Bientôt disponible : configuration des cartes postales par catégorie (photos fixes, rotation, annotations).</p>
+          <p class="gestion-hint">Activer la rotation sur une catégorie affiche un tirage aléatoire de photos à chaque chargement de page, à la place des cartes postales fixes actuelles. Désactivée (par défaut), la catégorie garde son affichage actuel, géré depuis Emplacements.</p>
+          <div class="postcards-list" data-postcards-list aria-live="polite"></div>
         </article>
 
         <article class="gestion-card" data-panel="plus">

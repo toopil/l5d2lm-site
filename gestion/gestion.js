@@ -166,6 +166,7 @@
     await loadCategoriesPanel();
     await loadMediaPanel();
     await loadSlotsPanel();
+    await loadPostcardsPanel();
     return true;
   };
 
@@ -443,6 +444,19 @@
   ];
   const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
 
+  // Cartes postales (Cartes postales) : catégories dont la bande de cartes
+  // postales peut basculer en rotation aléatoire (voir build/slots.py,
+  // POSTCARD_CATEGORY_SECTION_SLUGS — doit rester synchronisé). Les valeurs
+  // par défaut pré-remplissent "nombre visible" avec le nombre d'emplacements
+  // fixes actuels de chaque page, pour un réglage cohérent au premier essai.
+  const POSTCARD_ELIGIBLE_SECTION_SLUGS = [
+    'accueil', 'massage', 'colo-pour-adultes', 'animations-participatives', 'espaces-a-decouvrir'
+  ];
+  const POSTCARD_DEFAULT_VISIBLE_COUNT = {
+    accueil: 2, massage: 4, 'colo-pour-adultes': 5, 'animations-participatives': 3, 'espaces-a-decouvrir': 3
+  };
+  const postcardsListEl = document.querySelector('[data-postcards-list]');
+
   // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
   const categoriesTree = document.querySelector('[data-categories-tree]');
   const categoryNewButton = document.querySelector('[data-category-new]');
@@ -495,6 +509,8 @@
     libraryCounts: { bySection: new Map(), total: 0 },
     sectionOrderItems: [],
     slotAssignments: new Map(),
+    postcardConfigs: new Map(),
+    postcardPoolBySection: new Map(),
     signedUrlCache: new Map(),
     heicPreviewCache: new Map(),
     editList: [],
@@ -1500,7 +1516,8 @@
       const titles = {
         replace: 'Choisir une photo de remplacement',
         add: 'Ajouter une photo à cette page',
-        slot: 'Choisir une photo pour cet emplacement'
+        slot: 'Choisir une photo pour cet emplacement',
+        postcard: 'Ajouter une photo à cette carte postale'
       };
       mediaPickerTitle.textContent = titles[mode] || 'Choisir une photo';
     }
@@ -1523,8 +1540,9 @@
     // (media_id, section_id) est une clé composite unique en base : une photo
     // déjà présente sur cette page ne peut pas y occuper une deuxième position.
     // Ne s'applique qu'aux modes "Changer"/"+ Ajouter" (vue par page) : un
-    // emplacement fixe (mode "slot") n'a pas cette contrainte.
-    const alreadyOnPage = mediaState.pickerMode === 'slot'
+    // emplacement fixe (mode "slot") ou un pool de cartes postales (mode
+    // "postcard", plusieurs photos par catégorie) n'a pas cette contrainte.
+    const alreadyOnPage = (mediaState.pickerMode === 'slot' || mediaState.pickerMode === 'postcard')
       ? new Set()
       : new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
     const entries = Array.from(mediaState.importedByFilename.entries()).filter(([filename, info]) => {
@@ -1579,6 +1597,11 @@
     try {
       if (mode === 'slot') {
         await publishMediaForSlot(mediaId, context.slotKey);
+        closeMediaPicker();
+        return;
+      }
+      if (mode === 'postcard') {
+        await addPostcardPoolItem(context.sectionId, mediaId);
         closeMediaPicker();
         return;
       }
@@ -1809,19 +1832,18 @@
     renderSlotsList();
   };
 
-  // Rend un média public (bucket l5d2lm-public-media) s'il ne l'est pas déjà,
-  // puis l'assigne à l'emplacement — remplace toute photo précédemment
-  // assignée à ce même emplacement (un emplacement = une photo à la fois).
-  const publishMediaForSlot = async (mediaId, slotKey) => {
-    const media = mediaState.library.get(mediaId);
-    if (!media) throw new Error('Photo introuvable dans la médiathèque.');
-
+  // Vérifie les droits puis rend un média public (bucket l5d2lm-public-media)
+  // s'il ne l'est pas déjà — précondition commune à tout affichage sur le
+  // site public (Emplacements comme Cartes postales). Lève une erreur si la
+  // photo est marquée "Ne pas publier" ; demande confirmation si "À
+  // vérifier" (renvoie false sans rien faire si l'admin annule).
+  const ensureMediaPublished = async (media) => {
     if (media.rights_status === 'do_not_publish') {
       throw new Error('Cette photo est marquée "Ne pas publier" : changez ses droits avant de la publier sur le site.');
     }
     if (media.rights_status === 'needs_review') {
       const confirmed = window.confirm('Les droits de cette photo sont encore "À vérifier". La publier quand même ?');
-      if (!confirmed) return;
+      if (!confirmed) return false;
     }
 
     const supabase = getSupabase();
@@ -1858,6 +1880,19 @@
       media.processing_status = 'ready';
       media.publish_status = 'published';
     }
+    return true;
+  };
+
+  // Assigne une photo (déjà rendue publique par ensureMediaPublished) à
+  // l'emplacement — remplace toute photo précédemment assignée à ce même
+  // emplacement (un emplacement = une photo à la fois).
+  const publishMediaForSlot = async (mediaId, slotKey) => {
+    const media = mediaState.library.get(mediaId);
+    if (!media) throw new Error('Photo introuvable dans la médiathèque.');
+
+    const proceed = await ensureMediaPublished(media);
+    if (proceed === false) return;
+    const supabase = getSupabase();
 
     // Un emplacement = une association active à la fois : on retire
     // l'ancienne avant d'insérer la nouvelle plutôt qu'un upsert, l'index
@@ -1907,6 +1942,295 @@
       if (!silent) throw error;
       return false;
     }
+  };
+
+  // Cartes postales (rotation aléatoire par catégorie) : contrairement à
+  // Emplacements (une photo fixe par slot_key), plusieurs photos peuvent
+  // partager le même (section_id, role='postcard') — un vrai pool, piocher
+  // aléatoirement côté navigateur public (voir l5d2lm-script.js) quand la
+  // catégorie a l5d2lm_postcard_configs.enabled = true. Désactivée par
+  // défaut : la catégorie garde alors son affichage Emplacements actuel.
+  const fetchPostcardConfigs = async (sectionIds) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('l5d2lm_postcard_configs')
+      .select('section_id, enabled, visible_count')
+      .in('section_id', sectionIds);
+    if (error) throw error;
+    mediaState.postcardConfigs = new Map((data || []).map((row) => [row.section_id, row]));
+  };
+
+  const fetchPostcardPools = async (sectionIds) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('l5d2lm_media_usages')
+      .select('id, media_id, section_id, sort_order, annotation_override')
+      .eq('role', 'postcard')
+      .eq('active', true)
+      .is('deleted_at', null)
+      .in('section_id', sectionIds)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    mediaState.postcardPoolBySection = new Map();
+    (data || []).forEach((row) => {
+      const list = mediaState.postcardPoolBySection.get(row.section_id) || [];
+      list.push(row);
+      mediaState.postcardPoolBySection.set(row.section_id, list);
+    });
+  };
+
+  // Écrit la configuration d'une catégorie ; rotation_mode reste toujours
+  // "random" (seul mode demandé, pas de sélecteur admin) et preload_count
+  // se déduit automatiquement de la taille du pool plutôt que d'être un
+  // champ à comprendre et remplir.
+  const syncPostcardConfig = async (sectionId, overrides) => {
+    const supabase = getSupabase();
+    const current = mediaState.postcardConfigs.get(sectionId) || { enabled: false, visible_count: 3 };
+    const poolSize = (mediaState.postcardPoolBySection.get(sectionId) || []).length;
+    const next = {
+      section_id: sectionId,
+      enabled: overrides.enabled !== undefined ? overrides.enabled : current.enabled,
+      visible_count: overrides.visible_count !== undefined ? overrides.visible_count : (current.visible_count || 3),
+      rotation_mode: 'random',
+      preload_count: Math.min(poolSize, 24)
+    };
+    const { error } = await supabase.from('l5d2lm_postcard_configs').upsert(next, { onConflict: 'section_id' });
+    if (error) throw error;
+    mediaState.postcardConfigs.set(sectionId, next);
+  };
+
+  const togglePostcardRotation = async (sectionId, enabled) => {
+    try {
+      await syncPostcardConfig(sectionId, { enabled });
+      renderPostcardsList();
+      const published = await triggerPublishNow({ silent: true });
+      setStatus(
+        `${enabled ? 'Rotation activée' : 'Rotation désactivée'} — ` +
+        (published ? 'publication du site en cours.' : 'le site public se mettra à jour automatiquement (sous 3h maximum).'),
+        'success'
+      );
+    } catch (error) {
+      setStatus(error.message || 'Impossible de modifier la configuration.', 'error');
+    }
+  };
+
+  const addPostcardPoolItem = async (sectionId, mediaId) => {
+    const media = mediaState.library.get(mediaId);
+    if (!media) throw new Error('Photo introuvable dans la médiathèque.');
+    const proceed = await ensureMediaPublished(media);
+    if (proceed === false) return;
+
+    const supabase = getSupabase();
+    const pool = mediaState.postcardPoolBySection.get(sectionId) || [];
+    const maxOrder = pool.reduce((max, item) => Math.max(max, item.sort_order), -10);
+    const { data, error } = await supabase
+      .from('l5d2lm_media_usages')
+      .insert({ media_id: mediaId, section_id: sectionId, role: 'postcard', active: true, sort_order: maxOrder + 10 })
+      .select('id, media_id, section_id, sort_order, annotation_override')
+      .single();
+    if (error) { setStatus(error.message || 'Impossible d’ajouter cette photo.', 'error'); return; }
+
+    pool.push(data);
+    mediaState.postcardPoolBySection.set(sectionId, pool);
+    await syncPostcardConfig(sectionId, {});
+    renderPostcardsList();
+    setStatus('Photo ajoutée à la carte postale.', 'success');
+  };
+
+  const removePostcardPoolItem = async (sectionId, usageId) => {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media_usages').delete().eq('id', usageId);
+    if (error) { setStatus(error.message || 'Impossible de retirer cette photo.', 'error'); return; }
+
+    const pool = (mediaState.postcardPoolBySection.get(sectionId) || []).filter((item) => item.id !== usageId);
+    mediaState.postcardPoolBySection.set(sectionId, pool);
+    await syncPostcardConfig(sectionId, {});
+    renderPostcardsList();
+  };
+
+  const movePostcardPoolItem = async (sectionId, index, direction) => {
+    const pool = mediaState.postcardPoolBySection.get(sectionId) || [];
+    const current = pool[index];
+    const target = pool[index + direction];
+    if (!current || !target) return;
+    const supabase = getSupabase();
+    try {
+      const a = current.sort_order;
+      const b = target.sort_order;
+      const { error: error1 } = await supabase.from('l5d2lm_media_usages').update({ sort_order: b }).eq('id', current.id);
+      if (error1) throw error1;
+      const { error: error2 } = await supabase.from('l5d2lm_media_usages').update({ sort_order: a }).eq('id', target.id);
+      if (error2) throw error2;
+      current.sort_order = b;
+      target.sort_order = a;
+      pool.sort((x, y) => x.sort_order - y.sort_order);
+      mediaState.postcardPoolBySection.set(sectionId, pool);
+      renderPostcardsList();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de réordonner.', 'error');
+    }
+  };
+
+  const savePostcardAnnotation = async (usageId, sectionId, value) => {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('l5d2lm_media_usages')
+      .update({ annotation_override: value || null })
+      .eq('id', usageId);
+    if (error) { setStatus(error.message || 'Impossible d’enregistrer l’annotation.', 'error'); return; }
+    const pool = mediaState.postcardPoolBySection.get(sectionId) || [];
+    const item = pool.find((entry) => entry.id === usageId);
+    if (item) item.annotation_override = value || null;
+    setStatus('Annotation enregistrée.', 'success');
+  };
+
+  const renderPostcardPoolList = (container, sectionId, pool) => {
+    container.innerHTML = '';
+    pool.forEach((item, index) => {
+      const media = mediaState.library.get(item.media_id);
+      const row = document.createElement('div');
+      row.className = 'postcard-pool-item';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'postcard-pool-item__thumb';
+      if (media) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        attachMediaImage(img, media);
+        thumb.appendChild(img);
+      }
+      row.appendChild(thumb);
+
+      const annotationInput = document.createElement('input');
+      annotationInput.type = 'text';
+      annotationInput.className = 'postcard-pool-item__annotation';
+      annotationInput.placeholder = 'Annotation (visible au survol sur le site)';
+      annotationInput.value = item.annotation_override || media?.default_annotation || '';
+      annotationInput.addEventListener('blur', () => {
+        if (annotationInput.value.length > ANNOTATION_WARNING_LENGTH) {
+          setStatus(`Annotation longue (${annotationInput.value.length} caractères) : risque de déborder sur une vraie carte postale.`, 'error');
+        }
+        savePostcardAnnotation(item.id, sectionId, annotationInput.value.trim());
+      });
+      row.appendChild(annotationInput);
+
+      const upButton = document.createElement('button');
+      upButton.type = 'button';
+      upButton.className = 'btn';
+      upButton.textContent = '↑';
+      upButton.disabled = index === 0;
+      upButton.addEventListener('click', () => movePostcardPoolItem(sectionId, index, -1));
+      row.appendChild(upButton);
+
+      const downButton = document.createElement('button');
+      downButton.type = 'button';
+      downButton.className = 'btn';
+      downButton.textContent = '↓';
+      downButton.disabled = index === pool.length - 1;
+      downButton.addEventListener('click', () => movePostcardPoolItem(sectionId, index, 1));
+      row.appendChild(downButton);
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'btn';
+      removeButton.textContent = 'Retirer';
+      removeButton.addEventListener('click', () => removePostcardPoolItem(sectionId, item.id));
+      row.appendChild(removeButton);
+
+      container.appendChild(row);
+    });
+
+    const addButton = document.createElement('button');
+    addButton.type = 'button';
+    addButton.className = 'btn';
+    addButton.textContent = '+ Ajouter une photo';
+    addButton.addEventListener('click', () => openMediaPicker('postcard', { sectionId }));
+    container.appendChild(addButton);
+  };
+
+  const renderPostcardsList = () => {
+    if (!postcardsListEl) return;
+    postcardsListEl.innerHTML = '';
+
+    POSTCARD_ELIGIBLE_SECTION_SLUGS.forEach((slug) => {
+      const section = sectionsState.items.find((item) => item.slug === slug);
+      if (!section) return; // catégorie pas encore créée ("Créer les 6 catégories du site")
+
+      const config = mediaState.postcardConfigs.get(section.id) || { enabled: false, visible_count: POSTCARD_DEFAULT_VISIBLE_COUNT[slug] || 3 };
+      const pool = mediaState.postcardPoolBySection.get(section.id) || [];
+
+      const card = document.createElement('article');
+      card.className = 'postcard-config';
+
+      const header = document.createElement('div');
+      header.className = 'postcard-config__header';
+      const title = document.createElement('h3');
+      title.textContent = section.title;
+      header.appendChild(title);
+
+      const toggleButton = document.createElement('button');
+      toggleButton.type = 'button';
+      toggleButton.className = config.enabled ? 'btn btn-primary' : 'btn';
+      toggleButton.textContent = config.enabled ? 'Désactiver la rotation' : 'Activer la rotation';
+      toggleButton.addEventListener('click', () => togglePostcardRotation(section.id, !config.enabled));
+      header.appendChild(toggleButton);
+      card.appendChild(header);
+
+      const status = document.createElement('p');
+      status.className = 'gestion-hint';
+      status.textContent = config.enabled
+        ? `Rotation active : ${pool.length} photo(s) dans le pool, ${config.visible_count || 1} affichée(s) à la fois, tirage aléatoire à chaque visite.`
+        : 'Désactivée : cette catégorie garde ses cartes postales fixes actuelles (voir Emplacements).';
+      card.appendChild(status);
+
+      const visibleLabel = document.createElement('label');
+      visibleLabel.className = 'postcard-config__visible-count';
+      visibleLabel.append('Nombre affiché en même temps : ');
+      const visibleInput = document.createElement('input');
+      visibleInput.type = 'number';
+      visibleInput.min = '1';
+      visibleInput.max = '12';
+      visibleInput.value = String(config.visible_count || POSTCARD_DEFAULT_VISIBLE_COUNT[slug] || 3);
+      visibleInput.addEventListener('change', () => {
+        const value = Math.max(1, Math.min(12, parseInt(visibleInput.value, 10) || 1));
+        visibleInput.value = String(value);
+        syncPostcardConfig(section.id, { visible_count: value }).then(renderPostcardsList);
+      });
+      visibleLabel.appendChild(visibleInput);
+      card.appendChild(visibleLabel);
+
+      const poolWrap = document.createElement('div');
+      poolWrap.className = 'postcard-pool';
+      renderPostcardPoolList(poolWrap, section.id, pool);
+      card.appendChild(poolWrap);
+
+      postcardsListEl.appendChild(card);
+    });
+
+    if (!postcardsListEl.children.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'Créez d’abord les catégories du site (Site > Structure > "Créer les 6 catégories du site").';
+      postcardsListEl.appendChild(empty);
+    }
+  };
+
+  const loadPostcardsPanel = async () => {
+    if (!postcardsListEl) return;
+    const sectionIds = POSTCARD_ELIGIBLE_SECTION_SLUGS
+      .map((slug) => findSectionIdBySlug(slug))
+      .filter(Boolean);
+    if (!sectionIds.length) {
+      renderPostcardsList();
+      return;
+    }
+    try {
+      await fetchPostcardConfigs(sectionIds);
+      await fetchPostcardPools(sectionIds);
+    } catch (error) {
+      setStatus(error.message || 'Impossible de charger les cartes postales.', 'error');
+    }
+    renderPostcardsList();
   };
 
   document.querySelectorAll('[data-publish-now]').forEach((publishNowButton) => {
@@ -2796,6 +3120,10 @@
     }
     setStatus(`${rows.length} catégorie(s) créée(s) depuis le catalogue du site.`, 'success');
     await loadCategoriesPanel();
+    // Cartes postales dépend des catégories (section_id par slug) : sans ce
+    // rechargement, le panneau resterait affiché comme si aucune catégorie
+    // n'existait jusqu'au prochain rechargement complet de la page.
+    await loadPostcardsPanel();
   };
 
   const loadCategoriesPanel = async () => {

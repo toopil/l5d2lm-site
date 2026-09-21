@@ -920,3 +920,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Cartes postales : tirage aléatoire côté navigateur, uniquement pour les
+// catégories où la rotation est activée depuis /gestion > Cartes postales
+// (voir build/build.py, substitute_postcard_band). Les autres bandes
+// gardent leurs photos fixes générées côté serveur (Emplacements),
+// inchangées par ce script.
+document.addEventListener('DOMContentLoaded', () => {
+  const shuffle = (list) => {
+    const items = list.slice();
+    for (let i = items.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+  };
+
+  document.querySelectorAll('[data-postcard-band]').forEach((band) => {
+    const poolScript = band.nextElementSibling;
+    if (!poolScript || poolScript.dataset.postcardPool !== band.dataset.postcardBand) return;
+
+    const visibleCount = parseInt(band.dataset.visibleCount, 10) || 0;
+    let pool;
+    try {
+      pool = JSON.parse(poolScript.textContent);
+    } catch (error) {
+      return;
+    }
+    if (!Array.isArray(pool) || pool.length <= visibleCount) return;
+
+    const picked = shuffle(pool).slice(0, visibleCount);
+    band.innerHTML = '';
+    picked.forEach((item) => {
+      const card = document.createElement('div');
+      card.className = 'postcard';
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.alt = item.alt || '';
+      if (item.annotation) img.title = item.annotation;
+      card.appendChild(img);
+      band.appendChild(card);
+    });
+  });
+});
