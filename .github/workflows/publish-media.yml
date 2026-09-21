@@ -1,0 +1,43 @@
+name: Publier les emplacements photo
+
+# Régénère les pages publiques à partir des emplacements choisis dans
+# /gestion (Site > Emplacements) et publie s'il y a un changement réel.
+# Aucun secret nécessaire : build/build.py ne lit que des données déjà
+# publiques (clé publishable, RLS dédiée aux médias publiés) et commit
+# avec le GITHUB_TOKEN fourni automatiquement à chaque exécution.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-media
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Régénérer les pages depuis Supabase
+        run: python3 build/build.py
+
+      - name: Committer et publier si le contenu a changé
+        run: |
+          if git diff --quiet; then
+            echo "Aucun changement : rien à publier."
+            exit 0
+          fi
+          git config user.name "l5d2lm-publish-bot"
+          git config user.email "actions@github.com"
+          git add -A -- 'l5d2lm-*.html' 'sitemap.xml'
+          git commit -m "Publication automatique des emplacements photo"
+          git push

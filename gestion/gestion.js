@@ -392,6 +392,16 @@
   const mediaPickerSearch = document.querySelector('[data-media-picker-search]');
   const mediaPickerCloseButton = document.querySelector('[data-media-picker-close]');
 
+  // Emplacements photo fixes du site public (Site > Emplacements). Doit
+  // rester synchronisé avec build/slots.py — un slot_key ajouté ici sans
+  // marqueur MEDIA_SLOT correspondant dans un fragment content/*.html
+  // n'aurait aucun effet visible sur le site publié.
+  const SLOT_DEFINITIONS = [
+    { slotKey: 'corps-expression:theatre-improvisation', pageLabel: 'Corps & expression', label: 'Théâtre d’improvisation' },
+    { slotKey: 'corps-expression:reveil-du-corps', pageLabel: 'Corps & expression', label: 'Réveil du corps' }
+  ];
+  const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
+
   // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
   const categoriesTree = document.querySelector('[data-categories-tree]');
   const categoryNewButton = document.querySelector('[data-category-new]');
@@ -443,6 +453,7 @@
     activePage: 'all',
     libraryCounts: { bySection: new Map(), total: 0 },
     sectionOrderItems: [],
+    slotAssignments: new Map(),
     signedUrlCache: new Map(),
     dragMediaId: null,
     pickerMode: null,
@@ -1382,7 +1393,12 @@
     mediaState.pickerSearch = '';
     if (mediaPickerSearch) mediaPickerSearch.value = '';
     if (mediaPickerTitle) {
-      mediaPickerTitle.textContent = mode === 'replace' ? 'Choisir une photo de remplacement' : 'Ajouter une photo à cette page';
+      const titles = {
+        replace: 'Choisir une photo de remplacement',
+        add: 'Ajouter une photo à cette page',
+        slot: 'Choisir une photo pour cet emplacement'
+      };
+      mediaPickerTitle.textContent = titles[mode] || 'Choisir une photo';
     }
     mediaPicker.hidden = false;
     renderMediaPickerGrid();
@@ -1402,7 +1418,11 @@
     const query = mediaState.pickerSearch.toLowerCase();
     // (media_id, section_id) est une clé composite unique en base : une photo
     // déjà présente sur cette page ne peut pas y occuper une deuxième position.
-    const alreadyOnPage = new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
+    // Ne s'applique qu'aux modes "Changer"/"+ Ajouter" (vue par page) : un
+    // emplacement fixe (mode "slot") n'a pas cette contrainte.
+    const alreadyOnPage = mediaState.pickerMode === 'slot'
+      ? new Set()
+      : new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
     const entries = Array.from(mediaState.importedByFilename.entries()).filter(([filename, info]) => {
       if (alreadyOnPage.has(info?.id)) return false; // déjà utilisée sur cette page (couvre aussi "elle-même" en mode Changer)
       return !query || filename.toLowerCase().includes(query);
@@ -1453,6 +1473,11 @@
 
     const supabase = getSupabase();
     try {
+      if (mode === 'slot') {
+        await publishMediaForSlot(mediaId, context.slotKey);
+        closeMediaPicker();
+        return;
+      }
       if (mode === 'replace') {
         // Transaction unique côté base (l5d2lm_replace_section_media) : si
         // l'insertion de la nouvelle association échoue, l'ancienne n'est
@@ -1495,6 +1520,159 @@
       openMediaPicker('add', { sectionId: mediaState.activePage });
     });
   }
+
+  // Emplacements photo fixes (Site > Emplacements) : choisir une photo ici
+  // la publie (bucket public + l5d2lm_media_usages.slot_key) — le site
+  // public se met à jour tout seul au prochain passage du workflow GitHub
+  // Actions programmé, sans intervention manuelle dans le code.
+  const fetchSlotAssignments = async () => {
+    const supabase = getSupabase();
+    const slotKeys = SLOT_DEFINITIONS.map((slot) => slot.slotKey);
+    const { data, error } = await supabase
+      .from('l5d2lm_media_usages')
+      .select('slot_key, media_id')
+      .in('slot_key', slotKeys)
+      .eq('active', true)
+      .is('deleted_at', null);
+    if (error) throw error;
+
+    mediaState.slotAssignments = new Map();
+    (data || []).forEach((row) => {
+      const media = Array.from(mediaState.library.values()).find((entry) => entry.id === row.media_id);
+      if (media) mediaState.slotAssignments.set(row.slot_key, media);
+    });
+  };
+
+  const renderSlotsList = () => {
+    if (!mediaSlotsListEl) return;
+    mediaSlotsListEl.innerHTML = '';
+
+    SLOT_DEFINITIONS.forEach((slot) => {
+      const media = mediaState.slotAssignments.get(slot.slotKey);
+
+      const row = document.createElement('div');
+      row.className = 'media-slot-item';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'media-slot-item__thumb';
+      if (media) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        img.style.objectPosition = `${(media.focal_x ?? 0.5) * 100}% ${(media.focal_y ?? 0.5) * 100}%`;
+        attachMediaImage(img, media);
+        thumb.appendChild(img);
+      } else {
+        thumb.classList.add('media-slot-item__thumb--empty');
+        thumb.textContent = 'Photo à venir';
+      }
+      row.appendChild(thumb);
+
+      const body = document.createElement('div');
+      body.className = 'media-slot-item__body';
+      const title = document.createElement('strong');
+      title.textContent = slot.label;
+      body.appendChild(title);
+      const status = document.createElement('span');
+      status.className = media ? 'media-slot-item__status' : 'media-slot-item__status--empty';
+      status.textContent = media
+        ? `${slot.pageLabel} · photo publiée`
+        : `${slot.pageLabel} · aucune photo publiée`;
+      body.appendChild(status);
+      row.appendChild(body);
+
+      const chooseButton = document.createElement('button');
+      chooseButton.type = 'button';
+      chooseButton.className = 'btn';
+      chooseButton.textContent = media ? 'Changer la photo' : 'Choisir une photo';
+      chooseButton.addEventListener('click', () => openMediaPicker('slot', { slotKey: slot.slotKey }));
+      row.appendChild(chooseButton);
+
+      mediaSlotsListEl.appendChild(row);
+    });
+  };
+
+  const loadSlotsPanel = async () => {
+    if (!mediaSlotsListEl) return;
+    try {
+      await fetchSlotAssignments();
+      renderSlotsList();
+    } catch (error) {
+      setStatus(error.message || 'Impossible de charger les emplacements.', 'error');
+    }
+  };
+
+  const emplacementsSubtab = document.querySelector('[data-panel="site"] [data-subtab="emplacements"]');
+  if (emplacementsSubtab) emplacementsSubtab.addEventListener('click', loadSlotsPanel);
+
+  // Rend un média public (bucket l5d2lm-public-media) s'il ne l'est pas déjà,
+  // puis l'assigne à l'emplacement — remplace toute photo précédemment
+  // assignée à ce même emplacement (un emplacement = une photo à la fois).
+  const publishMediaForSlot = async (mediaId, slotKey) => {
+    const media = mediaState.library.get(mediaId);
+    if (!media) throw new Error('Photo introuvable dans la médiathèque.');
+
+    if (media.rights_status === 'do_not_publish') {
+      throw new Error('Cette photo est marquée "Ne pas publier" : changez ses droits avant de la publier sur le site.');
+    }
+    if (media.rights_status === 'needs_review') {
+      const confirmed = window.confirm('Les droits de cette photo sont encore "À vérifier". La publier quand même ?');
+      if (!confirmed) return;
+    }
+
+    const supabase = getSupabase();
+    let publicPath = media.public_path;
+
+    if (!publicPath) {
+      const src = await resolveMediaSrc(media);
+      if (!src) throw new Error('Impossible de récupérer le fichier de cette photo.');
+      const response = await fetch(src);
+      if (!response.ok) throw new Error('Impossible de récupérer le fichier de cette photo.');
+      const blob = await response.blob();
+
+      publicPath = `${media.id}/${sanitizeStorageSegment(media.original_filename)}`;
+      const { error: uploadError } = await supabase.storage
+        .from('l5d2lm-public-media')
+        .upload(publicPath, blob, { contentType: blob.type || 'application/octet-stream', upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from('l5d2lm_media')
+        .update({ public_path: publicPath, processing_status: 'ready', publish_status: 'published' })
+        .eq('id', media.id);
+      if (updateError) throw updateError;
+
+      media.public_path = publicPath;
+      media.processing_status = 'ready';
+      media.publish_status = 'published';
+    } else if (media.publish_status !== 'published' || media.processing_status !== 'ready') {
+      const { error: updateError } = await supabase
+        .from('l5d2lm_media')
+        .update({ processing_status: 'ready', publish_status: 'published' })
+        .eq('id', media.id);
+      if (updateError) throw updateError;
+      media.processing_status = 'ready';
+      media.publish_status = 'published';
+    }
+
+    // Un emplacement = une association active à la fois : on retire
+    // l'ancienne avant d'insérer la nouvelle plutôt qu'un upsert, l'index
+    // unique porte sur slot_key seul (pas sur media_id, slot_key).
+    const { error: deleteError } = await supabase
+      .from('l5d2lm_media_usages')
+      .delete()
+      .eq('slot_key', slotKey);
+    if (deleteError) throw deleteError;
+
+    const { error: insertError } = await supabase
+      .from('l5d2lm_media_usages')
+      .insert({ media_id: mediaId, slot_key: slotKey, role: 'fixed', active: true });
+    if (insertError) throw insertError;
+
+    mediaState.slotAssignments.set(slotKey, media);
+    renderSlotsList();
+    setStatus('Photo publiée pour cet emplacement — le site public se mettra à jour automatiquement.', 'success');
+  };
 
   const renderBulkCategoryChecks = () => {
     if (!bulkCategoryChecks) return;

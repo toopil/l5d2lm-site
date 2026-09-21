@@ -8,10 +8,10 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260921d">
+  <link rel="stylesheet" href="gestion-style.css?v=20260921e">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921d"></script>
+  <script defer src="gestion.js?v=20260921e"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -245,21 +245,12 @@
             <ol class="section-order-list" data-section-order-list aria-live="polite"></ol>
           </div>
 
-          <div class="media-picker" data-media-picker hidden>
-            <div class="media-picker__panel">
-              <div class="media-picker__heading">
-                <h3 data-media-picker-title>Choisir une photo</h3>
-                <button type="button" class="gestion-link-button" data-media-picker-close>Annuler</button>
-              </div>
-              <input type="search" class="photos-search" data-media-picker-search placeholder="Rechercher…" aria-label="Rechercher une photo">
-              <div class="media-grid media-grid--picker" data-media-picker-grid aria-live="polite"></div>
-            </div>
-          </div>
         </article>
 
         <article class="gestion-card" data-panel="site">
           <nav class="subnav" aria-label="Sections du site">
             <button type="button" class="subnav__tab is-active" data-subtab="structure">Structure</button>
+            <button type="button" class="subnav__tab" data-subtab="emplacements">Emplacements</button>
             <button type="button" class="subnav__tab" data-subtab="textes">Textes</button>
             <button type="button" class="subnav__tab" data-subtab="publication">Publication</button>
           </nav>
@@ -292,6 +283,11 @@
             </form>
 
             <div class="categories-tree" data-categories-tree aria-live="polite"></div>
+          </div>
+
+          <div class="subpanel" data-subpanel="emplacements" hidden>
+            <p class="gestion-hint">Chaque emplacement correspond à une photo fixe du site public (ex. les propositions de Corps &amp; expression). Choisir une photo ici la publie automatiquement — la page publique se met à jour d’elle-même, sans intervention manuelle.</p>
+            <div class="media-slots-list" data-media-slots-list aria-live="polite"></div>
           </div>
 
           <div class="subpanel" data-subpanel="textes" hidden>
@@ -328,6 +324,20 @@
             <p class="gestion-soon">Gestion détaillée du MFA et des sessions : bientôt disponible ici.</p>
           </div>
         </article>
+      </div>
+
+      <!-- Hors des .gestion-card (chacun display:none tant qu'inactif) :
+           le sélecteur de photos doit rester utilisable quel que soit
+           l'onglet ouvert (Photos > Changer/+Ajouter, Site > Emplacements). -->
+      <div class="media-picker" data-media-picker hidden>
+        <div class="media-picker__panel">
+          <div class="media-picker__heading">
+            <h3 data-media-picker-title>Choisir une photo</h3>
+            <button type="button" class="gestion-link-button" data-media-picker-close>Annuler</button>
+          </div>
+          <input type="search" class="photos-search" data-media-picker-search placeholder="Rechercher…" aria-label="Rechercher une photo">
+          <div class="media-grid media-grid--picker" data-media-picker-grid aria-live="polite"></div>
+        </div>
       </div>
     </section>
 
