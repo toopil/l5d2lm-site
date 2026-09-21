@@ -165,6 +165,7 @@
     setStatus('Accès sécurisé confirmé.', 'success');
     await loadCategoriesPanel();
     await loadMediaPanel();
+    await loadSlotsPanel();
     return true;
   };
 
@@ -1627,9 +1628,6 @@
     }
     renderSlotsList();
   };
-
-  const emplacementsSubtab = document.querySelector('[data-panel="site"] [data-subtab="emplacements"]');
-  if (emplacementsSubtab) emplacementsSubtab.addEventListener('click', loadSlotsPanel);
 
   // Rend un média public (bucket l5d2lm-public-media) s'il ne l'est pas déjà,
   // puis l'assigne à l'emplacement — remplace toute photo précédemment

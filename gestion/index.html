@@ -8,10 +8,10 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260921g">
+  <link rel="stylesheet" href="gestion-style.css?v=20260921h">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921g"></script>
+  <script defer src="gestion.js?v=20260921h"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -25,6 +25,7 @@
     <span class="admin-topbar__brand">Gestion L5D2LM</span>
     <nav class="gestion-tabs">
       <button type="button" class="gestion-tab is-active" data-tab="photos">Photos</button>
+      <button type="button" class="gestion-tab" data-tab="emplacements">Emplacements</button>
       <button type="button" class="gestion-tab" data-tab="site">Site</button>
       <button type="button" class="gestion-tab" data-tab="cartes">Cartes postales</button>
       <button type="button" class="gestion-tab" data-tab="plus">Plus</button>
@@ -247,10 +248,14 @@
 
         </article>
 
+        <article class="gestion-card" data-panel="emplacements">
+          <p class="gestion-hint">Chaque emplacement correspond à une photo fixe du site public (ex. les propositions de Corps &amp; expression). Choisir une photo ici la publie automatiquement — la page publique se met à jour d’elle-même, sans intervention manuelle.</p>
+          <div class="media-slots-list" data-media-slots-list aria-live="polite"></div>
+        </article>
+
         <article class="gestion-card" data-panel="site">
           <nav class="subnav" aria-label="Sections du site">
             <button type="button" class="subnav__tab is-active" data-subtab="structure">Structure</button>
-            <button type="button" class="subnav__tab" data-subtab="emplacements">Emplacements</button>
             <button type="button" class="subnav__tab" data-subtab="textes">Textes</button>
             <button type="button" class="subnav__tab" data-subtab="publication">Publication</button>
           </nav>
@@ -283,11 +288,6 @@
             </form>
 
             <div class="categories-tree" data-categories-tree aria-live="polite"></div>
-          </div>
-
-          <div class="subpanel" data-subpanel="emplacements" hidden>
-            <p class="gestion-hint">Chaque emplacement correspond à une photo fixe du site public (ex. les propositions de Corps &amp; expression). Choisir une photo ici la publie automatiquement — la page publique se met à jour d’elle-même, sans intervention manuelle.</p>
-            <div class="media-slots-list" data-media-slots-list aria-live="polite"></div>
           </div>
 
           <div class="subpanel" data-subpanel="textes" hidden>
