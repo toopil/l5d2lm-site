@@ -725,7 +725,10 @@
         updateMediaCounters();
       });
       label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(isImported ? 'Sélectionner (déjà importée)' : 'Sélectionner'));
+      // Le statut d'import est déjà visible par ailleurs (badge "À
+      // importer" sur les cartes en attente) : pas besoin de le répéter
+      // sur chaque case à cocher.
+      label.appendChild(document.createTextNode('Sélectionner'));
       card.appendChild(label);
 
       const thumb = document.createElement('div');
