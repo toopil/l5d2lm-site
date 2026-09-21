@@ -26,13 +26,13 @@
           <li class="nav-group">
             <a href="l5d2lm-index.html#espaces">Propositions</a>
             <ul class="subnav">
-              <li><a href="l5d2lm-massage-intuitif-reveil-energetique.html">Massage intuitif &amp; réveil énergétique</a></li>
-              <li><a href="l5d2lm-corps-expression.html">Corps &amp; expression</a></li>
-              <li><a href="l5d2lm-colos-sejours.html">Colo pour adultes</a></li>
-              <li><a href="l5d2lm-animations-participatives.html">Animations participatives</a></li>
+              <!-- NAV_ITEM:massage --><li><a href="l5d2lm-massage-intuitif-reveil-energetique.html">Massage intuitif &amp; réveil énergétique</a></li><!-- /NAV_ITEM -->
+              <!-- NAV_ITEM:corps-expression --><li><a href="l5d2lm-corps-expression.html">Corps &amp; expression</a></li><!-- /NAV_ITEM -->
+              <!-- NAV_ITEM:colo-pour-adultes --><li><a href="l5d2lm-colos-sejours.html">Colo pour adultes</a></li><!-- /NAV_ITEM -->
+              <!-- NAV_ITEM:animations-participatives --><li><a href="l5d2lm-animations-participatives.html">Animations participatives</a></li><!-- /NAV_ITEM -->
             </ul>
           </li>
-          <li><a href="l5d2lm-espaces-a-decouvrir.html">Espaces à découvrir</a></li>
+          <!-- NAV_ITEM:espaces-a-decouvrir --><li><a href="l5d2lm-espaces-a-decouvrir.html">Espaces à découvrir</a></li><!-- /NAV_ITEM -->
           <li><a href="l5d2lm-contact.html">Contact</a></li>
         </ul>
       </nav>
@@ -62,10 +62,11 @@
 
     <section class="section" id="propositions">
       <div class="container section-heading reveal">
-        <p class="eyebrow">Trois propositions</p>
+        <p class="eyebrow">Quatre propositions</p>
         <h2>Choisir la forme qui correspond au moment</h2>
       </div>
       <div class="container flip-cards reveal">
+        <!-- ACTIVITY:massage-intuitif:start -->
         <article class="flip-card flip-card--intuitif" id="massage-intuitif">
           <div class="flip-card__inner">
             <div class="flip-card__face flip-card__face--front">
@@ -95,7 +96,9 @@
             </div>
           </div>
         </article>
+        <!-- ACTIVITY:massage-intuitif:end -->
 
+        <!-- ACTIVITY:reveil-energetique:start -->
         <article class="flip-card flip-card--energetique" id="reveil-energetique">
           <div class="flip-card__inner">
             <div class="flip-card__face flip-card__face--front">
@@ -124,7 +127,9 @@
             </div>
           </div>
         </article>
+        <!-- ACTIVITY:reveil-energetique:end -->
 
+        <!-- ACTIVITY:massage-aquatique:start -->
         <article class="flip-card flip-card--aquatique" id="massage-aquatique">
           <div class="flip-card__inner">
             <div class="flip-card__face flip-card__face--front">
@@ -156,6 +161,35 @@
             </div>
           </div>
         </article>
+        <!-- ACTIVITY:massage-aquatique:end -->
+
+        <!-- ACTIVITY:formation:start -->
+        <article class="flip-card flip-card--formation" id="formation">
+          <div class="flip-card__inner">
+            <div class="flip-card__face flip-card__face--front">
+              <span class="offer-number" aria-hidden="true">04</span>
+              <h3>Formation</h3>
+              <p class="card-rhythm">Apprendre à guider un réveil énergétique.</p>
+              <p class="flip-card__duration">Durée selon le contexte</p>
+              <div class="card-actions">
+                <button type="button" class="card-link flip-card__toggle" data-flip-action="open" aria-expanded="false" aria-controls="formation-verso">Voir le détail</button>
+                <a class="card-link card-link--request" href="l5d2lm-contact.html?category=massage&amp;offer=transmission-reveil-energetique" data-request-category="massage" data-request-offer="transmission-reveil-energetique">Faire une demande</a>
+              </div>
+            </div>
+            <div class="flip-card__face flip-card__face--back" id="formation-verso">
+              <button type="button" class="flip-card__back-link" data-flip-action="close" aria-expanded="true">← Retour</button>
+              <h3>Formation</h3>
+              <p class="eyebrow">Formation • pratique collective</p>
+              <p class="service-emphasis">Apprendre à guider un réveil énergétique&nbsp;: une offre différente de recevoir un Réveil énergétique — ici, c’est vous qui apprenez à le proposer à d’autres.</p>
+              <p>Une pratique simple à découvrir, à partager et à réutiliser, entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.</p>
+              <div class="actions inline-request-action">
+                <a class="card-link" href="#formation-detail">Voir le détail de la formation ↓</a>
+                <a class="btn btn-primary" href="l5d2lm-contact.html?category=massage&amp;offer=transmission-reveil-energetique" data-request-category="massage" data-request-offer="transmission-reveil-energetique">Demander une transmission</a>
+              </div>
+            </div>
+          </div>
+        </article>
+        <!-- ACTIVITY:formation:end -->
       </div>
     </section>
 
@@ -233,7 +267,7 @@
       </div>
     </section>
 
-    <section class="section training-section" id="formation">
+    <section class="section training-section" id="formation-detail">
       <div class="container training-grid reveal">
         <div>
           <p class="eyebrow">Formation • pratique collective</p>

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -63,6 +64,44 @@ def fetch_published_slots() -> dict:
         if media and media.get("public_path"):
             published[row["slot_key"]] = media
     return published
+
+
+def _fetch_section_visibility(query: str, warning_label: str) -> set[str] | None:
+    """Renvoie les slugs *publiés* pour une requête l5d2lm_sections donnée,
+    ou None (rien à masquer) si la requête échoue OU si elle ne renvoie
+    STRICTEMENT AUCUNE ligne au total (statut confondu) : dans ce cas la
+    migration correspondante n'a probablement pas encore été appliquée,
+    et un ensemble vide serait interprété à tort comme « tout masquer ».
+    Seule une réponse non vide, où certaines lignes existent mais aucune
+    n'est publiée, produit un set() qui masque effectivement tout."""
+    url = f"{SUPABASE_URL}/rest/v1/l5d2lm_sections?{query}&select=slug,status"
+    req = urllib.request.Request(url, headers={
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"Avertissement : {warning_label} non récupérées ({exc}) — laissées visibles.")
+        return None
+    if not rows:
+        return None
+    return {row["slug"] for row in rows if row.get("status") == "published"}
+
+
+def fetch_published_section_slugs() -> set[str] | None:
+    """Slugs des catégories de premier niveau publiées (parent_id is
+    null). Voir _fetch_section_visibility pour la gestion prudente du
+    cas « table pas encore peuplée »."""
+    return _fetch_section_visibility("parent_id=is.null", "catégories publiées")
+
+
+def fetch_published_activity_slugs() -> set[str] | None:
+    """Slugs des activités (kind='proposal') publiées. Voir
+    _fetch_section_visibility pour la gestion prudente du cas « table
+    pas encore peuplée » (migration pas encore appliquée)."""
+    return _fetch_section_visibility("kind=eq.proposal", "activités publiées")
 
 
 def _slot_image_src(media: dict) -> str:
@@ -136,9 +175,54 @@ def substitute_media_slots(content: str, page_slug: str, published: dict) -> str
     return content
 
 
-def render_head(page: dict) -> str:
+NAV_ITEM_RE = re.compile(
+    r"<!-- NAV_ITEM:([\w-]+) -->.*?<!-- /NAV_ITEM -->\n?", re.DOTALL
+)
+
+
+def substitute_nav_visibility(chrome_html: str, published_section_slugs: set[str] | None) -> str:
+    """Retire du menu les entrées dont la catégorie correspondante n'est
+    pas publiée. published_section_slugs=None (erreur réseau) => rien
+    n'est retiré, par prudence."""
+    if published_section_slugs is None:
+        return chrome_html
+    def repl(match: re.Match) -> str:
+        slug = match.group(1)
+        return match.group(0) if slug in published_section_slugs else ""
+    return NAV_ITEM_RE.sub(repl, chrome_html)
+
+
+ACTIVITY_RE_TEMPLATE = r"<!-- ACTIVITY:{slug}:start -->.*?<!-- ACTIVITY:{slug}:end -->\n?"
+
+
+def substitute_activity_blocks(content: str, published_activity_slugs: set[str] | None) -> str:
+    """Retire les blocs d'activité (flip-cards) dont le slug n'est pas
+    publié. published_activity_slugs=None (erreur réseau) => rien n'est
+    retiré, par prudence."""
+    if published_activity_slugs is None:
+        return content
+    for match in re.finditer(r"<!-- ACTIVITY:([\w-]+):start -->", content):
+        slug = match.group(1)
+        if slug in published_activity_slugs:
+            continue
+        pattern = re.compile(ACTIVITY_RE_TEMPLATE.format(slug=re.escape(slug)), re.DOTALL)
+        content = pattern.sub("", content)
+    return content
+
+
+def render_head(page: dict, published_section_slugs: set[str] | None) -> str:
     tmpl = Template((ROOT / "_partials/head.html.tmpl").read_text(encoding="utf-8"))
     robots = page.get("robots")
+    section_slug = page.get("section_slug")
+    if (
+        not robots
+        and section_slug
+        and published_section_slugs is not None
+        and section_slug not in published_section_slugs
+    ):
+        # Catégorie masquée depuis /gestion : la page reste accessible par
+        # URL directe (pas de suppression) mais n'est plus indexée.
+        robots = "noindex, nofollow"
     robots_line = f'\n  <meta name="robots" content="{robots}">' if robots else ""
     asset_qs = f"?v={ASSET_VERSION}" if ASSET_VERSION else ""
     return tmpl.substitute(
@@ -150,12 +234,18 @@ def render_head(page: dict) -> str:
     )
 
 
-def build_page(page: dict, published_slots: dict) -> None:
-    head = render_head(page)
-    chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
+def build_page(
+    page: dict,
+    published_slots: dict,
+    chrome: str,
+    published_activity_slugs: set[str] | None,
+    published_section_slugs: set[str] | None,
+) -> None:
+    head = render_head(page, published_section_slugs)
     footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
     content = substitute_media_slots(content, page["slug"], published_slots)
+    content = substitute_activity_blocks(content, published_activity_slugs)
     page_html = (
         "<!doctype html>\n"
         '<html lang="fr">\n'
@@ -169,11 +259,19 @@ def build_page(page: dict, published_slots: dict) -> None:
     (ROOT / f'{page["slug"]}.html').write_text(page_html, encoding="utf-8")
 
 
-def build_sitemap() -> None:
+def build_sitemap(published_section_slugs: set[str] | None) -> None:
+    def is_indexable(p: dict) -> bool:
+        if p.get("robots"):
+            return False
+        section_slug = p.get("section_slug")
+        if section_slug and published_section_slugs is not None:
+            return section_slug in published_section_slugs
+        return True
+
     urls = "\n".join(
         f"  <url>\n    <loc>{BASE_URL}/{p['slug']}.html</loc>\n  </url>"
         for p in PAGES
-        if not p.get("robots")
+        if is_indexable(p)
     )
     sitemap = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -186,9 +284,13 @@ def build_sitemap() -> None:
 
 def main() -> None:
     published_slots = fetch_published_slots()
+    published_section_slugs = fetch_published_section_slugs()
+    published_activity_slugs = fetch_published_activity_slugs()
+    chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
+    chrome = substitute_nav_visibility(chrome, published_section_slugs)
     for page in PAGES:
-        build_page(page, published_slots)
-    build_sitemap()
+        build_page(page, published_slots, chrome, published_activity_slugs, published_section_slugs)
+    build_sitemap(published_section_slugs)
     print(f"{len(PAGES)} pages générées + sitemap.xml")
 
 
