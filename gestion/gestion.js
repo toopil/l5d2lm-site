@@ -1616,10 +1616,16 @@
     if (!mediaSlotsListEl) return;
     try {
       await fetchSlotAssignments();
-      renderSlotsList();
     } catch (error) {
-      setStatus(error.message || 'Impossible de charger les emplacements.', 'error');
+      // La liste des emplacements reste utile même si l'état publié n'a pas
+      // pu être récupéré (ex. migration slot_key pas encore appliquée) :
+      // on l'affiche quand même, chaque emplacement retombant sur son
+      // statut "photo déjà en ligne" / "Photo à venir" par défaut, plutôt
+      // que de laisser le panneau complètement vide sans explication.
+      mediaState.slotAssignments = new Map();
+      setStatus(`Impossible de vérifier les photos déjà publiées (${error.message || 'erreur inconnue'}) — la migration slot_key a-t-elle été appliquée dans Supabase ?`, 'error');
     }
+    renderSlotsList();
   };
 
   const emplacementsSubtab = document.querySelector('[data-panel="site"] [data-subtab="emplacements"]');
