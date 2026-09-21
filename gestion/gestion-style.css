@@ -5,6 +5,10 @@
     var(--bg);
 }
 
+.gestion-header[hidden] {
+  display: none;
+}
+
 .gestion-header {
   min-height: 76px;
   display: flex;
@@ -871,6 +875,20 @@
   min-height: 1.7em;
   margin: 1rem 0 0;
   font-weight: 700;
+}
+
+.gestion-status:not(:empty) {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(1040px, calc(100% - 2rem));
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  background: rgba(248, 245, 240, 0.98);
+  border: 1px solid rgba(75, 58, 47, 0.12);
+  box-shadow: 0 8px 20px rgba(75, 58, 47, 0.12);
 }
 
 .gestion-status.is-error {
