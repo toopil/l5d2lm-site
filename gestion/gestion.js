@@ -749,8 +749,12 @@
 
       const meta = document.createElement('div');
       meta.className = 'media-item__meta';
+      const info = isImported ? mediaState.importedByFilename.get(item.filename) : null;
+      // Une fois un titre personnalisé enregistré, il remplace le nom
+      // technique du fichier comme texte principal — jamais les deux à
+      // la fois (le nom de fichier reste consultable via "Modifier...").
       const name = document.createElement('strong');
-      name.textContent = item.filename;
+      name.textContent = info?.default_annotation || item.filename;
       meta.appendChild(name);
 
       if (!isImported) {
@@ -764,21 +768,19 @@
       }
 
       if (isImported) {
-        const info = mediaState.importedByFilename.get(item.filename);
-
-        const titleEl = document.createElement('p');
-        titleEl.className = 'media-item__title';
-        titleEl.textContent = info.default_annotation || '(sans titre)';
-        meta.appendChild(titleEl);
-
         const rightsRow = document.createElement('div');
         rightsRow.className = 'media-item__rights';
 
-        const rightsBadge = document.createElement('span');
-        const rightsDef = RIGHTS_STATUSES.find((entry) => entry.value === info.rights_status);
-        rightsBadge.className = `media-badge media-badge--rights-${info.rights_status}`;
-        rightsBadge.textContent = rightsDef ? rightsDef.label : info.rights_status;
-        rightsRow.appendChild(rightsBadge);
+        // "Autorisation OK" est l'état validé : l'afficher sur chaque carte
+        // n'apporte rien une fois que c'est fait — seuls les statuts qui
+        // demandent encore une action restent visibles.
+        if (info.rights_status !== 'authorized') {
+          const rightsBadge = document.createElement('span');
+          const rightsDef = RIGHTS_STATUSES.find((entry) => entry.value === info.rights_status);
+          rightsBadge.className = `media-badge media-badge--rights-${info.rights_status}`;
+          rightsBadge.textContent = rightsDef ? rightsDef.label : info.rights_status;
+          rightsRow.appendChild(rightsBadge);
+        }
 
         const favoriteButton = document.createElement('button');
         favoriteButton.type = 'button';
@@ -2292,13 +2294,24 @@
       mediaUploadInput.value = '';
     });
   }
+  // Un menu "Classer"/"Droits"/"Plus" qui reste ouvert après un choix
+  // recouvre la grille en dessous (position absolute) : on le referme
+  // systématiquement une fois l'action lancée.
+  const closeBulkMenu = (button) => {
+    const details = button.closest('.bulk-menu');
+    if (details) details.open = false;
+  };
+
   if (rightsButtonsContainer) {
     RIGHTS_STATUSES.forEach(({ value, label }) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'btn';
       button.textContent = label;
-      button.addEventListener('click', () => handleBulkRightsChange(value));
+      button.addEventListener('click', () => {
+        closeBulkMenu(button);
+        handleBulkRightsChange(value);
+      });
       rightsButtonsContainer.appendChild(button);
     });
   }
@@ -2312,9 +2325,17 @@
     });
   });
   document.querySelectorAll('[data-bulk-category-apply]').forEach((button) => {
-    button.addEventListener('click', () => handleBulkCategoryApply(button.dataset.bulkCategoryApply));
+    button.addEventListener('click', () => {
+      closeBulkMenu(button);
+      handleBulkCategoryApply(button.dataset.bulkCategoryApply);
+    });
   });
-  if (bulkTrashButton) bulkTrashButton.addEventListener('click', handleBulkTrash);
+  if (bulkTrashButton) {
+    bulkTrashButton.addEventListener('click', () => {
+      closeBulkMenu(bulkTrashButton);
+      handleBulkTrash();
+    });
+  }
 
   // Onglet Catégories : créer/modifier/ordonner/publier-masquer/supprimer
   // les propositions (l5d2lm_sections), jusqu'à ~3 niveaux via parent_id.
