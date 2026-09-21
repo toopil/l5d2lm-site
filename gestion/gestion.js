@@ -397,8 +397,11 @@
   // marqueur MEDIA_SLOT correspondant dans un fragment content/*.html
   // n'aurait aucun effet visible sur le site publié.
   const SLOT_DEFINITIONS = [
+    { slotKey: 'corps-expression:playful-extatique', pageLabel: 'Corps & expression', label: 'Playful extatique', fallbackFilename: 'l5d2lm-photo-corps-expression-2.jpg' },
     { slotKey: 'corps-expression:theatre-improvisation', pageLabel: 'Corps & expression', label: 'Théâtre d’improvisation' },
-    { slotKey: 'corps-expression:reveil-du-corps', pageLabel: 'Corps & expression', label: 'Réveil du corps' }
+    { slotKey: 'corps-expression:reveil-du-corps', pageLabel: 'Corps & expression', label: 'Réveil du corps' },
+    { slotKey: 'corps-expression:jeux-de-mouvement', pageLabel: 'Corps & expression', label: 'Jeux de mouvement', fallbackFilename: 'l5d2lm-photo-corps-expression-jeux.jpg' },
+    { slotKey: 'corps-expression:a-portee-de-main', pageLabel: 'Corps & expression', label: 'À portée de main', fallbackFilename: 'l5d2lm-photo-corps-expression-4.jpg' }
   ];
   const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
 
@@ -1549,6 +1552,13 @@
 
     SLOT_DEFINITIONS.forEach((slot) => {
       const media = mediaState.slotAssignments.get(slot.slotKey);
+      // Une photo déjà en place avant ce mécanisme (import initial du site)
+      // et jamais republiée depuis l'admin : le site public l'affiche déjà
+      // (voir build/slots.py, fallback), mais elle n'est pas encore "gérée"
+      // ici — à ne pas confondre avec un emplacement réellement vide.
+      const fallbackEntry = !media && slot.fallbackFilename
+        ? allSiteMedia().find((item) => item.filename === slot.fallbackFilename)
+        : null;
 
       const row = document.createElement('div');
       row.className = 'media-slot-item';
@@ -1562,6 +1572,12 @@
         img.style.objectPosition = `${(media.focal_x ?? 0.5) * 100}% ${(media.focal_y ?? 0.5) * 100}%`;
         attachMediaImage(img, media);
         thumb.appendChild(img);
+      } else if (fallbackEntry) {
+        const img = document.createElement('img');
+        img.src = fallbackEntry.src;
+        img.alt = '';
+        img.loading = 'lazy';
+        thumb.appendChild(img);
       } else {
         thumb.classList.add('media-slot-item__thumb--empty');
         thumb.textContent = 'Photo à venir';
@@ -1574,10 +1590,14 @@
       title.textContent = slot.label;
       body.appendChild(title);
       const status = document.createElement('span');
-      status.className = media ? 'media-slot-item__status' : 'media-slot-item__status--empty';
-      status.textContent = media
-        ? `${slot.pageLabel} · photo publiée`
-        : `${slot.pageLabel} · aucune photo publiée`;
+      status.className = media || fallbackEntry ? 'media-slot-item__status' : 'media-slot-item__status--empty';
+      if (media) {
+        status.textContent = `${slot.pageLabel} · photo publiée`;
+      } else if (fallbackEntry) {
+        status.textContent = `${slot.pageLabel} · photo déjà en ligne, pas encore gérée ici`;
+      } else {
+        status.textContent = `${slot.pageLabel} · aucune photo publiée`;
+      }
       body.appendChild(status);
       row.appendChild(body);
 

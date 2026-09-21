@@ -76,6 +76,19 @@ def render_slot(slot: dict, media: dict | None) -> str:
             f'                  <img src="{html.escape(src, quote=True)}" alt="{alt}" loading="lazy">\n'
             '                </div>'
         )
+    fallback = slot.get("fallback")
+    if fallback:
+        # Photo déjà en place avant le passage par ce mécanisme (ex. import
+        # initial du site) : reste affichée tant que l'admin ne publie pas
+        # explicitement un remplacement — jamais de régression silencieuse
+        # vers "Photo à venir" pour une photo qui existe déjà.
+        dims = f' width="{fallback["width"]}" height="{fallback["height"]}"' if fallback.get("width") else ""
+        return (
+            '<div class="flip-card__media">\n'
+            f'                  {band}\n'
+            f'                  <img src="{fallback["src"]}" alt=""{dims}>\n'
+            '                </div>'
+        )
     title = html.escape(slot["title"])
     return (
         '<div class="flip-card__media flip-card__media--placeholder">\n'
