@@ -308,6 +308,10 @@
   font-size: 0.92rem;
 }
 
+[data-publish-now] {
+  margin-bottom: 1.2rem;
+}
+
 .media-slots-list {
   display: grid;
   gap: 0.7rem;
