@@ -1909,8 +1909,7 @@
     }
   };
 
-  const publishNowButton = document.querySelector('[data-publish-now]');
-  if (publishNowButton) {
+  document.querySelectorAll('[data-publish-now]').forEach((publishNowButton) => {
     publishNowButton.addEventListener('click', async () => {
       setBusy(publishNowButton, true);
       setStatus('Déclenchement de la publication...');
@@ -1923,7 +1922,7 @@
         setBusy(publishNowButton, false);
       }
     });
-  }
+  });
 
   const renderBulkCategoryChecks = () => {
     if (!bulkCategoryChecks) return;
@@ -2601,7 +2600,15 @@
       setStatus(error.message || 'Impossible de changer le statut.', 'error');
       return;
     }
-    setStatus(`« ${section.title} » : ${CATEGORY_STATUS_LABEL[status] || status}.`, 'success');
+    // Déclenchement immédiat comme pour les emplacements photo : silencieux
+    // tant que la fonction Edge "trigger-publish" n'est pas configurée.
+    const published = await triggerPublishNow({ silent: true });
+    setStatus(
+      published
+        ? `« ${section.title} » : ${CATEGORY_STATUS_LABEL[status] || status} — publication du site en cours.`
+        : `« ${section.title} » : ${CATEGORY_STATUS_LABEL[status] || status} — le site public se mettra à jour automatiquement (sous 3h maximum).`,
+      'success'
+    );
     await loadCategoriesPanel();
   };
 

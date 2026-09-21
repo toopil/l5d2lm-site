@@ -12,7 +12,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260921s"></script>
+  <script defer src="gestion.js?v=20260921t"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -263,9 +263,11 @@
           </nav>
 
           <div class="subpanel is-active" data-subpanel="structure">
+            <p class="gestion-hint">Masquer ou publier une catégorie ou une activité met à jour le site public automatiquement, en général en quelques minutes.</p>
             <div class="categories-toolbar">
               <button class="btn btn-primary" type="button" data-category-new>Créer une catégorie</button>
               <button class="btn" type="button" data-category-seed>Créer les 6 catégories du site</button>
+              <button type="button" class="btn" data-publish-now>Publier maintenant</button>
             </div>
 
             <form class="gestion-form categories-form" data-category-form hidden>
