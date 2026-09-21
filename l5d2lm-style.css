@@ -282,10 +282,6 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 .flip-card--aquatique .flip-card__duration { background: rgba(92, 138, 149, 0.18); color: #3f6570; }
 .flip-card--aquatique .offer-number { color: rgba(92, 138, 149, 0.35); }
 
-.flip-card--formation .flip-card__face { background: #faf5ec; }
-.flip-card--formation .flip-card__duration { background: rgba(201, 154, 74, 0.18); color: #92702c; }
-.flip-card--formation .offer-number { color: rgba(201, 154, 74, 0.35); }
-
 .flip-card__face[inert] { pointer-events: none; }
 
 @media (max-width: 900px) {

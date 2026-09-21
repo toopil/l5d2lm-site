@@ -26,7 +26,7 @@ from slots import SLOTS  # noqa: E402
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20260919b"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20260921a"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
