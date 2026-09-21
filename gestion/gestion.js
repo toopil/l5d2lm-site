@@ -392,6 +392,7 @@
   const mediaPickerGrid = document.querySelector('[data-media-picker-grid]');
   const mediaPickerSearch = document.querySelector('[data-media-picker-search]');
   const mediaPickerCloseButton = document.querySelector('[data-media-picker-close]');
+  const mediaPickerUploadInput = document.querySelector('[data-media-picker-upload-input]');
 
   // Emplacements photo fixes du site public (Site > Emplacements). Doit
   // rester synchronisé avec build/slots.py — un slot_key ajouté ici sans
@@ -1510,6 +1511,70 @@
       setStatus(error.message || 'Impossible de choisir cette photo.', 'error');
     }
   };
+
+  // Importer directement une photo qui n'a jamais été mise dans la
+  // médiathèque, depuis le sélecteur lui-même (Changer / + Ajouter /
+  // Emplacements) — sans devoir aller d'abord dans Photos pour l'importer.
+  const importFileForPicker = async (file) => {
+    const supabase = getSupabase();
+    const hash = await sha256Hex(file);
+
+    // Contenu identique déjà présent : réutilise la fiche existante plutôt
+    // que de dupliquer l'import (même règle que l'import depuis Photos).
+    const { data: existingRow } = await supabase
+      .from('l5d2lm_media')
+      .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+      .eq('original_sha256', hash)
+      .is('deleted_at', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingRow) {
+      mediaState.library.set(existingRow.id, existingRow);
+      mediaState.importedByFilename.set(existingRow.original_filename, existingRow);
+      return existingRow.id;
+    }
+
+    const storagePath = `${crypto.randomUUID()}/${sanitizeStorageSegment(file.name)}`;
+    const contentType = file.type || 'application/octet-stream';
+    const { error: uploadError } = await supabase.storage
+      .from('l5d2lm-private-originals')
+      .upload(storagePath, file, { contentType, upsert: false });
+    if (uploadError) throw uploadError;
+
+    const { data: insertedRow, error: insertError } = await supabase
+      .from('l5d2lm_media')
+      .insert({
+        original_filename: file.name,
+        original_mime_type: contentType,
+        original_byte_size: file.size,
+        original_sha256: hash,
+        original_private_path: storagePath
+      })
+      .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+      .single();
+    if (insertError) throw insertError;
+
+    mediaState.library.set(insertedRow.id, insertedRow);
+    mediaState.importedByFilename.set(insertedRow.original_filename, insertedRow);
+    return insertedRow.id;
+  };
+
+  if (mediaPickerUploadInput) {
+    mediaPickerUploadInput.addEventListener('change', async () => {
+      const file = mediaPickerUploadInput.files?.[0];
+      mediaPickerUploadInput.value = '';
+      if (!file) return;
+      setStatus(`Import de ${file.name} en cours...`);
+      try {
+        const mediaId = await importFileForPicker(file);
+        setStatus(`${file.name} importée, droits à vérifier.`, 'success');
+        await choosePickerMedia(mediaId);
+      } catch (error) {
+        setStatus(error.message || `Impossible d’importer ${file.name}.`, 'error');
+      }
+    });
+  }
 
   if (mediaPickerCloseButton) mediaPickerCloseButton.addEventListener('click', closeMediaPicker);
   if (mediaPickerSearch) {

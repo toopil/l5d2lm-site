@@ -1076,6 +1076,21 @@
   margin: 0;
 }
 
+.media-picker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.media-picker__actions .photos-search {
+  flex: 1 1 200px;
+}
+
+.media-picker__actions .media-upload-button {
+  flex: 0 0 auto;
+}
+
 .media-grid--picker .media-item {
   cursor: pointer;
 }
