@@ -265,7 +265,7 @@
 }
 
 /* Sous-navigation (Site > Structure/Textes/Publication, Plus > Corbeille/...) */
-.subnav {
+.gestion-subnav {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;

@@ -41,9 +41,9 @@
   };
 
   // Sous-navigations génériques (Site > Structure/Textes/Publication,
-  // Plus > Corbeille/Historique/Sécurité) : chaque .subnav ne pilote que
-  // les .subpanel de son propre article[data-panel].
-  document.querySelectorAll('.subnav').forEach((nav) => {
+  // Plus > Corbeille/Historique/Sécurité) : chaque .gestion-subnav ne pilote
+  // que les .subpanel de son propre article[data-panel].
+  document.querySelectorAll('.gestion-subnav').forEach((nav) => {
     const container = nav.closest('[data-panel]');
     if (!container) return;
     nav.querySelectorAll('[data-subtab]').forEach((tabButton) => {
