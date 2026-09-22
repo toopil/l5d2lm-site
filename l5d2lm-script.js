@@ -947,9 +947,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       return;
     }
-    if (!Array.isArray(pool) || pool.length <= visibleCount) return;
+    if (!Array.isArray(pool)) return;
 
-    const picked = shuffle(pool).slice(0, visibleCount);
+    // Une même photo ne doit jamais apparaître deux fois dans le même
+    // tirage, même si elle a été ajoutée en double côté admin : on ne
+    // garde qu'une occurrence par source avant de tirer au sort.
+    const seen = new Set();
+    const uniquePool = pool.filter((item) => {
+      if (seen.has(item.src)) return false;
+      seen.add(item.src);
+      return true;
+    });
+    if (uniquePool.length <= visibleCount) return;
+
+    const picked = shuffle(uniquePool).slice(0, visibleCount);
     band.innerHTML = '';
     picked.forEach((item) => {
       const card = document.createElement('div');

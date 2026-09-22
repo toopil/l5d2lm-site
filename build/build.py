@@ -26,7 +26,7 @@ from slots import SLOTS, POSTCARD_CATEGORY_SECTION_SLUGS  # noqa: E402
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20260922a"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20260922b"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
@@ -158,14 +158,25 @@ def fetch_postcard_pools(section_slugs: list) -> dict:
         return {}
 
     pools: dict = {}
+    seen_src: dict = {}
     slugs = set(section_slugs)
     for row in rows:
         section = row.get("section")
         media = row.get("media")
         if not section or not media or section.get("slug") not in slugs or not media.get("public_path"):
             continue
-        pools.setdefault(section["slug"], []).append({
-            "src": _slot_image_src(media),
+        slug = section["slug"]
+        src = _slot_image_src(media)
+        # Une même photo ne doit jamais apparaître deux fois dans le rendu
+        # de repli (avant tirage côté navigateur) : ne garder que la
+        # première occurrence par catégorie, même si elle a été ajoutée en
+        # double au pool depuis /gestion.
+        seen = seen_src.setdefault(slug, set())
+        if src in seen:
+            continue
+        seen.add(src)
+        pools.setdefault(slug, []).append({
+            "src": src,
             "alt": row.get("alt_override") or media.get("alt_text") or "",
             "annotation": row.get("annotation_override") or media.get("default_annotation") or "",
         })
@@ -366,9 +377,14 @@ def build_page(
 ) -> None:
     head = render_head(page, published_section_slugs)
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
+    # Doit tourner AVANT substitute_media_slots : cette dernière insère des
+    # <div class="postcard"> imbriqués dans .photo-band, ce qui casserait
+    # PHOTO_BAND_RE (non gourmande, s'arrêterait au premier </div> imbriqué
+    # au lieu de celui de .photo-band). Tant que le marqueur MEDIA_SLOT est
+    # encore un simple commentaire, le remplacement est sans ambiguïté.
+    content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
     content = substitute_media_slots(content, page["slug"], published_slots)
     content = substitute_activity_blocks(content, published_activity_slugs)
-    content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
     # Mêmes marqueurs NAV_ITEM que le menu (voir substitute_nav_visibility) :
     # une catégorie masquée disparaît aussi des liens qui y renvoient à
     # l'intérieur d'une page (ex. les cartes "Propositions" de l'accueil).

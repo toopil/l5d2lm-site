@@ -1539,12 +1539,16 @@
     const query = mediaState.pickerSearch.toLowerCase();
     // (media_id, section_id) est une clé composite unique en base : une photo
     // déjà présente sur cette page ne peut pas y occuper une deuxième position.
-    // Ne s'applique qu'aux modes "Changer"/"+ Ajouter" (vue par page) : un
-    // emplacement fixe (mode "slot") ou un pool de cartes postales (mode
-    // "postcard", plusieurs photos par catégorie) n'a pas cette contrainte.
-    const alreadyOnPage = (mediaState.pickerMode === 'slot' || mediaState.pickerMode === 'postcard')
+    // Un emplacement fixe (mode "slot") n'a pas cette contrainte (une même
+    // photo peut servir à plusieurs emplacements). Un pool de cartes
+    // postales (mode "postcard") a sa propre règle : jamais deux fois la
+    // même photo dans le pool d'UNE catégorie — mais elle peut très bien
+    // servir aussi ailleurs sur le site.
+    const alreadyOnPage = mediaState.pickerMode === 'slot'
       ? new Set()
-      : new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
+      : mediaState.pickerMode === 'postcard'
+        ? new Set((mediaState.postcardPoolBySection.get(mediaState.pickerContext?.sectionId) || []).map((item) => item.media_id))
+        : new Set(mediaState.sectionOrderItems.map((entry) => entry.mediaId));
     const entries = Array.from(mediaState.importedByFilename.entries()).filter(([filename, info]) => {
       if (alreadyOnPage.has(info?.id)) return false; // déjà utilisée sur cette page (couvre aussi "elle-même" en mode Changer)
       return !query || filename.toLowerCase().includes(query);
@@ -2017,11 +2021,20 @@
   const addPostcardPoolItem = async (sectionId, mediaId) => {
     const media = mediaState.library.get(mediaId);
     if (!media) throw new Error('Photo introuvable dans la médiathèque.');
+
+    const pool = mediaState.postcardPoolBySection.get(sectionId) || [];
+    // Une même photo ne doit jamais pouvoir apparaître deux fois en même
+    // temps sur le site : refuser ici plutôt que de compter uniquement sur
+    // le filtrage de secours côté site public.
+    if (pool.some((item) => item.media_id === mediaId)) {
+      setStatus('Cette photo est déjà dans le pool de cette carte postale.', 'error');
+      return;
+    }
+
     const proceed = await ensureMediaPublished(media);
     if (proceed === false) return;
 
     const supabase = getSupabase();
-    const pool = mediaState.postcardPoolBySection.get(sectionId) || [];
     const maxOrder = pool.reduce((max, item) => Math.max(max, item.sort_order), -10);
     const { data, error } = await supabase
       .from('l5d2lm_media_usages')
