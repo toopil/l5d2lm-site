@@ -135,6 +135,39 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 @media (max-width: 640px) {
   .photo-band .postcard { width: 108px; }
 }
+
+/* Ancrages photo optionnels (Emplacements > toutes les pages). Le texte se
+   réorganise toujours autour, jamais l'inverse : sur mobile, la photo
+   flottante repasse en bloc empilé (float: none), donc aucun risque de
+   chevauchement à aucune taille d'écran. */
+.clearfix::after { content: ""; display: table; clear: both; }
+.anchor-photo {
+  width: clamp(180px, 32vw, 260px);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+.anchor-photo--right { float: right; margin-left: 1.5rem; }
+.anchor-photo--left { float: left; margin-right: 1.5rem; }
+.anchor-photo img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+@media (max-width: 760px) {
+  .anchor-photo { float: none; width: 100%; margin-left: 0; margin-right: 0; }
+}
+.photo-single {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.photo-single img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
 .hero-mark--massage {
   gap: 1rem; justify-items: center; align-content: center;
 }

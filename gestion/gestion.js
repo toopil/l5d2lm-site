@@ -413,34 +413,59 @@
   // rester synchronisé avec build/slots.py — un slot_key ajouté ici sans
   // marqueur MEDIA_SLOT correspondant dans un fragment content/*.html
   // n'aurait aucun effet visible sur le site publié.
+  // Les ancrages "Photo — ..." / "Photo flottante — ..." sont optionnels :
+  // aucune photo par défaut, aucun effet sur le site tant que rien n'est
+  // choisi ici (voir build/slots.py, kind "float"/"band" pour le détail du
+  // rendu et la garantie « jamais de chevauchement avec le texte »).
   const SLOT_DEFINITIONS = [
     { slotKey: 'corps-expression:playful-extatique', pageLabel: 'Corps & expression', label: 'Playful extatique', fallbackFilename: 'l5d2lm-photo-corps-expression-2.jpg' },
     { slotKey: 'corps-expression:theatre-improvisation', pageLabel: 'Corps & expression', label: 'Théâtre d’improvisation' },
     { slotKey: 'corps-expression:reveil-du-corps', pageLabel: 'Corps & expression', label: 'Réveil du corps' },
     { slotKey: 'corps-expression:jeux-de-mouvement', pageLabel: 'Corps & expression', label: 'Jeux de mouvement', fallbackFilename: 'l5d2lm-photo-corps-expression-jeux.jpg' },
     { slotKey: 'corps-expression:a-portee-de-main', pageLabel: 'Corps & expression', label: 'À portée de main', fallbackFilename: 'l5d2lm-photo-corps-expression-4.jpg' },
+    { slotKey: 'corps-expression:anchor-band-hero', pageLabel: 'Corps & expression', label: 'Photo — entre le hero et les propositions' },
+    { slotKey: 'corps-expression:anchor-band-cadre', pageLabel: 'Corps & expression', label: 'Photo — avant « Un cadre commun »' },
+    { slotKey: 'corps-expression:anchor-float-cadre', pageLabel: 'Corps & expression', label: 'Photo flottante — « Un cadre commun »' },
+    { slotKey: 'corps-expression:anchor-band-footer', pageLabel: 'Corps & expression', label: 'Photo — avant le bas de page' },
 
     { slotKey: 'accueil:postcard-1', pageLabel: 'Accueil', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-index.jpg' },
     { slotKey: 'accueil:postcard-2', pageLabel: 'Accueil', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-index-2.jpg' },
+    { slotKey: 'accueil:anchor-band-hero', pageLabel: 'Accueil', label: 'Photo — entre l’accueil et Propositions' },
+    { slotKey: 'accueil:anchor-float-formats', pageLabel: 'Accueil', label: 'Photo flottante — « Des formats qui se construisent ensemble »' },
+    { slotKey: 'accueil:anchor-band-footer', pageLabel: 'Accueil', label: 'Photo — avant le bas de page' },
 
     { slotKey: 'massage:postcard-1', pageLabel: 'Massage', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-massage-intuitif.jpg' },
     { slotKey: 'massage:postcard-2', pageLabel: 'Massage', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-massage-2.jpg' },
     { slotKey: 'massage:postcard-3', pageLabel: 'Massage', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-massage-3.jpg' },
     { slotKey: 'massage:postcard-4', pageLabel: 'Massage', label: 'Carte postale 4', fallbackFilename: 'l5d2lm-photo-massage-4.jpg' },
+    { slotKey: 'massage:anchor-float-chenda', pageLabel: 'Massage', label: 'Photo flottante — « Espace Chèndâ »' },
+    { slotKey: 'massage:anchor-float-deroulement', pageLabel: 'Massage', label: 'Photo flottante — « Comment se déroule une séance ? »' },
+    { slotKey: 'massage:anchor-float-qui-masse', pageLabel: 'Massage', label: 'Photo flottante — « Qui masse ? »' },
+    { slotKey: 'massage:anchor-band-transmission', pageLabel: 'Massage', label: 'Photo — avant « Recevoir, ou apprendre à transmettre »' },
 
     { slotKey: 'colo:postcard-1', pageLabel: 'Colo pour adultes', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-colo.jpg' },
     { slotKey: 'colo:postcard-2', pageLabel: 'Colo pour adultes', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-colo-2.jpg' },
     { slotKey: 'colo:postcard-3', pageLabel: 'Colo pour adultes', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-colo-3.jpg' },
     { slotKey: 'colo:postcard-4', pageLabel: 'Colo pour adultes', label: 'Carte postale 4', fallbackFilename: 'l5d2lm-photo-colo-4.jpg' },
     { slotKey: 'colo:postcard-5', pageLabel: 'Colo pour adultes', label: 'Carte postale 5', fallbackFilename: 'l5d2lm-photo-colo-5.jpg' },
+    { slotKey: 'colo:anchor-float-intro', pageLabel: 'Colo pour adultes', label: 'Photo flottante — introduction' },
+    { slotKey: 'colo:anchor-float-magie', pageLabel: 'Colo pour adultes', label: 'Photo flottante — « La magie de chacun »' },
+    { slotKey: 'colo:anchor-band-pratique', pageLabel: 'Colo pour adultes', label: 'Photo — avant « Quelques repères simples »' },
+    { slotKey: 'colo:anchor-band-footer', pageLabel: 'Colo pour adultes', label: 'Photo — avant le bas de page' },
 
     { slotKey: 'animation:postcard-1', pageLabel: 'Animation participative', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-animation.jpg' },
     { slotKey: 'animation:postcard-2', pageLabel: 'Animation participative', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-animation-2.jpg' },
     { slotKey: 'animation:postcard-3', pageLabel: 'Animation participative', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-animation-3.jpg' },
+    { slotKey: 'animation:anchor-band-hero', pageLabel: 'Animation participative', label: 'Photo — avant la mallette d’outils' },
+    { slotKey: 'animation:anchor-float-souvenirs', pageLabel: 'Animation participative', label: 'Photo flottante — « Photos de groupe »' },
+    { slotKey: 'animation:anchor-band-principes', pageLabel: 'Animation participative', label: 'Photo — avant les principes' },
+    { slotKey: 'animation:anchor-band-finale', pageLabel: 'Animation participative', label: 'Photo — avant la section finale' },
 
     { slotKey: 'espaces:postcard-1', pageLabel: 'Espaces à découvrir', label: 'Carte postale 1', fallbackFilename: 'l5d2lm-photo-espaces.jpg' },
     { slotKey: 'espaces:postcard-2', pageLabel: 'Espaces à découvrir', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-espaces-2.jpg' },
-    { slotKey: 'espaces:postcard-3', pageLabel: 'Espaces à découvrir', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-espaces-3.jpg' }
+    { slotKey: 'espaces:postcard-3', pageLabel: 'Espaces à découvrir', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-espaces-3.jpg' },
+    { slotKey: 'espaces:anchor-band-initiatives', pageLabel: 'Espaces à découvrir', label: 'Photo — sous « Initiatives à explorer »' },
+    { slotKey: 'espaces:anchor-band-footer', pageLabel: 'Espaces à découvrir', label: 'Photo — avant le bas de page' }
   ];
   const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
 

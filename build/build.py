@@ -26,7 +26,7 @@ from slots import SLOTS, POSTCARD_CATEGORY_SECTION_SLUGS  # noqa: E402
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20260922b"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20260922c"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
@@ -237,9 +237,33 @@ def render_postcard_slot(slot: dict, media: dict | None) -> str:
     return '<div class="postcard postcard--empty"></div>'
 
 
+def render_float_slot(slot: dict, media: dict | None) -> str:
+    # Ancrage optionnel : rien tant que l'admin n'a pas choisi de photo
+    # (pas de "Photo à venir" au milieu d'un paragraphe existant).
+    if not media:
+        return ""
+    src = html.escape(_slot_image_src(media), quote=True)
+    alt = html.escape(media.get("alt_text") or "", quote=True)
+    side = "left" if slot.get("float_side") == "left" else "right"
+    return f'<div class="anchor-photo anchor-photo--{side}"><img src="{src}" alt="{alt}" loading="lazy"></div>'
+
+
+def render_band_slot(slot: dict, media: dict | None) -> str:
+    if not media:
+        return ""
+    src = html.escape(_slot_image_src(media), quote=True)
+    alt = html.escape(media.get("alt_text") or "", quote=True)
+    return f'<div class="photo-single"><img src="{src}" alt="{alt}" loading="lazy"></div>'
+
+
 def render_slot(slot: dict, media: dict | None) -> str:
-    if slot.get("kind") == "postcard":
+    kind = slot.get("kind")
+    if kind == "postcard":
         return render_postcard_slot(slot, media)
+    if kind == "float":
+        return render_float_slot(slot, media)
+    if kind == "band":
+        return render_band_slot(slot, media)
     return render_proposition_slot(slot, media)
 
 
