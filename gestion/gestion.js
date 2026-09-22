@@ -60,10 +60,21 @@
     });
   });
 
+  let statusHideTimer = null;
   const setStatus = (message = '', type = '') => {
     status.textContent = message;
     status.classList.toggle('is-error', type === 'error');
     status.classList.toggle('is-success', type === 'success');
+    if (statusHideTimer) clearTimeout(statusHideTimer);
+    // Les erreurs restent affichées le temps que l'admin agisse (bouton
+    // "Retirer"/nouvelle action) ; les messages de succès ou neutres
+    // disparaissent tout seuls pour ne pas rester en permanence à l'écran.
+    if (message && type !== 'error') {
+      statusHideTimer = setTimeout(() => {
+        status.textContent = '';
+        status.classList.remove('is-error', 'is-success');
+      }, 5000);
+    }
   };
 
   const cleanCode = (value) => String(value || '').replace(/\s+/g, '');
