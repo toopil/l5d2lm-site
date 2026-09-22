@@ -295,16 +295,21 @@ NAV_ITEM_RE = re.compile(
 )
 
 
-def substitute_nav_visibility(chrome_html: str, published_section_slugs: set[str] | None) -> str:
-    """Retire du menu les entrées dont la catégorie correspondante n'est
-    pas publiée. published_section_slugs=None (erreur réseau) => rien
-    n'est retiré, par prudence."""
+def substitute_nav_visibility(html_str: str, published_section_slugs: set[str] | None) -> str:
+    """Retire tout bloc <!-- NAV_ITEM:slug -->...<!-- /NAV_ITEM --> dont la
+    catégorie correspondante n'est pas publiée — utilisé pour le menu
+    (chrome.html), le pied de page (footer.html) ET les liens vers une
+    catégorie à l'intérieur du contenu d'une page (ex. les cartes
+    "Propositions" de l'accueil) : mêmes marqueurs, même règle partout,
+    pour qu'une catégorie masquée disparaisse de tous les endroits où le
+    site y renvoie, pas seulement du menu. published_section_slugs=None
+    (erreur réseau) => rien n'est retiré, par prudence."""
     if published_section_slugs is None:
-        return chrome_html
+        return html_str
     def repl(match: re.Match) -> str:
         slug = match.group(1)
         return match.group(0) if slug in published_section_slugs else ""
-    return NAV_ITEM_RE.sub(repl, chrome_html)
+    return NAV_ITEM_RE.sub(repl, html_str)
 
 
 ACTIVITY_RE_TEMPLATE = r"<!-- ACTIVITY:{slug}:start -->.*?<!-- ACTIVITY:{slug}:end -->\n?"
@@ -353,17 +358,21 @@ def build_page(
     page: dict,
     published_slots: dict,
     chrome: str,
+    footer: str,
     published_activity_slugs: set[str] | None,
     published_section_slugs: set[str] | None,
     enabled_postcard_categories: dict,
     postcard_pools: dict,
 ) -> None:
     head = render_head(page, published_section_slugs)
-    footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
     content = substitute_media_slots(content, page["slug"], published_slots)
     content = substitute_activity_blocks(content, published_activity_slugs)
     content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
+    # Mêmes marqueurs NAV_ITEM que le menu (voir substitute_nav_visibility) :
+    # une catégorie masquée disparaît aussi des liens qui y renvoient à
+    # l'intérieur d'une page (ex. les cartes "Propositions" de l'accueil).
+    content = substitute_nav_visibility(content, published_section_slugs)
     page_html = (
         "<!doctype html>\n"
         '<html lang="fr">\n'
@@ -408,11 +417,14 @@ def main() -> None:
     postcard_pools = fetch_postcard_pools(list(enabled_postcard_categories.keys()))
     chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
     chrome = substitute_nav_visibility(chrome, published_section_slugs)
+    footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
+    footer = substitute_nav_visibility(footer, published_section_slugs)
     for page in PAGES:
         build_page(
             page,
             published_slots,
             chrome,
+            footer,
             published_activity_slugs,
             published_section_slugs,
             enabled_postcard_categories,
