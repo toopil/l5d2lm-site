@@ -639,15 +639,21 @@
       body: 'Chaque proposition s’adapte à votre groupe et aux personnes présentes. Il ne s’agit pas de réussir une performance, mais d’expérimenter à son rythme.',
       button_label: 'Imaginer votre atelier', button_url: 'l5d2lm-contact.html?category=corps-expression'
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-propositions-heading', label: 'En-tête « Cinq propositions »', fields: ['eyebrow', 'title', 'lead'], defaults: {
-      eyebrow: 'Cinq propositions', title: 'Plusieurs manières de bouger et de se rencontrer.',
-      lead: 'Chaque proposition possède sa couleur et peut être adaptée à votre groupe, au lieu et à l’énergie du moment.'
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-jeu-danse', label: 'Jeu danse (famille)', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Jeu danse', title: 'Le jeu comme porte d’entrée vers la danse.',
+      body: 'Pas pour apprendre les bons mouvements, mais pour jouer, essayer, improviser et voir ce qui se passe.\n\nTout peut commencer par presque rien : une consigne, une musique, un regard, une rencontre.\n\nLe jeu devient mouvement, le mouvement devient rencontre et, parfois presque sans s’en rendre compte, le jeu devient danse.'
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique', label: 'Playful extatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique', label: 'Playful extatique (format de Jeu danse)', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Playful extatique',
       lead: 'Une exploration guidée, portée par la musique.',
       body: 'Une exploration guidée du corps, du mouvement et du jeu, portée par la musique. Chacun reste libre de s’approprier les propositions : sensations et émotions ont leur place.\n\nCe n’est ni un cours de danse ni une chorégraphie : un espace pour se lâcher sur la musique et rencontrer les autres autrement.',
       button_label: 'Faire une demande pour Playful extatique', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=playful-extatique'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'a-portee-de-main', label: 'À portée de main (format de Jeu danse)', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'À portée de main',
+      lead: 'Deux personnes, trois danses : la sienne, celle de l’autre, celle du lien.',
+      body: 'Deux personnes, trois danses : la danse de soi, la danse de l’autre et celle du lien.\n\nLa rencontre commence par un retour à soi, puis deux personnes mettent leurs paumes en contact et bougent ensemble, sans leader permanent. Le mouvement peut ensuite engager les bras, puis le corps entier.',
+      button_label: 'Proposer un lieu ou un partenariat', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=a-portee-de-main&intent=lieu-partenariat'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'theatre-improvisation', label: 'Théâtre d’improvisation', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Théâtre d’improvisation',
@@ -655,26 +661,24 @@
       body: 'Petits jeux et exercices progressifs : ni match d’impro, ni représentation à préparer. La progression se fait crescendo, sans stress.\n\n- Chacun participe selon son envie : observer, entrer dans un jeu, en sortir.\n- L’objectif est la spontanéité, l’écoute, l’accueil de ce qui apparaît.\n\nAdapté à tous les âges, de 4 à 96 ans.',
       button_label: 'Faire une demande pour le Théâtre d’improvisation', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=theatre-improvisation'
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps', label: 'Réveil du corps', fields: ['title', 'lead', 'body', 'button'], defaults: {
-      title: 'Réveil du corps',
-      lead: 'Remettre le corps en mouvement, retrouver une présence à soi.',
-      body: 'Respiration, automassage, étirements, mobilisation articulaire, danse, yoga, sons tibétains. L’ambiance s’adapte au groupe et au moment : douce ou plus dynamique.\n\n- Peut aussi devenir un rendez-vous collectif régulier.',
-      button_label: 'Faire une demande pour le Réveil du corps', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=reveil-du-corps'
-    } },
     { page: 'l5d2lm-corps-expression', blockKey: 'jeux-de-mouvement', label: 'Jeux de mouvement', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Jeux de mouvement',
       lead: 'Courir, observer, réagir, improviser, coopérer.',
       body: 'Jeu, théâtre d’improvisation, réveil du corps et danse réunis. Le contenu change selon l’âge, le lieu et l’énergie du moment.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\nEnfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.',
       button_label: 'Faire une demande pour les Jeux de mouvement', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=jeux-de-mouvement'
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'a-portee-de-main', label: 'À portée de main', fields: ['title', 'lead', 'body', 'button'], defaults: {
-      title: 'À portée de main',
-      lead: 'Deux personnes, trois danses : la sienne, celle de l’autre, celle du lien.',
-      body: 'Deux personnes, trois danses : la danse de soi, la danse de l’autre et celle du lien.\n\nLa rencontre commence par un retour à soi, puis deux personnes mettent leurs paumes en contact et bougent ensemble, sans leader permanent. Le mouvement peut ensuite engager les bras, puis le corps entier.',
-      button_label: 'Proposer un lieu ou un partenariat', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=a-portee-de-main&intent=lieu-partenariat'
+    { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps', label: 'Réveil du corps', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Réveil du corps',
+      lead: 'Remettre le corps en mouvement, retrouver une présence à soi.',
+      body: 'Respiration, automassage, étirements, mobilisation articulaire, danse, yoga, sons tibétains. L’ambiance s’adapte au groupe et au moment : douce ou plus dynamique.\n\n- Peut aussi devenir un rendez-vous collectif régulier.',
+      button_label: 'Faire une demande pour le Réveil du corps', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=reveil-du-corps'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-parcours', label: 'Présentation / parcours', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'D’où vient cette approche ?', title: 'Du jeu au mouvement, et du mouvement à la rencontre.',
+      body: 'Issu de l’animation, du théâtre d’improvisation et des jeux collectifs, Julien aime créer des situations simples où chacun peut essayer, bouger et rencontrer les autres sans pression.\n\nLa danse est venue nourrir cette approche au fil du temps, avec une envie particulière : partir du jeu plutôt que chercher immédiatement à « bien danser », et explorer différentes manières de bouger et de rencontrer l’autre.\n\nLes propositions de Corps & expression mélangent ainsi jeu, improvisation, mouvement et danse selon le groupe, le lieu et l’énergie du moment.'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-cadre', label: '« Un cadre commun »', fields: ['eyebrow', 'title', 'body'], defaults: {
-      eyebrow: 'Un cadre commun', title: 'Le même esprit pour les cinq propositions.',
+      eyebrow: 'Un cadre commun', title: 'Le même esprit pour chaque proposition.',
       body: 'Chaque proposition s’adapte au groupe, au lieu et à l’énergie du moment. Il n’y a pas de performance à réussir : chacun peut participer à son rythme, observer, ou simplement essayer. Le respect et le consentement de chaque personne restent la base.'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -2732,7 +2736,7 @@
   const textPreviewIframeEl = document.querySelector('[data-text-preview-iframe]');
 
   const textState = {
-    selectedPage: 'l5d2lm-massage-intuitif-reveil-energetique', // seule page instrumentée pour l'instant
+    selectedPage: 'l5d2lm-massage-intuitif-reveil-energetique', // page ouverte par défaut à l'arrivée sur l'onglet
     blocksByKey: new Map(),
     openBlock: null,
     editorInputs: {},

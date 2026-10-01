@@ -321,6 +321,28 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   .flip-cards { grid-template-columns: 1fr; }
 }
 
+/* Corps & expression — accroche discrète sous le titre « Jeu danse » */
+.jeu-danse-signature {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--earth-link);
+}
+
+/* Corps & expression — regroupement visuel des formats de la famille Jeu danse */
+.jeu-danse-group {
+  display: flex; flex-direction: column; gap: 1.6rem;
+  padding: 1.5rem clamp(1rem, 3vw, 1.6rem) 1.8rem;
+  border: 1px solid rgba(201, 131, 95, 0.3);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+.jeu-danse-group__label {
+  margin: 0; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--terracotta);
+}
+
 /* Corps & expression — grandes bandes photographiques retournables */
 .flip-bands { display: flex; flex-direction: column; gap: 1.6rem; }
 .flip-card--band { perspective: 2000px; }
