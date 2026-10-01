@@ -8,11 +8,11 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20260922a">
+  <link rel="stylesheet" href="gestion-style.css?v=20261001a">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20260922d"></script>
+  <script defer src="gestion.js?v=20261001a"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -295,7 +295,33 @@
           </div>
 
           <div class="subpanel" data-subpanel="textes" hidden>
-            <p class="gestion-soon">Bientôt disponible : édition des textes du site, page par page.</p>
+            <p class="gestion-hint">Modifier un texte l’enregistre en brouillon : le site public continue d’afficher l’ancienne version jusqu’à ce que vous cliquiez sur Publier.</p>
+            <nav class="text-page-nav" data-text-page-nav aria-label="Pages du site"></nav>
+            <div class="text-blocks-list" data-text-blocks-list aria-live="polite"></div>
+
+            <div class="text-editor" data-text-editor hidden>
+              <div class="text-editor__panel">
+                <div class="text-editor__heading">
+                  <h3 data-text-editor-title></h3>
+                  <span class="text-status-badge" data-text-editor-status></span>
+                  <button type="button" class="gestion-link-button" data-text-editor-close>Fermer</button>
+                </div>
+
+                <div class="text-editor__fields" data-text-editor-fields></div>
+
+                <details class="text-editor__accordion" data-text-editor-history hidden>
+                  <summary>Historique</summary>
+                  <div data-text-editor-history-list></div>
+                </details>
+
+                <div class="gestion-actions-line text-editor__actions">
+                  <button type="button" class="btn" data-text-save-draft>Enregistrer le brouillon</button>
+                  <button type="button" class="btn" data-text-preview>Aperçu</button>
+                  <button type="button" class="btn btn-primary" data-text-publish>Publier</button>
+                  <button type="button" class="btn" data-text-cancel>Annuler</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="subpanel" data-subpanel="publication" hidden>
@@ -333,7 +359,23 @@
 
       <!-- Hors des .gestion-card (chacun display:none tant qu'inactif) :
            le sélecteur de photos doit rester utilisable quel que soit
-           l'onglet ouvert (Photos > Changer/+Ajouter, Site > Emplacements). -->
+           l'onglet ouvert (Photos > Changer/+Ajouter, Site > Emplacements).
+           Même raison pour l'aperçu de texte ci-dessous. -->
+      <div class="text-preview-overlay" data-text-preview-overlay hidden>
+        <div class="text-preview-overlay__panel">
+          <div class="text-preview-overlay__heading">
+            <div class="text-preview-overlay__modes">
+              <button type="button" class="btn is-active" data-text-preview-mode="desktop">Aperçu ordinateur</button>
+              <button type="button" class="btn" data-text-preview-mode="mobile">Aperçu mobile</button>
+            </div>
+            <button type="button" class="gestion-link-button" data-text-preview-close>Fermer l’aperçu</button>
+          </div>
+          <div class="text-preview-overlay__frame-wrap">
+            <iframe data-text-preview-iframe title="Aperçu de la page"></iframe>
+          </div>
+        </div>
+      </div>
+
       <div class="media-picker" data-media-picker hidden>
         <div class="media-picker__panel">
           <div class="media-picker__heading">

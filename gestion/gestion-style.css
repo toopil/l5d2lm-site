@@ -464,6 +464,214 @@
   min-width: 0;
 }
 
+/* Textes (Site > Textes) */
+.text-page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.text-blocks-group-heading {
+  margin: 1.2rem 0 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(75, 58, 47, 0.1);
+  font-size: 1rem;
+}
+
+.text-blocks-list > .text-blocks-group-heading:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.text-block-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(75, 58, 47, 0.1);
+  margin-bottom: 0.7rem;
+}
+
+.text-block-item__body strong {
+  display: block;
+}
+
+.text-block-item__snippet {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.text-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(75, 58, 47, 0.08);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.text-status-badge.is-published { background: rgba(135, 173, 110, 0.22); color: #3f6b2c; }
+.text-status-badge.is-draft { background: rgba(201, 154, 74, 0.2); color: #8a6420; }
+.text-status-badge.is-pending { background: rgba(201, 131, 95, 0.2); color: #a35a37; }
+.text-status-badge.is-hidden { background: rgba(141, 63, 44, 0.14); color: #8d3f2c; }
+
+.text-editor {
+  margin-top: 1.2rem;
+  padding: 1.2rem;
+  border-radius: 20px;
+  background: rgba(248, 245, 240, 0.7);
+  border: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.text-editor__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.text-editor__heading h3 {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.text-editor__accordion {
+  margin-bottom: 0.8rem;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.text-editor__accordion summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.text-editor__field {
+  display: block;
+  margin-top: 0.8rem;
+}
+
+.text-editor__field span {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.text-editor__field input,
+.text-editor__field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.text-editor__toolbar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.text-editor__toolbar button {
+  min-height: 34px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(75, 58, 47, 0.14);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.text-editor__actions {
+  margin-top: 0.4rem;
+}
+
+.text-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid rgba(75, 58, 47, 0.08);
+}
+
+.text-history-item:first-child {
+  border-top: 0;
+}
+
+.text-preview-overlay[hidden] {
+  display: none;
+}
+
+.text-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(43, 33, 24, 0.55);
+}
+
+.text-preview-overlay__panel {
+  width: min(1100px, 100%);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.text-preview-overlay__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid rgba(75, 58, 47, 0.1);
+}
+
+.text-preview-overlay__modes {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.text-preview-overlay__frame-wrap {
+  flex: 1 1 auto;
+  overflow: auto;
+  background: rgba(75, 58, 47, 0.06);
+  padding: 1.2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.text-preview-overlay__frame-wrap iframe {
+  width: 100%;
+  height: 75vh;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.text-preview-overlay.is-mobile .text-preview-overlay__frame-wrap iframe {
+  width: 390px;
+}
+
 .gestion-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

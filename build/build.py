@@ -23,6 +23,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pages import PAGES, BASE_URL  # noqa: E402
 from slots import SLOTS, POSTCARD_CATEGORY_SECTION_SLUGS  # noqa: E402
+from texts import TEXT_BLOCKS, render_lead, render_body, is_safe_url  # noqa: E402
+
+TEXT_SNAPSHOT_PATH = ROOT / "build" / "published-texts.snapshot.json"
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
@@ -102,6 +105,135 @@ def fetch_published_activity_slugs() -> set[str] | None:
     _fetch_section_visibility pour la gestion prudente du cas « table
     pas encore peuplée » (migration pas encore appliquée)."""
     return _fetch_section_visibility("kind=eq.proposal", "activités publiées")
+
+
+def fetch_published_text_blocks() -> dict | None:
+    """{(page_slug, block_key): {title, eyebrow, lead, body, button_label,
+    button_url}} pour les textes publiés depuis /gestion > Site > Textes.
+    La RLS limite déjà la clé publishable aux lignes status='published' et
+    deleted_at is null (voir migration de fondation) : inutile de
+    refiltrer ici.
+
+    None UNIQUEMENT si la requête échoue (réseau/parsing) — c'est le
+    signal utilisé par resolve_text_blocks() pour retomber sur le dernier
+    instantané committé plutôt que de perdre une publication récente. Un
+    dict vide (requête réussie, rien publié) est en revanche un résultat
+    sûr en lui-même : contrairement aux catégories, l'absence de texte
+    publié pour un bloc ne doit jamais « tout masquer » — elle laisse
+    simplement le texte d'origine du fragment affiché, comme aujourd'hui."""
+    url = (
+        f"{SUPABASE_URL}/rest/v1/l5d2lm_text_blocks"
+        f"?select=page_slug,block_key,title,eyebrow,lead,body,button_label,button_url"
+    )
+    req = urllib.request.Request(url, headers={
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"Avertissement : textes publiés non récupérés ({exc}) — repli sur le dernier instantané connu.")
+        return None
+    return {(row["page_slug"], row["block_key"]): row for row in rows}
+
+
+def load_text_snapshot() -> dict:
+    """Dernier instantané de textes publiés committé dans le dépôt — filet
+    de sécurité si Supabase est injoignable pendant un build (voir
+    resolve_text_blocks). {} si le fichier n'existe pas encore (avant la
+    toute première publication) ou est illisible."""
+    if not TEXT_SNAPSHOT_PATH.exists():
+        return {}
+    try:
+        rows = json.loads(TEXT_SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    except ValueError:
+        return {}
+    return {(row["page_slug"], row["block_key"]): row for row in rows}
+
+
+def save_text_snapshot(published: dict) -> None:
+    rows = [
+        {"page_slug": page_slug, "block_key": block_key, **{
+            k: v for k, v in row.items() if k not in ("page_slug", "block_key")
+        }}
+        for (page_slug, block_key), row in sorted(published.items())
+    ]
+    TEXT_SNAPSHOT_PATH.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def resolve_text_blocks() -> dict:
+    """Ordre de priorité (voir plan, point « une seule source de
+    vérité ») : Supabase (source de vérité) en premier ; si injoignable,
+    le dernier instantané déjà committé (jamais l'ancien texte d'origine
+    du dépôt, qui régresserait silencieusement une publication récente
+    en cas de simple incident réseau pendant un build) ; le texte
+    d'origine du fragment ne s'applique que si AUCUNE des deux sources
+    n'a de valeur pour un bloc donné (géré par substitute_text_blocks)."""
+    fetched = fetch_published_text_blocks()
+    if fetched is not None:
+        save_text_snapshot(fetched)
+        return fetched
+    print("Avertissement : utilisation de l'instantané de textes déjà committé (Supabase injoignable).")
+    return load_text_snapshot()
+
+
+TEXT_MARKER_RE_TEMPLATE = r"<!-- TEXT:{block_key}:{field} -->(.*?)<!-- /TEXT -->"
+TEXT_ANCHOR_RE = re.compile(r'(<a\b[^>]*?\bhref=")[^"]*(")([^>]*>)(.*?)(</a>)', re.DOTALL)
+
+
+def _substitute_text_field(content: str, block_key: str, field: str, render) -> str:
+    """Remplace le contenu entre <!-- TEXT:block_key:field --> et
+    <!-- /TEXT --> par render(texte_actuel) -> nouveau HTML, pour TOUTES
+    les occurrences du marqueur (ex. le titre d'une proposition apparaît
+    à la fois recto et verso, avec le même block_key:field — les deux
+    doivent changer ensemble). Les commentaires marqueurs restent dans la
+    sortie (invisibles, servent aussi d'ancrage à l'aperçu live dans
+    /gestion). Une occurrence est laissée telle quelle si render renvoie
+    None pour elle (rien à publier pour ce champ)."""
+    pattern = re.compile(TEXT_MARKER_RE_TEMPLATE.format(block_key=re.escape(block_key), field=field), re.DOTALL)
+
+    def repl(match: re.Match) -> str:
+        replacement = render(match.group(1))
+        if replacement is None:
+            return match.group(0)
+        return f"<!-- TEXT:{block_key}:{field} -->{replacement}<!-- /TEXT -->"
+
+    return pattern.sub(repl, content)
+
+
+def substitute_text_blocks(content: str, page_slug: str, published: dict) -> str:
+    for block in TEXT_BLOCKS:
+        if block["page"] != page_slug:
+            continue
+        row = published.get((page_slug, block["block_key"]))
+        if not row:
+            continue
+        for field in block["fields"]:
+            if field == "button":
+                label = row.get("button_label")
+                url = row.get("button_url")
+                if not label or not url or not is_safe_url(url):
+                    continue
+                content = _substitute_text_field(
+                    content, block["block_key"], "button",
+                    lambda current, label=label, url=url: TEXT_ANCHOR_RE.sub(
+                        lambda m: f"{m.group(1)}{html.escape(url, quote=True)}{m.group(2)}{m.group(3)}{html.escape(label)}{m.group(5)}",
+                        current, count=1,
+                    ) if TEXT_ANCHOR_RE.search(current) else None,
+                )
+                continue
+            value = row.get(field)
+            if not value:
+                continue
+            if field == "body":
+                rendered = render_body(value)
+            elif field == "lead":
+                rendered = render_lead(value)
+            else:
+                rendered = html.escape(value)
+            content = _substitute_text_field(content, block["block_key"], field, lambda current, rendered=rendered: rendered)
+    return content
 
 
 def fetch_enabled_postcard_categories() -> dict:
@@ -398,6 +530,7 @@ def build_page(
     published_section_slugs: set[str] | None,
     enabled_postcard_categories: dict,
     postcard_pools: dict,
+    published_text_blocks: dict,
 ) -> None:
     head = render_head(page, published_section_slugs)
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
@@ -409,6 +542,7 @@ def build_page(
     content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
     content = substitute_media_slots(content, page["slug"], published_slots)
     content = substitute_activity_blocks(content, published_activity_slugs)
+    content = substitute_text_blocks(content, page["slug"], published_text_blocks)
     # Mêmes marqueurs NAV_ITEM que le menu (voir substitute_nav_visibility) :
     # une catégorie masquée disparaît aussi des liens qui y renvoient à
     # l'intérieur d'une page (ex. les cartes "Propositions" de l'accueil).
@@ -455,6 +589,7 @@ def main() -> None:
     published_activity_slugs = fetch_published_activity_slugs()
     enabled_postcard_categories = fetch_enabled_postcard_categories()
     postcard_pools = fetch_postcard_pools(list(enabled_postcard_categories.keys()))
+    published_text_blocks = resolve_text_blocks()
     chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
     chrome = substitute_nav_visibility(chrome, published_section_slugs)
     footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
@@ -469,6 +604,7 @@ def main() -> None:
             published_section_slugs,
             enabled_postcard_categories,
             postcard_pools,
+            published_text_blocks,
         )
     build_sitemap(published_section_slugs)
     print(f"{len(PAGES)} pages générées + sitemap.xml")

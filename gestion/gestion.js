@@ -178,6 +178,7 @@
     await loadMediaPanel();
     await loadSlotsPanel();
     await loadPostcardsPanel();
+    await loadTextsPanel();
     return true;
   };
 
@@ -492,6 +493,107 @@
     accueil: 2, massage: 4, 'colo-pour-adultes': 5, 'animations-participatives': 3, 'espaces-a-decouvrir': 3
   };
   const postcardsListEl = document.querySelector('[data-postcards-list]');
+
+  // Textes (Site > Textes) : doit rester synchronisé avec build/texts.py
+  // (TEXT_BLOCKS) — mêmes page/block_key/fields. "defaults" reprend le
+  // texte actuellement en place dans le fragment content/*.html, au format
+  // léger (pas de HTML) : sert à pré-remplir l'éditeur pour un bloc jamais
+  // encore modifié, sans que l'admin ait à recopier le texte du site.
+  const TEXT_PAGES = [
+    { slug: null, label: 'Toutes les pages' },
+    { slug: 'l5d2lm-index', label: 'Accueil' },
+    { slug: 'l5d2lm-massage-intuitif-reveil-energetique', label: 'Massage' },
+    { slug: 'l5d2lm-corps-expression', label: 'Corps & expression' },
+    { slug: 'l5d2lm-colos-sejours', label: 'Colo pour adultes' },
+    { slug: 'l5d2lm-animations-participatives', label: 'Animation participative' },
+    { slug: 'l5d2lm-espaces-a-decouvrir', label: 'Espaces à découvrir' }
+  ];
+  const TEXT_PAGES_SECONDARY = [
+    { slug: 'l5d2lm-contact', label: 'Contact' },
+    { slug: '__commun__', label: 'Éléments communs' },
+    { slug: 'l5d2lm-mentions-legales', label: 'Mentions légales' }
+  ];
+
+  const TEXT_BLOCKS = [
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Massage',
+      lead: 'Prendre soin peut prendre plusieurs formes.',
+      body: 'Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un réveil énergétique ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**',
+      button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-propositions-heading', label: 'En-tête « Trois propositions »', fields: ['eyebrow', 'title'], defaults: {
+      eyebrow: 'Trois propositions', title: 'Choisir la forme qui correspond au moment'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Massage intuitif',
+      lead: 'Prendre le temps.\nÉcouter le corps.\nS’adapter à ce qui est présent.',
+      body: 'Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.',
+      button_label: 'Faire une demande pour le Massage intuitif', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-intuitif'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'reveil-energetique', label: 'Réveil énergétique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Réveil énergétique',
+      lead: 'Recevoir.\nRéveiller.\nApprendre à transmettre.',
+      body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.',
+      button_label: 'Faire une demande pour le recevoir', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Massage aquatique',
+      lead: 'Se laisser porter.\nRespirer.\nRetrouver de la légèreté.',
+      body: 'Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Durée :** de 45 à 90 minutes.\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.',
+      button_label: 'Faire une demande pour le Massage aquatique', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-aquatique'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-heading', label: 'En-tête « Quelques repères simples »', fields: ['eyebrow', 'title'], defaults: {
+      eyebrow: 'Avant de venir', title: 'Quelques repères simples'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-deroulement', label: '« Comment se déroule une séance ? »', fields: ['title', 'body'], defaults: {
+      title: 'Comment se déroule une séance ?',
+      body: 'Chaque rencontre commence par un court échange. Ce temps permet de clarifier vos attentes et de repérer d’éventuelles douleurs, blessures ou zones sensibles afin que je puisse adapter la séance.\n\nIl ne s’agit pas d’un diagnostic médical, mais d’un moment d’écoute pour prendre soin du corps avec respect.\n\nUne fois installé, je vous invite à respirer, à vous déposer et à prendre le temps.'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-parler', label: '« Faut-il parler pendant la séance ? »', fields: ['title', 'body'], defaults: {
+      title: 'Faut-il parler pendant la séance ?',
+      body: 'Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe réveil énergétique laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-premiere-fois', label: '« Et si c’est une première fois ? »', fields: ['title', 'body'], defaults: {
+      title: 'Et si c’est une première fois ?',
+      body: 'Aucune expérience préalable n’est nécessaire. La proposition s’adapte à votre rythme, vos envies et vos limites.'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-chenda', label: 'Espace Chèndâ', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+      eyebrow: 'Lieu principal', title: 'Espace Chèndâ',
+      body: 'Je donne principalement les massages intuitifs à l’Espace Chèndâ.',
+      button_label: 'Voir l’adresse et l’itinéraire', button_url: 'https://search.ch/tel/sierre/avenue-general-guisan-19/espace-chenda.fr.html'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-qui-masse', label: 'Qui masse ?', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Présentation pour l’espace massage', title: 'Qui masse ?',
+      body: 'Mon parcours s’est construit entre l’animation socioculturelle, les métiers du bois, le travail manuel, le mouvement et la relation humaine.\n\nDepuis de nombreuses années, j’accompagne des personnes et des groupes à travers le jeu, la créativité, l’expression corporelle et des expériences collectives. La menuiserie et la charpente ont aussi nourri mon rapport aux mains, à la matière, aux formes, aux appuis et à la précision du geste.\n\nLe toucher a progressivement pris une place importante dans ma manière de créer du lien. Dans des contextes amicaux, associatifs ou événementiels, j’ai observé combien un contact respectueux pouvait aider à relâcher les tensions, ralentir et retrouver une présence plus concrète au corps.\n\nJe masse de manière intuitive. Je ne reproduis pas une séance identique d’une personne à l’autre. Je m’adapte aux besoins exprimés, aux zones de tension, aux limites de chacun et aux réactions du corps au fil de la séance.\n\nJ’accorde une grande importance au respect, au consentement et à un cadre clair, sécurisant et non sexualisé.'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-heading', label: 'En-tête « Recevoir, ou apprendre à transmettre »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Réveil énergétique', title: 'Recevoir, ou apprendre à transmettre',
+      lead: 'Le Réveil énergétique se découvre de deux façons : en le recevant, ou en apprenant à le proposer à d’autres.'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-recevoir', label: 'Recevoir un réveil énergétique', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+      eyebrow: 'Recevoir', title: 'Recevoir un réveil énergétique',
+      body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.',
+      button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-transmettre', label: 'Apprendre à transmettre', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+      eyebrow: 'Apprendre à transmettre', title: 'Apprendre à transmettre le réveil énergétique',
+      body: 'Le Réveil énergétique a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.',
+      button_label: 'Demander une transmission', button_url: 'l5d2lm-contact.html?category=massage&offer=transmission-reveil-energetique'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-cta', label: 'Construire une proposition', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+      eyebrow: 'Imaginer le bon format', title: 'Construire une proposition',
+      body: 'Chaque rencontre est différente. Lorsqu’une proposition résonne avec votre besoin ou votre curiosité, le format peut s’ajuster au contexte, au lieu et aux personnes présentes.\n\nLa durée et les tarifs sont définis selon le lieu, le nombre de personnes et le contexte.',
+      button_label: 'Parler de votre besoin', button_url: 'l5d2lm-contact.html?category=massage'
+    } },
+    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent chaque jour. Les mains créent du lien.\nLe corps mérite parfois simplement un peu d’attention.'
+    } }
+  ];
+
+  const FIELD_LABELS = {
+    title: 'Titre', eyebrow: 'Surtitre', lead: 'Accroche', body: 'Texte principal',
+    button_label: 'Texte du bouton', button_url: 'Lien du bouton'
+  };
 
   // Catégories (onglet Catégories, et cases à cocher réutilisées dans Photos)
   const categoriesTree = document.querySelector('[data-categories-tree]');
@@ -2280,6 +2382,632 @@
       setStatus(error.message || 'Impossible de charger les cartes postales.', 'error');
     }
     renderPostcardsList();
+  };
+
+  // Textes (Site > Textes) --------------------------------------------
+  //
+  // Même grammaire restreinte que build/texts.py (render_lead/render_body) :
+  // **gras**, *italique*, [texte](url), "- item" pour une liste, ligne
+  // vide = nouveau paragraphe. Ce miroir JS ne sert QUE pour l'aperçu
+  // local dans /gestion — la seule publication qui compte reste calculée
+  // côté build.py à partir du texte brut enregistré en base.
+  const escapeHtml = (text) => String(text ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+
+  const isSafeTextUrl = (url) => {
+    url = String(url || '').trim();
+    if (!url) return false;
+    if (/^(https?:\/\/|mailto:|tel:|#|\/)/.test(url)) return true;
+    const prefix = url.split(/[/?]/)[0];
+    return !prefix.includes(':');
+  };
+
+  const renderInlineText = (escaped) => {
+    let text = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, url) =>
+      isSafeTextUrl(url) ? `<a href="${escapeHtml(url)}">${label}</a>` : label);
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    return text;
+  };
+
+  const renderLeadText = (text) => renderInlineText(escapeHtml(text || '')).replace(/\n/g, '<br>');
+
+  const renderBodyText = (text) => {
+    text = String(text || '').trim();
+    if (!text) return '';
+    const blocks = text.split(/\n\s*\n/);
+    return blocks.map((block) => {
+      const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return '';
+      if (lines.every((line) => /^-\s+/.test(line))) {
+        return `<ul>${lines.map((line) => `<li>${renderInlineText(escapeHtml(line.replace(/^-\s+/, '')))}</li>`).join('')}</ul>`;
+      }
+      if (lines.every((line) => /^\d+\.\s+/.test(line))) {
+        return `<ol>${lines.map((line) => `<li>${renderInlineText(escapeHtml(line.replace(/^\d+\.\s+/, '')))}</li>`).join('')}</ol>`;
+      }
+      return `<p>${lines.map((line) => renderInlineText(escapeHtml(line))).join('<br>')}</p>`;
+    }).filter(Boolean).join('\n');
+  };
+
+  const textPageNavEl = document.querySelector('[data-text-page-nav]');
+  const textBlocksListEl = document.querySelector('[data-text-blocks-list]');
+  const textEditorEl = document.querySelector('[data-text-editor]');
+  const textEditorFieldsEl = document.querySelector('[data-text-editor-fields]');
+  const textEditorTitleEl = document.querySelector('[data-text-editor-title]');
+  const textEditorStatusEl = document.querySelector('[data-text-editor-status]');
+  const textEditorHistoryEl = document.querySelector('[data-text-editor-history]');
+  const textEditorHistoryListEl = document.querySelector('[data-text-editor-history-list]');
+  const textPreviewOverlayEl = document.querySelector('[data-text-preview-overlay]');
+  const textPreviewIframeEl = document.querySelector('[data-text-preview-iframe]');
+
+  const textState = {
+    selectedPage: 'l5d2lm-massage-intuitif-reveil-energetique', // seule page instrumentée pour l'instant
+    blocksByKey: new Map(),
+    openBlock: null,
+    editorInputs: {},
+    previewMode: 'desktop'
+  };
+
+  const textBlockStateKey = (page, blockKey) => `${page}::${blockKey}`;
+
+  const fetchTextBlocksForPages = async (pageSlugs) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('l5d2lm_text_blocks')
+      .select('id, page_slug, block_key, title, eyebrow, lead, body, button_label, button_url, status, published_at, updated_at, deleted_at')
+      .in('page_slug', pageSlugs);
+    if (error) throw error;
+    textState.blocksByKey = new Map();
+    (data || []).forEach((row) => {
+      const key = textBlockStateKey(row.page_slug, row.block_key);
+      const bucket = textState.blocksByKey.get(key) || { draft: null, published: null, hidden: null, archived: [] };
+      if (row.deleted_at) {
+        bucket.archived.push(row);
+      } else if (row.status === 'draft') {
+        bucket.draft = row;
+      } else if (row.status === 'published') {
+        bucket.published = row;
+      } else if (row.status === 'hidden') {
+        bucket.hidden = row;
+      }
+      textState.blocksByKey.set(key, bucket);
+    });
+    textState.blocksByKey.forEach((bucket) => {
+      bucket.archived.sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1));
+    });
+  };
+
+  const textBlockStatus = (page, blockKey) => {
+    const bucket = textState.blocksByKey.get(textBlockStateKey(page, blockKey));
+    if (!bucket) return { label: 'Texte d’origine', cssClass: '' };
+    if (bucket.hidden) return { label: 'Masqué', cssClass: 'is-hidden' };
+    if (bucket.published && bucket.draft) return { label: 'Modifications non publiées', cssClass: 'is-pending' };
+    if (bucket.published) return { label: 'Publié', cssClass: 'is-published' };
+    if (bucket.draft) return { label: 'Brouillon', cssClass: 'is-draft' };
+    return { label: 'Texte d’origine', cssClass: '' };
+  };
+
+  const textBlockCurrentValues = (block) => {
+    const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    const row = bucket?.draft || bucket?.published || bucket?.hidden || null;
+    const values = {};
+    block.fields.forEach((field) => {
+      if (field === 'button') {
+        values.button_label = row?.button_label ?? block.defaults.button_label ?? '';
+        values.button_url = row?.button_url ?? block.defaults.button_url ?? '';
+      } else {
+        values[field] = row?.[field] ?? block.defaults[field] ?? '';
+      }
+    });
+    return values;
+  };
+
+  const textBlockSnippet = (block) => {
+    const values = textBlockCurrentValues(block);
+    const snippet = values.title || values.eyebrow || values.lead || (values.body || '').split('\n')[0] || '';
+    return snippet.length > 110 ? `${snippet.slice(0, 110)}…` : snippet;
+  };
+
+  const renderTextPageNav = () => {
+    if (!textPageNavEl) return;
+    textPageNavEl.innerHTML = '';
+    [...TEXT_PAGES, ...TEXT_PAGES_SECONDARY].forEach((page) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = page.slug === textState.selectedPage ? 'gestion-tab is-active' : 'gestion-tab';
+      button.textContent = page.label;
+      button.addEventListener('click', () => {
+        textState.selectedPage = page.slug;
+        renderTextPageNav();
+        renderTextBlocksList();
+      });
+      textPageNavEl.appendChild(button);
+    });
+  };
+
+  const renderTextBlocksList = () => {
+    if (!textBlocksListEl) return;
+    textBlocksListEl.innerHTML = '';
+    closeTextEditor();
+
+    if (textState.selectedPage === '__commun__') {
+      const soon = document.createElement('p');
+      soon.className = 'gestion-soon';
+      soon.textContent = 'Bientôt disponible : éléments communs (navigation, pied de page).';
+      textBlocksListEl.appendChild(soon);
+      return;
+    }
+
+    const pages = textState.selectedPage ? [textState.selectedPage] : TEXT_PAGES.filter((p) => p.slug).map((p) => p.slug);
+    let anyBlock = false;
+    pages.forEach((pageSlug) => {
+      const blocks = TEXT_BLOCKS.filter((b) => b.page === pageSlug);
+      if (!blocks.length) return;
+      anyBlock = true;
+      if (!textState.selectedPage) {
+        const heading = document.createElement('h3');
+        heading.className = 'text-blocks-group-heading';
+        heading.textContent = TEXT_PAGES.find((p) => p.slug === pageSlug)?.label || pageSlug;
+        textBlocksListEl.appendChild(heading);
+      }
+      blocks.forEach((block) => {
+        const row = document.createElement('div');
+        row.className = 'text-block-item';
+
+        const body = document.createElement('div');
+        body.className = 'text-block-item__body';
+        const title = document.createElement('strong');
+        title.textContent = block.label;
+        body.appendChild(title);
+        const snippet = document.createElement('p');
+        snippet.className = 'text-block-item__snippet';
+        snippet.textContent = textBlockSnippet(block);
+        body.appendChild(snippet);
+        row.appendChild(body);
+
+        const status = textBlockStatus(block.page, block.blockKey);
+        const badge = document.createElement('span');
+        badge.className = `text-status-badge ${status.cssClass}`;
+        badge.textContent = status.label;
+        row.appendChild(badge);
+
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn';
+        editButton.textContent = 'Modifier';
+        editButton.addEventListener('click', () => openTextEditor(block));
+        row.appendChild(editButton);
+
+        textBlocksListEl.appendChild(row);
+      });
+    });
+
+    if (!anyBlock) {
+      const soon = document.createElement('p');
+      soon.className = 'gestion-soon';
+      soon.textContent = 'Bientôt disponible : édition des textes de cette page.';
+      textBlocksListEl.appendChild(soon);
+    }
+  };
+
+  const buildFormattingToolbar = (textarea) => {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'text-editor__toolbar';
+    const insert = (before, after = '') => {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.slice(start, end) || 'texte';
+      textarea.value = `${textarea.value.slice(0, start)}${before}${selected}${after}${textarea.value.slice(end)}`;
+      textarea.focus();
+      textarea.selectionStart = start + before.length;
+      textarea.selectionEnd = start + before.length + selected.length;
+    };
+    const addButton = (label, title, handler) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.title = title;
+      button.textContent = label;
+      button.addEventListener('click', handler);
+      toolbar.appendChild(button);
+    };
+    addButton('Gras', 'Gras', () => insert('**', '**'));
+    addButton('Italique', 'Italique', () => insert('*', '*'));
+    addButton('Lien', 'Insérer un lien', () => {
+      const url = window.prompt('Lien (https://... ou une page du site, ex. l5d2lm-contact.html)');
+      if (url) insert('[', `](${url})`);
+    });
+    addButton('Liste', 'Liste à puces', () => {
+      const start = textarea.selectionStart;
+      const before = textarea.value.slice(0, start);
+      const needsNewline = before.length && !before.endsWith('\n');
+      insert(`${needsNewline ? '\n' : ''}- `, '');
+    });
+    return toolbar;
+  };
+
+  const renderTextHistory = (block) => {
+    const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    const archived = bucket?.archived || [];
+    if (!textEditorHistoryEl || !textEditorHistoryListEl) return;
+    if (!archived.length) {
+      textEditorHistoryEl.hidden = true;
+      return;
+    }
+    textEditorHistoryEl.hidden = false;
+    textEditorHistoryListEl.innerHTML = '';
+    archived.forEach((row) => {
+      const item = document.createElement('div');
+      item.className = 'text-history-item';
+      const date = document.createElement('span');
+      const when = row.published_at || row.updated_at;
+      date.textContent = when ? new Date(when).toLocaleString('fr-CH') : 'Date inconnue';
+      item.appendChild(date);
+      const restoreButton = document.createElement('button');
+      restoreButton.type = 'button';
+      restoreButton.className = 'btn';
+      restoreButton.textContent = 'Restaurer en brouillon';
+      restoreButton.addEventListener('click', () => restoreTextVersion(block, row));
+      item.appendChild(restoreButton);
+      textEditorHistoryListEl.appendChild(item);
+    });
+  };
+
+  const openTextEditor = (block) => {
+    textState.openBlock = block;
+    textState.editorInputs = {};
+    const values = textBlockCurrentValues(block);
+
+    if (textEditorTitleEl) textEditorTitleEl.textContent = block.label;
+    const status = textBlockStatus(block.page, block.blockKey);
+    if (textEditorStatusEl) {
+      textEditorStatusEl.textContent = status.label;
+      textEditorStatusEl.className = `text-status-badge ${status.cssClass}`;
+    }
+
+    textEditorFieldsEl.innerHTML = '';
+
+    const addGroup = (label, fields, open) => {
+      if (!fields.length) return;
+      const details = document.createElement('details');
+      details.className = 'text-editor__accordion';
+      details.open = open;
+      const summary = document.createElement('summary');
+      summary.textContent = label;
+      details.appendChild(summary);
+      fields.forEach((field) => {
+        const wrap = document.createElement('label');
+        wrap.className = 'text-editor__field';
+        const span = document.createElement('span');
+        span.textContent = FIELD_LABELS[field];
+        wrap.appendChild(span);
+        let input;
+        if (field === 'body') {
+          input = document.createElement('textarea');
+          input.rows = 8;
+          input.value = values.body || '';
+          wrap.appendChild(buildFormattingToolbar(input));
+        } else if (field === 'lead') {
+          input = document.createElement('textarea');
+          input.rows = 3;
+          input.value = values.lead || '';
+        } else {
+          input = document.createElement('input');
+          input.type = 'text';
+          input.value = values[field] || '';
+        }
+        wrap.appendChild(input);
+        textState.editorInputs[field] = input;
+        details.appendChild(wrap);
+      });
+      textEditorFieldsEl.appendChild(details);
+    };
+
+    addGroup('Essentiel', block.fields.filter((f) => f === 'eyebrow' || f === 'title'), true);
+    addGroup('Texte principal', block.fields.filter((f) => f === 'lead' || f === 'body'), true);
+
+    if (block.fields.includes('button')) {
+      const details = document.createElement('details');
+      details.className = 'text-editor__accordion';
+      details.open = true;
+      const summary = document.createElement('summary');
+      summary.textContent = 'Bouton et lien';
+      details.appendChild(summary);
+
+      const labelWrap = document.createElement('label');
+      labelWrap.className = 'text-editor__field';
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = FIELD_LABELS.button_label;
+      labelWrap.appendChild(labelSpan);
+      const labelInput = document.createElement('input');
+      labelInput.type = 'text';
+      labelInput.value = values.button_label || '';
+      labelWrap.appendChild(labelInput);
+      textState.editorInputs.button_label = labelInput;
+      details.appendChild(labelWrap);
+
+      const urlWrap = document.createElement('label');
+      urlWrap.className = 'text-editor__field';
+      const urlSpan = document.createElement('span');
+      urlSpan.textContent = FIELD_LABELS.button_url;
+      urlWrap.appendChild(urlSpan);
+      const urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.value = values.button_url || '';
+      urlWrap.appendChild(urlInput);
+      textState.editorInputs.button_url = urlInput;
+      details.appendChild(urlWrap);
+
+      textEditorFieldsEl.appendChild(details);
+    }
+
+    renderTextHistory(block);
+    textEditorEl.hidden = false;
+    textEditorEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const closeTextEditor = () => {
+    textState.openBlock = null;
+    textState.editorInputs = {};
+    if (textEditorEl) textEditorEl.hidden = true;
+  };
+
+  const collectEditorValues = (block) => {
+    const row = {};
+    block.fields.forEach((field) => {
+      if (field === 'button') {
+        row.button_label = textState.editorInputs.button_label?.value.trim() || null;
+        row.button_url = textState.editorInputs.button_url?.value.trim() || null;
+      } else {
+        row[field] = textState.editorInputs[field]?.value.trim() || null;
+      }
+    });
+    return row;
+  };
+
+  const ALL_TEXT_PAGE_SLUGS = TEXT_PAGES.filter((p) => p.slug).map((p) => p.slug);
+
+  const saveTextDraft = async () => {
+    const block = textState.openBlock;
+    if (!block) return;
+    const values = collectEditorValues(block);
+    if (values.button_url && !isSafeTextUrl(values.button_url)) {
+      setStatus('Lien de bouton invalide : utilisez http(s)://, mailto:, tel:, # ou un chemin relatif.', 'error');
+      return;
+    }
+    const supabase = getSupabase();
+    const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    try {
+      if (bucket?.draft) {
+        const { error } = await supabase.from('l5d2lm_text_blocks').update(values).eq('id', bucket.draft.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('l5d2lm_text_blocks').insert({
+          page_slug: block.page, block_key: block.blockKey, status: 'draft', ...values
+        });
+        if (error) throw error;
+      }
+      await fetchTextBlocksForPages(ALL_TEXT_PAGE_SLUGS);
+      renderTextBlocksList();
+      openTextEditor(block);
+      setStatus('Brouillon enregistré.', 'success');
+    } catch (error) {
+      setStatus(error.message || 'Impossible d’enregistrer le brouillon.', 'error');
+    }
+  };
+
+  const publishTextBlock = async () => {
+    const block = textState.openBlock;
+    if (!block) return;
+    const values = collectEditorValues(block);
+    if (values.button_url && !isSafeTextUrl(values.button_url)) {
+      setStatus('Lien de bouton invalide : utilisez http(s)://, mailto:, tel:, # ou un chemin relatif.', 'error');
+      return;
+    }
+    const supabase = getSupabase();
+    const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    try {
+      // Archive l'ancienne version publiée (jamais supprimée) avant de
+      // publier la nouvelle : c'est ce qui alimente l'historique.
+      if (bucket?.published) {
+        const { error } = await supabase.from('l5d2lm_text_blocks')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', bucket.published.id);
+        if (error) throw error;
+      }
+      if (bucket?.draft) {
+        const { error } = await supabase.from('l5d2lm_text_blocks')
+          .update({ ...values, status: 'published', published_at: new Date().toISOString() })
+          .eq('id', bucket.draft.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('l5d2lm_text_blocks').insert({
+          page_slug: block.page, block_key: block.blockKey, status: 'published',
+          published_at: new Date().toISOString(), ...values
+        });
+        if (error) throw error;
+      }
+      await fetchTextBlocksForPages(ALL_TEXT_PAGE_SLUGS);
+      renderTextBlocksList();
+      closeTextEditor();
+      const published = await triggerPublishNow({ silent: true });
+      setStatus(
+        published
+          ? 'Texte publié — publication du site en cours.'
+          : 'Texte publié — le site public se mettra à jour automatiquement (sous 3h maximum).',
+        'success'
+      );
+    } catch (error) {
+      setStatus(error.message || 'Impossible de publier ce texte.', 'error');
+    }
+  };
+
+  const restoreTextVersion = async (block, archivedRow) => {
+    const supabase = getSupabase();
+    const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    const values = {};
+    block.fields.forEach((field) => {
+      if (field === 'button') {
+        values.button_label = archivedRow.button_label;
+        values.button_url = archivedRow.button_url;
+      } else {
+        values[field] = archivedRow[field];
+      }
+    });
+    try {
+      if (bucket?.draft) {
+        const { error } = await supabase.from('l5d2lm_text_blocks').update(values).eq('id', bucket.draft.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('l5d2lm_text_blocks').insert({
+          page_slug: block.page, block_key: block.blockKey, status: 'draft', ...values
+        });
+        if (error) throw error;
+      }
+      await fetchTextBlocksForPages(ALL_TEXT_PAGE_SLUGS);
+      renderTextBlocksList();
+      openTextEditor(block);
+      setStatus('Version restaurée en brouillon — vérifiez l’aperçu avant de publier.', 'success');
+    } catch (error) {
+      setStatus(error.message || 'Impossible de restaurer cette version.', 'error');
+    }
+  };
+
+  // Aperçu : charge la vraie page publique dans une iframe (même origine
+  // que /gestion, donc accès direct au DOM), puis remplace le contenu
+  // entre les commentaires <!-- TEXT:block:field --> / <!-- /TEXT -->
+  // laissés par build.py — réutilise à 100% la mise en page/CSS/responsive
+  // réels du site, sans réimplémenter de second moteur de rendu. Le
+  // brouillon n'est jamais publié par cet aperçu : il ne touche que le DOM
+  // local de l'iframe.
+  const PAGE_URL_BY_SLUG = {
+    'l5d2lm-index': '../l5d2lm-index.html',
+    'l5d2lm-massage-intuitif-reveil-energetique': '../l5d2lm-massage-intuitif-reveil-energetique.html',
+    'l5d2lm-corps-expression': '../l5d2lm-corps-expression.html',
+    'l5d2lm-colos-sejours': '../l5d2lm-colos-sejours.html',
+    'l5d2lm-animations-participatives': '../l5d2lm-animations-participatives.html',
+    'l5d2lm-espaces-a-decouvrir': '../l5d2lm-espaces-a-decouvrir.html',
+    'l5d2lm-contact': '../l5d2lm-contact.html',
+    'l5d2lm-mentions-legales': '../l5d2lm-mentions-legales.html'
+  };
+
+  const findCommentMarkers = (doc, openText, closeText) => {
+    const walker = document.createTreeWalker(doc, NodeFilter.SHOW_COMMENT);
+    let openNode = null;
+    let closeNode = null;
+    let node = walker.nextNode();
+    while (node) {
+      if (!openNode && node.data.trim() === openText) {
+        openNode = node;
+      } else if (openNode && !closeNode && node.data.trim() === closeText) {
+        closeNode = node;
+        break;
+      }
+      node = walker.nextNode();
+    }
+    return openNode && closeNode ? { openNode, closeNode } : null;
+  };
+
+  const patchPreviewField = (doc, blockKey, field, htmlFragment) => {
+    const range = findCommentMarkers(doc, `TEXT:${blockKey}:${field}`, '/TEXT');
+    if (!range) return;
+    let node = range.openNode.nextSibling;
+    while (node && node !== range.closeNode) {
+      const next = node.nextSibling;
+      node.remove();
+      node = next;
+    }
+    const wrapper = doc.createElement('div');
+    wrapper.innerHTML = htmlFragment;
+    Array.from(wrapper.childNodes).forEach((child) => {
+      range.closeNode.parentNode.insertBefore(child, range.closeNode);
+    });
+  };
+
+  const patchPreviewButton = (doc, blockKey, label, url) => {
+    const range = findCommentMarkers(doc, `TEXT:${blockKey}:button`, '/TEXT');
+    if (!range) return;
+    // Le <a> se trouve entre les deux marqueurs (nœud frère), pas un enfant.
+    let node = range.openNode.nextSibling;
+    let existingAnchor = null;
+    while (node && node !== range.closeNode) {
+      if (node.nodeType === 1 && node.tagName === 'A') { existingAnchor = node; break; }
+      node = node.nextSibling;
+    }
+    if (!existingAnchor || !url || !isSafeTextUrl(url)) return;
+    existingAnchor.textContent = label || existingAnchor.textContent;
+    existingAnchor.setAttribute('href', url);
+  };
+
+  const applyPreviewToIframe = (doc, block, values) => {
+    block.fields.forEach((field) => {
+      if (field === 'button') {
+        patchPreviewButton(doc, block.blockKey, values.button_label, values.button_url);
+        return;
+      }
+      if (!values[field]) return;
+      const html = field === 'body' ? renderBodyText(values[field]) : renderLeadText(values[field]);
+      patchPreviewField(doc, block.blockKey, field, field === 'title' || field === 'eyebrow' ? escapeHtml(values[field]) : html);
+    });
+  };
+
+  const openTextPreview = () => {
+    const block = textState.openBlock;
+    if (!block) return;
+    const url = PAGE_URL_BY_SLUG[block.page];
+    if (!url || !textPreviewOverlayEl || !textPreviewIframeEl) {
+      setStatus('Aperçu indisponible pour cette page.', 'error');
+      return;
+    }
+    const values = collectEditorValues(block);
+    textPreviewOverlayEl.hidden = false;
+    setTextPreviewMode(textState.previewMode);
+    textPreviewIframeEl.onload = () => {
+      try {
+        applyPreviewToIframe(textPreviewIframeEl.contentDocument, block, values);
+      } catch (error) {
+        setStatus('Impossible de générer l’aperçu.', 'error');
+      }
+    };
+    textPreviewIframeEl.src = `${url}?preview=${Date.now()}`;
+  };
+
+  const closeTextPreview = () => {
+    if (!textPreviewOverlayEl) return;
+    textPreviewOverlayEl.hidden = true;
+    if (textPreviewIframeEl) textPreviewIframeEl.src = 'about:blank';
+  };
+
+  const setTextPreviewMode = (mode) => {
+    textState.previewMode = mode;
+    if (!textPreviewOverlayEl) return;
+    textPreviewOverlayEl.querySelectorAll('[data-text-preview-mode]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.textPreviewMode === mode);
+    });
+    textPreviewOverlayEl.classList.toggle('is-mobile', mode === 'mobile');
+  };
+
+  if (textEditorFieldsEl) {
+    document.querySelector('[data-text-editor-close]')?.addEventListener('click', closeTextEditor);
+    document.querySelector('[data-text-cancel]')?.addEventListener('click', closeTextEditor);
+    document.querySelector('[data-text-save-draft]')?.addEventListener('click', saveTextDraft);
+    document.querySelector('[data-text-publish]')?.addEventListener('click', publishTextBlock);
+    document.querySelector('[data-text-preview]')?.addEventListener('click', openTextPreview);
+    document.querySelector('[data-text-preview-close]')?.addEventListener('click', closeTextPreview);
+    textPreviewOverlayEl?.querySelectorAll('[data-text-preview-mode]').forEach((button) => {
+      button.addEventListener('click', () => setTextPreviewMode(button.dataset.textPreviewMode));
+    });
+  }
+
+  const loadTextsPanel = async () => {
+    if (!textBlocksListEl) return;
+    try {
+      await fetchTextBlocksForPages(ALL_TEXT_PAGE_SLUGS);
+    } catch (error) {
+      setStatus(error.message || 'Impossible de charger les textes.', 'error');
+    }
+    renderTextPageNav();
+    renderTextBlocksList();
   };
 
   document.querySelectorAll('[data-publish-now]').forEach((publishNowButton) => {
