@@ -515,6 +515,50 @@
   ];
 
   const TEXT_BLOCKS = [
+    { page: 'l5d2lm-index', blockKey: 'accueil-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Association en Valais', title: 'Les 5 doigts de la main',
+      lead: 'Créer du lien par le corps, le jeu, les émotions et le vivant.',
+      body: 'Les 5 doigts de la main est une association en Valais. Le projet rassemble des espaces simples pour bouger, ressentir, créer, prendre soin et vivre des expériences collectives. À travers des ateliers, des massages intuitifs, des colos pour adultes et des animations participatives, le lien reprend place dans le réel.',
+      button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-espaces-heading', label: 'En-tête « Les grands espaces »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Les grands espaces', title: 'Plusieurs portes d’entrée, une même envie de lien.',
+      lead: 'Chaque proposition peut s’adapter à votre groupe, votre école, votre entreprise, votre événement, votre famille ou votre lieu culturel, en Suisse romande et en France.'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-card-massage', label: 'Carte Massage', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Massages & réveil énergétique',
+      body: 'Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.',
+      button_label: 'Découvrir', button_url: 'l5d2lm-massage-intuitif-reveil-energetique.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-card-corps-expression', label: 'Carte Corps & expression', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Corps & expression',
+      body: 'Playful extatique, improvisation, réveil du corps, jeux de mouvement et « À portée de main ».',
+      button_label: 'Découvrir', button_url: 'l5d2lm-corps-expression.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-card-colo', label: 'Carte Colo pour adultes', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Colo pour adultes',
+      body: 'Retrouver l’esprit d’une colo et construire ensemble un séjour où chacun peut apporter sa magie.',
+      button_label: 'Découvrir', button_url: 'l5d2lm-colos-sejours.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-card-animation', label: 'Carte Animations participatives', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Animations participatives',
+      body: 'Des jeux et propositions vivantes pour rendre chacun acteur et créer des souvenirs de groupe marquants.',
+      button_label: 'Découvrir', button_url: 'l5d2lm-animations-participatives.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-card-espaces', label: 'Carte Espaces à découvrir', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Espaces à découvrir',
+      body: 'Des lieux, associations, écoles et initiatives existantes à faire connaître.',
+      button_label: 'Explorer', button_url: 'l5d2lm-espaces-a-decouvrir.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-formats', label: '« Des formats qui se construisent ensemble »', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Des formats qui se construisent ensemble',
+      body: 'Un atelier bien-être, une animation festival, un massage événementiel, une colo pour adultes ou un séjour créatif pour adultes peuvent naître d’une envie encore floue. La forme se précise ensuite avec vous, selon le lieu, la durée et les personnes présentes.',
+      button_label: 'Parler de votre idée', button_url: 'l5d2lm-contact.html'
+    } },
+    { page: 'l5d2lm-index', blockKey: 'accueil-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
     { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage',
       lead: 'Prendre soin peut prendre plusieurs formes.',
@@ -587,6 +631,252 @@
     } },
     { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
       lead: 'Les pieds portent chaque jour. Les mains créent du lien.\nLe corps mérite parfois simplement un peu d’attention.'
+    } },
+
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Mouvement • jeu • expression', title: 'Corps & expression',
+      lead: 'Des expériences pour remettre le corps en mouvement, jouer, s’exprimer et créer du lien.',
+      body: 'Chaque proposition s’adapte à votre groupe et aux personnes présentes. Il ne s’agit pas de réussir une performance, mais d’expérimenter à son rythme.',
+      button_label: 'Imaginer votre atelier', button_url: 'l5d2lm-contact.html?category=corps-expression'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-propositions-heading', label: 'En-tête « Cinq propositions »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Cinq propositions', title: 'Plusieurs manières de bouger et de se rencontrer.',
+      lead: 'Chaque proposition possède sa couleur et peut être adaptée à votre groupe, au lieu et à l’énergie du moment.'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique', label: 'Playful extatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Playful extatique',
+      lead: 'Une exploration guidée, portée par la musique.',
+      body: 'Une exploration guidée du corps, du mouvement et du jeu, portée par la musique. Chacun reste libre de s’approprier les propositions : sensations et émotions ont leur place.\n\nCe n’est ni un cours de danse ni une chorégraphie : un espace pour se lâcher sur la musique et rencontrer les autres autrement.',
+      button_label: 'Faire une demande pour Playful extatique', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=playful-extatique'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'theatre-improvisation', label: 'Théâtre d’improvisation', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Théâtre d’improvisation',
+      lead: 'Des petits jeux progressifs, sans représentation à préparer.',
+      body: 'Petits jeux et exercices progressifs : ni match d’impro, ni représentation à préparer. La progression se fait crescendo, sans stress.\n\n- Chacun participe selon son envie : observer, entrer dans un jeu, en sortir.\n- L’objectif est la spontanéité, l’écoute, l’accueil de ce qui apparaît.\n\nAdapté à tous les âges, de 4 à 96 ans.',
+      button_label: 'Faire une demande pour le Théâtre d’improvisation', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=theatre-improvisation'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps', label: 'Réveil du corps', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Réveil du corps',
+      lead: 'Remettre le corps en mouvement, retrouver une présence à soi.',
+      body: 'Respiration, automassage, étirements, mobilisation articulaire, danse, yoga, sons tibétains. L’ambiance s’adapte au groupe et au moment : douce ou plus dynamique.\n\n- Peut aussi devenir un rendez-vous collectif régulier.',
+      button_label: 'Faire une demande pour le Réveil du corps', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=reveil-du-corps'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'jeux-de-mouvement', label: 'Jeux de mouvement', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Jeux de mouvement',
+      lead: 'Courir, observer, réagir, improviser, coopérer.',
+      body: 'Jeu, théâtre d’improvisation, réveil du corps et danse réunis. Le contenu change selon l’âge, le lieu et l’énergie du moment.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\nEnfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.',
+      button_label: 'Faire une demande pour les Jeux de mouvement', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=jeux-de-mouvement'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'a-portee-de-main', label: 'À portée de main', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'À portée de main',
+      lead: 'Deux personnes, trois danses : la sienne, celle de l’autre, celle du lien.',
+      body: 'Deux personnes, trois danses : la danse de soi, la danse de l’autre et celle du lien.\n\nLa rencontre commence par un retour à soi, puis deux personnes mettent leurs paumes en contact et bougent ensemble, sans leader permanent. Le mouvement peut ensuite engager les bras, puis le corps entier.',
+      button_label: 'Proposer un lieu ou un partenariat', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=a-portee-de-main&intent=lieu-partenariat'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-cadre', label: '« Un cadre commun »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Un cadre commun', title: 'Le même esprit pour les cinq propositions.',
+      body: 'Chaque proposition s’adapte au groupe, au lieu et à l’énergie du moment. Il n’y a pas de performance à réussir : chacun peut participer à son rythme, observer, ou simplement essayer. Le respect et le consentement de chaque personne restent la base.'
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Jouer • partager • construire ensemble', title: 'Colo pour adultes',
+      lead: 'Retrouver l’esprit d’une colo et construire le séjour ensemble.',
+      body: 'Une expérience collective pour sortir du quotidien, rencontrer d’autres personnes, jouer, partager et vivre un séjour dans lequel chacun peut réellement prendre sa place.',
+      button_label: 'Découvrir la Colo pour adultes et s’inscrire', button_url: 'https://form.jotform.com/toopilon/cpa--colo-pour-adultes-1'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-collective-heading', label: '« Une expérience collective »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Une expérience collective', title: 'Un cadre où chacun peut prendre sa place.',
+      body: 'La Colo pour adultes s’adresse aux personnes qui souhaitent sortir du quotidien, rencontrer d’autres personnes, jouer, partager et vivre un séjour dans lequel chacun peut réellement prendre sa place.\n\nL’accompagnement peut couvrir toute la durée du séjour : organisation, co-organisation, animation ou responsabilité du cadre, selon les besoins du projet.'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-magie', label: '« La magie de chacun »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'La magie de chacun', title: 'Le programme ne vient pas seulement d’activités décidées à l’avance.',
+      body: 'Chaque participant peut aussi proposer sa « magie » aux autres : un jeu, une activité, une passion, un savoir-faire, une pratique ou simplement une envie.\n\nL’objectif est de créer un cadre de confiance dans lequel chacun peut participer, essayer, proposer ou simplement profiter du séjour à son rythme. Le groupe devient progressivement acteur de sa propre expérience.'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-depart', label: '« À partir de 15 adultes »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Point de départ', title: 'À partir de 15 adultes',
+      body: 'Une colo peut être organisée à partir de **15 participants adultes**.'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-construction', label: '« Selon le groupe »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Construction', title: 'Selon le groupe',
+      body: 'Le contenu, la durée, le lieu et les activités sont construits en fonction des personnes présentes.'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-actions', label: '« Participer ou soutenir »', fields: ['eyebrow', 'title', 'button'], defaults: {
+      eyebrow: 'Participer ou soutenir', title: 'Choisir la manière de rejoindre le projet.',
+      button_label: 'Découvrir la Colo pour adultes et s’inscrire', button_url: 'https://form.jotform.com/toopilon/cpa--colo-pour-adultes-1'
+    } },
+    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Festivals • fêtes • moments collectifs', title: 'Animation participative',
+      lead: 'Être acteur plutôt que spectateur.',
+      body: 'L’animation participative peut trouver sa place dans votre festival, votre fête, votre association, votre événement familial ou tout autre moment collectif.\n\nElle peut être préparée à l’avance ou se construire directement sur place, selon le public, l’ambiance et les interactions qui apparaissent.',
+      button_label: 'Imaginer votre animation', button_url: 'l5d2lm-contact.html?category=animations-participatives&offer=animation-participative'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-mallette-heading', label: 'En-tête « Une mallette d’outils »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Une mallette d’outils', title: 'Des propositions choisies selon le contexte et les personnes présentes.',
+      lead: 'La diversité des jeux permet de faire évoluer l’animation en fonction de ce qui se passe sur le moment.'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-rencontrer', label: '« Se rencontrer »', fields: ['title', 'body'], defaults: {
+      title: 'Se rencontrer',
+      body: '- Jeux pour briser la glace\n- Jeux d’interaction et de mouvement\n- Mimes'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-jouer', label: '« Jouer et essayer »', fields: ['title', 'body'], defaults: {
+      title: 'Jouer et essayer',
+      body: '- Tir à l’arc\n- Slackline\n- Jeux de lancer\n- Jeux en bois et jeux de société'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-creer', label: '« Créer ensemble »', fields: ['title', 'body'], defaults: {
+      title: 'Créer ensemble',
+      body: '- Photos de groupe marquantes et drôles\n- Propositions improvisées à partir de ce qui se passe sur le moment'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-souvenirs', label: '« Photos de groupe »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Photos de groupe', title: 'Créer un souvenir qui raconte vraiment quelque chose du groupe.',
+      body: 'L’animation aide les participants à imaginer une situation, une composition, un geste ou une mise en scène collective.\n\nL’objectif est de créer un souvenir original, marquant et drôle, plutôt qu’une simple photo où tout le monde pose face à l’appareil.'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-essentiel', label: '« L’essentiel »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'L’essentiel', title: 'Créer du lien, pas une performance.',
+      body: 'Il n’y a pas de résultat particulier à atteindre. L’essentiel est de provoquer des rencontres et de permettre aux personnes d’interagir les unes avec les autres.'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-duree-public', label: '« Durée et public »', fields: ['eyebrow', 'title', 'body'], defaults: {
+      eyebrow: 'Durée et public', title: 'De 30 minutes à 4 heures',
+      body: 'Les animations peuvent durer d’une demi-heure à quatre heures et s’adresser aux enfants, aux adolescents ou aux adultes.'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-cta', label: 'Appel à l’action final', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Votre événement, votre public, une ambiance ?',
+      body: 'La proposition peut se préparer en amont ou s’inventer sur place à partir de votre contexte.',
+      button_label: 'Construire votre animation', button_url: 'l5d2lm-contact.html?category=animations-participatives&offer=animation-participative'
+    } },
+    { page: 'l5d2lm-animations-participatives', blockKey: 'animation-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Faire circuler les bonnes adresses', title: 'Espaces à découvrir',
+      lead: 'Des lieux, initiatives, écoles et projets existants à faire connaître.',
+      body: 'Cette page rassemble des lieux, associations, écoles, projets et initiatives qui existent déjà et qui méritent d’être partagés. Ces espaces ne sont pas forcément partenaires des 5 doigts de la main. L’idée est de rendre visibles des points vivants déjà présents aux alentours.',
+      button_label: 'Proposer un espace à découvrir', button_url: 'l5d2lm-contact.html?category=espaces-a-decouvrir&offer=proposer-un-lieu'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-initiatives-heading', label: 'En-tête « Initiatives à explorer »', fields: ['eyebrow', 'title'], defaults: {
+      eyebrow: 'Initiatives à explorer', title: 'Des espaces, lieux, initiatives et projets inspirants.'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-satellite', label: 'Le Satellite', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Le Satellite',
+      body: 'Sierre — Culture, partage et vie de quartier : jardin, ateliers, coworking et marché.',
+      button_label: 'www.lesatellite.ch', button_url: 'https://www.lesatellite.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-archipel', label: 'L’Archipel', fields: ['title', 'body', 'button'], defaults: {
+      title: 'L’Archipel',
+      body: 'Sion — Tiers-lieu avec ressourcerie, coworking, atelier partagé et jardin-forêt.',
+      button_label: 'archipelsion.ch', button_url: 'https://archipelsion.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-aslec', label: 'ASLEC', fields: ['title', 'body', 'button'], defaults: {
+      title: 'ASLEC',
+      body: 'Sierre — Loisirs, éducation et culture pour enfants et ados.',
+      button_label: 'aslec.ch', button_url: 'https://aslec.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-kairos', label: 'Association Kaïros', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Association Kaïros',
+      body: 'Uvrier — Verger en permaculture, forêt nourricière, jus et nectars maison.',
+      button_label: 'associationkairos.com', button_url: 'https://www.associationkairos.com/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-digestif', label: 'Compagnie Digestif / Treffpunkt Tschüdanga', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Compagnie Digestif / Treffpunkt Tschüdanga',
+      body: 'Salgesch — Rencontre humain-nature-animaux en forêt de Finges : cirque, jardin et résidences d’artistes.',
+      button_label: 'compagniedigestif.ch', button_url: 'https://www.compagniedigestif.ch/fr/angebote/treffpunkt-tschudanga/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-akenes', label: 'École aux Akènes', fields: ['title', 'body', 'button'], defaults: {
+      title: 'École aux Akènes',
+      body: 'Lens — École où l’enfant apprend à son rythme, en autonomie.',
+      button_label: 'ecoleauxakenes.ch', button_url: 'https://www.ecoleauxakenes.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-educaterre', label: 'EducaTerre', fields: ['title', 'body', 'button'], defaults: {
+      title: 'EducaTerre',
+      body: 'Valais — Apprendre et s’épanouir au contact de la nature.',
+      button_label: 'educaterre.ch', button_url: 'https://educaterre.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-mandala', label: 'Mandala Schule', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Mandala Schule',
+      body: 'Venthône — École privée pour les 4-15 ans, proche de la nature, reconnue depuis 2015.',
+      button_label: 'mandala-schule.ch', button_url: 'https://mandala-schule.ch/fr/accueil/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-canopee', label: 'Épicerie La Canopée', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Épicerie La Canopée',
+      body: 'Muraz — Épicerie coopérative, locale et démocratique.',
+      button_label: 'epicerielacanopee.ch', button_url: 'https://epicerielacanopee.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-terraformation', label: 'Terra Formation', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Terra Formation',
+      body: 'Fondation valaisanne autour de la biodiversité, de la régénération des écosystèmes et de la transmission de pratiques écologiques.',
+      button_label: 'terraformation.ch', button_url: 'https://www.terraformation.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-agroecologie', label: 'Journées de l’Agroécologie', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Journées de l’Agroécologie',
+      body: 'Événements partout en Suisse autour de l’agroécologie : ateliers, visites, formations et rencontres. Chaque personne peut aussi proposer son propre événement.',
+      button_label: 'agroecologyworks.ch', button_url: 'https://www.agroecologyworks.ch/fr/journees-de-l-agroecologie/2026/events'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-passeport-possibles', label: 'Passeport des possibles', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Passeport des possibles',
+      body: 'Parcours ludique à Fribourg pour découvrir plusieurs associations à travers des petites activités autour du réemploi, du bricolage et de l’économie circulaire.',
+      button_label: 'lafabriquefribourg.ch', button_url: 'https://lafabriquefribourg.ch/le-passeport-des-possibles/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-transports-gratuits', label: 'Transports publics gratuits', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Transports publics gratuits',
+      body: 'Initiative suisse visant à rendre les transports publics locaux et régionaux gratuits, et les déplacements longue distance beaucoup plus accessibles.',
+      button_label: 'transports-publics-gratuits.ch', button_url: 'https://transports-publics-gratuits.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-sentiers-savoirs', label: 'Sentiers des Savoirs', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Sentiers des Savoirs',
+      body: 'Réseau où l’on voyage, souvent à pied, pour rencontrer des personnes et apprendre directement auprès d’elles des savoir-faire artisanaux, agricoles ou liés au vivant.',
+      button_label: 'sentiers-des-savoirs.ch', button_url: 'https://sentiers-des-savoirs.ch/'
+    } },
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: 'l5d2lm-contact', blockKey: 'contact-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body'], defaults: {
+      eyebrow: 'Contact & demandes', title: 'Une envie, une idée, un lieu, une demande ?',
+      lead: 'Vous pouvez écrire même si tout n’est pas encore clair.',
+      body: 'Votre demande peut concerner un massage, un réveil énergétique, un atelier corps & expression, « À portée de main », une colo, une animation participative ou un espace à découvrir. La forme se précisera ensuite avec vous, selon le contexte.'
+    } },
+    { page: 'l5d2lm-contact', blockKey: 'contact-demande-heading', label: 'En-tête « Demande »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Demande', title: 'Qu’est-ce qui vous amène ?',
+      lead: 'Un premier choix permet d’orienter votre demande. Le formulaire s’adapte ensuite à la proposition qui vous intéresse.'
+    } },
+    { page: 'l5d2lm-contact', blockKey: 'contact-note', label: '« Écrire simplement »', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Écrire simplement',
+      body: 'Votre demande sert seulement à commencer la conversation. Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.',
+      button_label: 'l5d2lm@ik.me', button_url: 'mailto:l5d2lm@ik.me'
+    } },
+    { page: 'l5d2lm-contact', blockKey: 'contact-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: 'Informations légales', title: 'Mentions légales',
+      lead: 'Éditeur, contact et hébergement de ce site.'
+    } },
+    { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-editeur', label: 'Éditeur du site', fields: ['title', 'body'], defaults: {
+      title: 'Éditeur du site',
+      body: 'Les 5 Doigts de la Main, association à but non lucratif de droit suisse (Valais, Suisse).\n\nResponsable de la publication : le comité de l’association.'
+    } },
+    { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-contact', label: 'Contact', fields: ['title', 'body'], defaults: {
+      title: 'Contact',
+      body: 'Pour toute question relative au site ou à son contenu : [l5d2lm@ik.me](mailto:l5d2lm@ik.me), ou via la [page contact](l5d2lm-contact.html).'
+    } },
+    { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-hebergement', label: 'Hébergement', fields: ['title', 'body'], defaults: {
+      title: 'Hébergement',
+      body: 'Ce site est hébergé par GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis (GitHub Pages).'
+    } },
+    { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+      lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
+    } },
+
+    { page: '__commun__', blockKey: 'commun-footer-tagline', label: 'Accroche du pied de page', fields: ['lead'], defaults: {
+      lead: 'Créer du lien par le corps, le jeu, les émotions et le vivant.'
     } }
   ];
 
@@ -2531,14 +2821,6 @@
     textBlocksListEl.innerHTML = '';
     closeTextEditor();
 
-    if (textState.selectedPage === '__commun__') {
-      const soon = document.createElement('p');
-      soon.className = 'gestion-soon';
-      soon.textContent = 'Bientôt disponible : éléments communs (navigation, pied de page).';
-      textBlocksListEl.appendChild(soon);
-      return;
-    }
-
     const pages = textState.selectedPage ? [textState.selectedPage] : TEXT_PAGES.filter((p) => p.slug).map((p) => p.slug);
     let anyBlock = false;
     pages.forEach((pageSlug) => {
@@ -2765,7 +3047,7 @@
     return row;
   };
 
-  const ALL_TEXT_PAGE_SLUGS = TEXT_PAGES.filter((p) => p.slug).map((p) => p.slug);
+  const ALL_TEXT_PAGE_SLUGS = [...new Set(TEXT_BLOCKS.map((b) => b.page))];
 
   const saveTextDraft = async () => {
     const block = textState.openBlock;
@@ -2888,7 +3170,10 @@
     'l5d2lm-animations-participatives': '../l5d2lm-animations-participatives.html',
     'l5d2lm-espaces-a-decouvrir': '../l5d2lm-espaces-a-decouvrir.html',
     'l5d2lm-contact': '../l5d2lm-contact.html',
-    'l5d2lm-mentions-legales': '../l5d2lm-mentions-legales.html'
+    'l5d2lm-mentions-legales': '../l5d2lm-mentions-legales.html',
+    // Pied de page partagé : identique sur toutes les pages, l'accueil
+    // suffit à en donner un aperçu représentatif.
+    __commun__: '../l5d2lm-index.html'
   };
 
   const findCommentMarkers = (doc, openText, closeText) => {

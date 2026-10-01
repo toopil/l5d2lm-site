@@ -593,6 +593,7 @@ def main() -> None:
     chrome = (ROOT / "_partials/chrome.html").read_text(encoding="utf-8")
     chrome = substitute_nav_visibility(chrome, published_section_slugs)
     footer = (ROOT / "_partials/footer.html").read_text(encoding="utf-8")
+    footer = substitute_text_blocks(footer, "__commun__", published_text_blocks)
     footer = substitute_nav_visibility(footer, published_section_slugs)
     for page in PAGES:
         build_page(
