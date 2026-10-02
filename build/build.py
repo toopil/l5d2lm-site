@@ -29,7 +29,7 @@ TEXT_SNAPSHOT_PATH = ROOT / "build" / "published-texts.snapshot.json"
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20261002d"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20261002e"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
