@@ -173,8 +173,8 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
    colonne dédiée, pour rester compact en priorité sur mobile. */
 .hero-logo-float {
   float: right;
-  width: clamp(90px, 24vw, 220px);
-  margin: 0 0 14px 16px;
+  width: clamp(90px, 26vw, 340px);
+  margin: 0 0 16px 20px;
 }
 .hero-logo-float .page-logo { width: 100%; }
 .hero-mark__caption {
