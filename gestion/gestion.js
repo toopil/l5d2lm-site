@@ -477,7 +477,21 @@
     { slotKey: 'espaces:postcard-2', pageLabel: 'Espaces à découvrir', label: 'Carte postale 2', fallbackFilename: 'l5d2lm-photo-espaces-2.jpg' },
     { slotKey: 'espaces:postcard-3', pageLabel: 'Espaces à découvrir', label: 'Carte postale 3', fallbackFilename: 'l5d2lm-photo-espaces-3.jpg' },
     { slotKey: 'espaces:anchor-band-initiatives', pageLabel: 'Espaces à découvrir', label: 'Photo — sous « Initiatives à explorer »' },
-    { slotKey: 'espaces:anchor-band-footer', pageLabel: 'Espaces à découvrir', label: 'Photo — avant le bas de page' }
+    { slotKey: 'espaces:anchor-band-footer', pageLabel: 'Espaces à découvrir', label: 'Photo — avant le bas de page' },
+    { slotKey: 'espaces:espace-satellite', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Le Satellite' },
+    { slotKey: 'espaces:espace-archipel', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — L’Archipel' },
+    { slotKey: 'espaces:espace-aslec', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — ASLEC' },
+    { slotKey: 'espaces:espace-kairos', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Association Kaïros' },
+    { slotKey: 'espaces:espace-digestif', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Compagnie Digestif' },
+    { slotKey: 'espaces:espace-akenes', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — École aux Akènes' },
+    { slotKey: 'espaces:espace-educaterre', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — EducaTerre' },
+    { slotKey: 'espaces:espace-mandala', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Mandala Schule' },
+    { slotKey: 'espaces:espace-canopee', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Épicerie La Canopée' },
+    { slotKey: 'espaces:espace-terraformation', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Terra Formation' },
+    { slotKey: 'espaces:espace-agroecologie', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Journées de l’Agroécologie' },
+    { slotKey: 'espaces:espace-passeport-possibles', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Passeport des possibles' },
+    { slotKey: 'espaces:espace-transports-gratuits', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Transports publics gratuits' },
+    { slotKey: 'espaces:espace-sentiers-savoirs', pageLabel: 'Espaces à découvrir', label: 'Logo/photo — Sentiers des Savoirs' }
   ];
   const mediaSlotsListEl = document.querySelector('[data-media-slots-list]');
 

@@ -29,7 +29,7 @@ TEXT_SNAPSHOT_PATH = ROOT / "build" / "published-texts.snapshot.json"
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20261002f"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20261002g"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
@@ -369,6 +369,21 @@ def render_postcard_slot(slot: dict, media: dict | None) -> str:
     return '<div class="postcard postcard--empty"></div>'
 
 
+def render_card_photo_slot(slot: dict, media: dict | None) -> str:
+    # Petite vignette logo/photo dans une carte de texte (ex. Espaces à
+    # découvrir) : object-fit:contain (voir CSS) pour ne jamais recadrer
+    # un logo externe. Rien tant qu'aucune photo n'est choisie — comme
+    # "float"/"band", pas de carré vide dans la grille.
+    if media:
+        src = html.escape(_slot_image_src(media), quote=True)
+        alt = html.escape(media.get("alt_text") or "", quote=True)
+        return f'<div class="card-photo"><img src="{src}" alt="{alt}" loading="lazy"></div>'
+    fallback = slot.get("fallback")
+    if fallback:
+        return f'<div class="card-photo"><img src="{fallback["src"]}" alt=""></div>'
+    return ""
+
+
 def render_float_slot(slot: dict, media: dict | None) -> str:
     # Ancrage optionnel : rien tant que l'admin n'a pas choisi de photo
     # (pas de "Photo à venir" au milieu d'un paragraphe existant).
@@ -396,6 +411,8 @@ def render_slot(slot: dict, media: dict | None) -> str:
         return render_float_slot(slot, media)
     if kind == "band":
         return render_band_slot(slot, media)
+    if kind == "card-photo":
+        return render_card_photo_slot(slot, media)
     return render_proposition_slot(slot, media)
 
 

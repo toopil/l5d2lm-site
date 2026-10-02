@@ -11,7 +11,7 @@ publié explicitement une photo pour un emplacement depuis Emplacements,
 la photo déjà en place avant ce mécanisme continue de s'afficher
 normalement.
 
-Quatre formats (`kind`) :
+Cinq formats (`kind`) :
 - "proposition" (Corps & expression) : bande large avec numéro et texte
   "Photo à venir" en l'absence de photo.
 - "postcard" (bandes de cartes postales : Accueil, Massage, Colo,
@@ -23,6 +23,10 @@ Quatre formats (`kind`) :
   optionnel, pas de "Photo à venir" au milieu d'un paragraphe).
 - "band" (photo seule, pleine largeur, entre deux sections existantes) :
   même règle, rien n'est affiché tant qu'aucune photo n'est choisie.
+- "card-photo" (petite vignette logo/photo dans une carte de texte, ex.
+  les 14 organismes d'Espaces à découvrir) : `object-fit:contain` (ne
+  recadre jamais un logo externe), rien n'est affiché tant qu'aucune
+  photo n'est choisie.
 
 Étendre à une nouvelle page = ajouter des entrées ici + le marqueur
 correspondant dans le fragment ; aucune autre infrastructure à toucher.
@@ -134,6 +138,21 @@ SLOTS = [
          title="Espaces à découvrir — bande sous « Initiatives à explorer »"),
     dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:anchor-band-footer", kind="band",
          title="Espaces à découvrir — bande avant le bas de page"),
+
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-satellite", kind="card-photo", title="Espaces à découvrir — Le Satellite"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-archipel", kind="card-photo", title="Espaces à découvrir — L’Archipel"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-aslec", kind="card-photo", title="Espaces à découvrir — ASLEC"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-kairos", kind="card-photo", title="Espaces à découvrir — Association Kaïros"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-digestif", kind="card-photo", title="Espaces à découvrir — Compagnie Digestif"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-akenes", kind="card-photo", title="Espaces à découvrir — École aux Akènes"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-educaterre", kind="card-photo", title="Espaces à découvrir — EducaTerre"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-mandala", kind="card-photo", title="Espaces à découvrir — Mandala Schule"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-canopee", kind="card-photo", title="Espaces à découvrir — Épicerie La Canopée"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-terraformation", kind="card-photo", title="Espaces à découvrir — Terra Formation"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-agroecologie", kind="card-photo", title="Espaces à découvrir — Journées de l’Agroécologie"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-passeport-possibles", kind="card-photo", title="Espaces à découvrir — Passeport des possibles"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-transports-gratuits", kind="card-photo", title="Espaces à découvrir — Transports publics gratuits"),
+    dict(page="l5d2lm-espaces-a-decouvrir", slot_key="espaces:espace-sentiers-savoirs", kind="card-photo", title="Espaces à découvrir — Sentiers des Savoirs"),
 ]
 
 # Pages avec une bande de cartes postales -> slug l5d2lm_sections de la
