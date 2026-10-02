@@ -174,7 +174,7 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 .hero-logo-float {
   float: right;
   width: clamp(90px, 26vw, 340px);
-  margin: 0 0 16px 20px;
+  margin: 0 clamp(0px, 3vw, 32px) 16px 20px;
 }
 .hero-logo-float .page-logo { width: 100%; }
 .hero-mark__caption {
