@@ -72,7 +72,7 @@ button, input, select, textarea { font: inherit; }
 .nav-group:hover .subnav, .nav-group:focus-within .subnav { display: block; }
 .nav-toggle { display: none; border: 0; background: var(--paper); color: var(--ink); font-weight: 700; }
 
-.hero { padding: clamp(3.5rem, 7vw, 6.3rem) 0 3rem; }
+.hero { padding: clamp(1.75rem, 7vw, 6.3rem) 0 3rem; }
 .eyebrow {
   text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.78rem; font-weight: 800;
   color: var(--muted); margin-bottom: 0.6rem;
