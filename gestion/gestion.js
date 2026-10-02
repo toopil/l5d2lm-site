@@ -1292,6 +1292,37 @@
       }
       card.appendChild(thumb);
 
+      // Titre + annotation saisissables tout de suite, avant même l'import :
+      // repris automatiquement dans la fiche Supabase (voir
+      // handleImportSelection), pour ne pas avoir à rouvrir chaque photo
+      // une par une juste pour ça.
+      if (isUpload && !isImported) {
+        const quickFields = document.createElement('div');
+        quickFields.className = 'media-item__quick-fields';
+
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Titre';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.placeholder = 'Ex. Et si le terrain de jeu, c’était toi ?';
+        titleInput.value = item.title || '';
+        titleInput.addEventListener('input', () => { item.title = titleInput.value; });
+        titleLabel.appendChild(titleInput);
+        quickFields.appendChild(titleLabel);
+
+        const annotationLabel = document.createElement('label');
+        annotationLabel.textContent = 'Annotation (affichée au survol)';
+        const annotationInput = document.createElement('input');
+        annotationInput.type = 'text';
+        annotationInput.placeholder = 'Ex. Deux personnes dansent, mains jointes.';
+        annotationInput.value = item.annotation || '';
+        annotationInput.addEventListener('input', () => { item.annotation = annotationInput.value; });
+        annotationLabel.appendChild(annotationInput);
+        quickFields.appendChild(annotationLabel);
+
+        card.appendChild(quickFields);
+      }
+
       // Une seule rangée compacte pour tout le statut (droits à traiter,
       // favori, catégories) plutôt que plusieurs lignes empilées.
       const statusRow = document.createElement('div');
@@ -1390,7 +1421,12 @@
         src: heic ? '' : URL.createObjectURL(file),
         isHeic: heic,
         mimeType: file.type,
-        bytes: file.size
+        bytes: file.size,
+        // Saisis directement sur la carte avant import (voir
+        // renderMediaGrid) pour éviter de rouvrir chaque photo une par
+        // une juste pour ça : repris tels quels dans l'insert Supabase.
+        title: '',
+        annotation: ''
       };
       mediaState.localUploads.unshift(upload);
       mediaState.selected.add(id); // prêtes à être importées d'un clic
@@ -3758,7 +3794,11 @@
               original_byte_size: blob.size,
               original_sha256: hash,
               original_private_path: storagePath,
-              upload_batch_id: batch.id
+              upload_batch_id: batch.id,
+              // Titre/annotation saisis sur la carte avant import (voir
+              // renderMediaGrid) — null si laissés vides, comme avant.
+              default_annotation: item.kind === 'upload' && item.title ? item.title.trim() : null,
+              alt_text: item.kind === 'upload' && item.annotation ? item.annotation.trim() : null
             })
             .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
             .single();

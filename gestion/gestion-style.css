@@ -994,6 +994,28 @@
   overflow-wrap: anywhere;
 }
 
+.media-item__quick-fields {
+  display: grid;
+  gap: 0.45rem;
+}
+.media-item__quick-fields label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.media-item__quick-fields input[type="text"] {
+  min-height: 40px;
+  border: 1px solid rgba(75, 58, 47, 0.18);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
 .media-item__status-row {
   display: flex;
   flex-wrap: wrap;
