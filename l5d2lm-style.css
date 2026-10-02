@@ -168,9 +168,15 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
   box-shadow: var(--shadow);
 }
 
-.hero-mark--massage {
-  gap: 1rem; justify-items: center; align-content: center;
+/* Hero Massage : logo réduit, flottant à droite du texte d'intro —
+   le texte s'enroule naturellement autour (comme .anchor-photo), pas de
+   colonne dédiée, pour rester compact en priorité sur mobile. */
+.hero-logo-float {
+  float: right;
+  width: clamp(90px, 24vw, 220px);
+  margin: 0 0 14px 16px;
 }
+.hero-logo-float .page-logo { width: 100%; }
 .hero-mark__caption {
   margin: 0; max-width: 280px; text-align: center; color: var(--muted); font-size: 0.95rem;
 }
