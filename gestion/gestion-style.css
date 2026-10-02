@@ -393,6 +393,13 @@
   font-weight: 700;
 }
 
+.media-slot-item__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
 /* Cartes postales (rotation aléatoire par catégorie) */
 .postcards-list {
   display: grid;

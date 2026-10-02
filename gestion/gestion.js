@@ -2292,12 +2292,29 @@
       body.appendChild(status);
       row.appendChild(body);
 
+      const actions = document.createElement('div');
+      actions.className = 'media-slot-item__actions';
+
       const chooseButton = document.createElement('button');
       chooseButton.type = 'button';
       chooseButton.className = 'btn';
       chooseButton.textContent = media ? 'Changer la photo' : 'Choisir une photo';
       chooseButton.addEventListener('click', () => openMediaPicker('slot', { slotKey: slot.slotKey }));
-      row.appendChild(chooseButton);
+      actions.appendChild(chooseButton);
+
+      // Retirer : seulement quand une photo est réellement gérée ici (pas
+      // pour un simple repère "Photo à venir", ni pour une photo déjà en
+      // ligne avant ce mécanisme et pas encore gérée — rien à retirer).
+      if (media) {
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'gestion-link-button';
+        removeButton.textContent = 'Retirer la photo';
+        removeButton.addEventListener('click', () => removeSlotMedia(slot.slotKey));
+        actions.appendChild(removeButton);
+      }
+
+      row.appendChild(actions);
 
       currentGroup.appendChild(row);
     });
@@ -2407,6 +2424,26 @@
       published
         ? 'Photo publiée pour cet emplacement — publication du site en cours.'
         : 'Photo publiée pour cet emplacement — le site public se mettra à jour automatiquement (sous 3h maximum).',
+      'success'
+    );
+  };
+
+  // Retire la photo d'un emplacement sans la remplacer : l'emplacement
+  // redevient vide ("Photo à venir" ou rien, selon le format — voir
+  // build/build.py) plutôt que de forcer un remplacement immédiat.
+  const removeSlotMedia = async (slotKey) => {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media_usages').delete().eq('slot_key', slotKey);
+    if (error) { setStatus(error.message || 'Impossible de retirer la photo.', 'error'); return; }
+
+    mediaState.slotAssignments.delete(slotKey);
+    renderSlotsList();
+
+    const published = await triggerPublishNow({ silent: true });
+    setStatus(
+      published
+        ? 'Photo retirée de cet emplacement — publication du site en cours.'
+        : 'Photo retirée de cet emplacement — le site public se mettra à jour automatiquement (sous 3h maximum).',
       'success'
     );
   };
