@@ -502,7 +502,7 @@
   const TEXT_PAGES = [
     { slug: null, label: 'Toutes les pages' },
     { slug: 'l5d2lm-index', label: 'Accueil' },
-    { slug: 'l5d2lm-massage-intuitif-reveil-energetique', label: 'Massage' },
+    { slug: 'l5d2lm-massage', label: 'Massage' },
     { slug: 'l5d2lm-corps-expression', label: 'Corps & expression' },
     { slug: 'l5d2lm-colos-sejours', label: 'Colo pour adultes' },
     { slug: 'l5d2lm-animations-participatives', label: 'Animation participative' },
@@ -528,7 +528,7 @@
     { page: 'l5d2lm-index', blockKey: 'accueil-card-massage', label: 'Carte Massage', fields: ['title', 'body', 'button'], defaults: {
       title: 'Massages & réveil énergétique',
       body: 'Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.',
-      button_label: 'Découvrir', button_url: 'l5d2lm-massage-intuitif-reveil-energetique.html'
+      button_label: 'Découvrir', button_url: 'l5d2lm-massage.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-corps-expression', label: 'Carte Corps & expression', fields: ['title', 'body', 'button'], defaults: {
       title: 'Corps & expression',
@@ -559,77 +559,77 @@
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
     } },
 
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage',
       lead: 'Prendre soin peut prendre plusieurs formes.',
       body: 'Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un réveil énergétique ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**',
       button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-propositions-heading', label: 'En-tête « Trois propositions »', fields: ['eyebrow', 'title'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-propositions-heading', label: 'En-tête « Trois propositions »', fields: ['eyebrow', 'title'], defaults: {
       eyebrow: 'Trois propositions', title: 'Choisir la forme qui correspond au moment'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage intuitif',
       lead: 'Prendre le temps.\nÉcouter le corps.\nS’adapter à ce qui est présent.',
       body: 'Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.',
       button_label: 'Faire une demande pour le Massage intuitif', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-intuitif'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'reveil-energetique', label: 'Réveil énergétique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Réveil énergétique', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Réveil énergétique',
       lead: 'Recevoir.\nRéveiller.\nApprendre à transmettre.',
       body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.',
       button_label: 'Faire une demande pour le recevoir', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage aquatique',
       lead: 'Se laisser porter.\nRespirer.\nRetrouver de la légèreté.',
       body: 'Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Durée :** de 45 à 90 minutes.\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.',
       button_label: 'Faire une demande pour le Massage aquatique', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-aquatique'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-heading', label: 'En-tête « Quelques repères simples »', fields: ['eyebrow', 'title'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-practical-heading', label: 'En-tête « Quelques repères simples »', fields: ['eyebrow', 'title'], defaults: {
       eyebrow: 'Avant de venir', title: 'Quelques repères simples'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-deroulement', label: '« Comment se déroule une séance ? »', fields: ['title', 'body'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-practical-deroulement', label: '« Comment se déroule une séance ? »', fields: ['title', 'body'], defaults: {
       title: 'Comment se déroule une séance ?',
       body: 'Chaque rencontre commence par un court échange. Ce temps permet de clarifier vos attentes et de repérer d’éventuelles douleurs, blessures ou zones sensibles afin que je puisse adapter la séance.\n\nIl ne s’agit pas d’un diagnostic médical, mais d’un moment d’écoute pour prendre soin du corps avec respect.\n\nUne fois installé, je vous invite à respirer, à vous déposer et à prendre le temps.'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-parler', label: '« Faut-il parler pendant la séance ? »', fields: ['title', 'body'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-practical-parler', label: '« Faut-il parler pendant la séance ? »', fields: ['title', 'body'], defaults: {
       title: 'Faut-il parler pendant la séance ?',
       body: 'Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe réveil énergétique laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-practical-premiere-fois', label: '« Et si c’est une première fois ? »', fields: ['title', 'body'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-practical-premiere-fois', label: '« Et si c’est une première fois ? »', fields: ['title', 'body'], defaults: {
       title: 'Et si c’est une première fois ?',
       body: 'Aucune expérience préalable n’est nécessaire. La proposition s’adapte à votre rythme, vos envies et vos limites.'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-chenda', label: 'Espace Chèndâ', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-chenda', label: 'Espace Chèndâ', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Lieu principal', title: 'Espace Chèndâ',
       body: 'Je donne principalement les massages intuitifs à l’Espace Chèndâ.',
       button_label: 'Voir l’adresse et l’itinéraire', button_url: 'https://search.ch/tel/sierre/avenue-general-guisan-19/espace-chenda.fr.html'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-qui-masse', label: 'Qui masse ?', fields: ['eyebrow', 'title', 'body'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-qui-masse', label: 'Qui masse ?', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Présentation pour l’espace massage', title: 'Qui masse ?',
       body: 'Mon parcours s’est construit entre l’animation socioculturelle, les métiers du bois, le travail manuel, le mouvement et la relation humaine.\n\nDepuis de nombreuses années, j’accompagne des personnes et des groupes à travers le jeu, la créativité, l’expression corporelle et des expériences collectives. La menuiserie et la charpente ont aussi nourri mon rapport aux mains, à la matière, aux formes, aux appuis et à la précision du geste.\n\nLe toucher a progressivement pris une place importante dans ma manière de créer du lien. Dans des contextes amicaux, associatifs ou événementiels, j’ai observé combien un contact respectueux pouvait aider à relâcher les tensions, ralentir et retrouver une présence plus concrète au corps.\n\nJe masse de manière intuitive. Je ne reproduis pas une séance identique d’une personne à l’autre. Je m’adapte aux besoins exprimés, aux zones de tension, aux limites de chacun et aux réactions du corps au fil de la séance.\n\nJ’accorde une grande importance au respect, au consentement et à un cadre clair, sécurisant et non sexualisé.'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-heading', label: 'En-tête « Recevoir, ou apprendre à transmettre »', fields: ['eyebrow', 'title', 'lead'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-training-heading', label: 'En-tête « Recevoir, ou apprendre à transmettre »', fields: ['eyebrow', 'title', 'lead'], defaults: {
       eyebrow: 'Réveil énergétique', title: 'Recevoir, ou apprendre à transmettre',
       lead: 'Le Réveil énergétique se découvre de deux façons : en le recevant, ou en apprenant à le proposer à d’autres.'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-recevoir', label: 'Recevoir un réveil énergétique', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-training-recevoir', label: 'Recevoir un réveil énergétique', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Recevoir', title: 'Recevoir un réveil énergétique',
       body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.',
       button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-training-transmettre', label: 'Apprendre à transmettre', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-training-transmettre', label: 'Apprendre à transmettre', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Apprendre à transmettre', title: 'Apprendre à transmettre le réveil énergétique',
       body: 'Le Réveil énergétique a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.',
       button_label: 'Demander une transmission', button_url: 'l5d2lm-contact.html?category=massage&offer=transmission-reveil-energetique'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-cta', label: 'Construire une proposition', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-cta', label: 'Construire une proposition', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Imaginer le bon format', title: 'Construire une proposition',
       body: 'Chaque rencontre est différente. Lorsqu’une proposition résonne avec votre besoin ou votre curiosité, le format peut s’ajuster au contexte, au lieu et aux personnes présentes.\n\nLa durée et les tarifs sont définis selon le lieu, le nombre de personnes et le contexte.',
       button_label: 'Parler de votre besoin', button_url: 'l5d2lm-contact.html?category=massage'
     } },
-    { page: 'l5d2lm-massage-intuitif-reveil-energetique', blockKey: 'massage-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
       lead: 'Les pieds portent chaque jour. Les mains créent du lien.\nLe corps mérite parfois simplement un peu d’attention.'
     } },
 
@@ -2736,7 +2736,7 @@
   const textPreviewIframeEl = document.querySelector('[data-text-preview-iframe]');
 
   const textState = {
-    selectedPage: 'l5d2lm-massage-intuitif-reveil-energetique', // page ouverte par défaut à l'arrivée sur l'onglet
+    selectedPage: 'l5d2lm-massage', // page ouverte par défaut à l'arrivée sur l'onglet
     blocksByKey: new Map(),
     openBlock: null,
     editorInputs: {},
@@ -3168,7 +3168,7 @@
   // local de l'iframe.
   const PAGE_URL_BY_SLUG = {
     'l5d2lm-index': '../l5d2lm-index.html',
-    'l5d2lm-massage-intuitif-reveil-energetique': '../l5d2lm-massage-intuitif-reveil-energetique.html',
+    'l5d2lm-massage': '../l5d2lm-massage.html',
     'l5d2lm-corps-expression': '../l5d2lm-corps-expression.html',
     'l5d2lm-colos-sejours': '../l5d2lm-colos-sejours.html',
     'l5d2lm-animations-participatives': '../l5d2lm-animations-participatives.html',
