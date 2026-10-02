@@ -59,7 +59,7 @@ TEXT_BLOCKS = [
 
     dict(page="l5d2lm-massage", block_key="massage-hero",
          label="Massage — présentation principale",
-         fields=["title", "lead", "body", "button"]),
+         fields=["eyebrow", "title", "lead", "body", "button"]),
     dict(page="l5d2lm-massage", block_key="massage-propositions-heading",
          label="Massage — en-tête « Trois propositions »",
          fields=["eyebrow", "title"]),

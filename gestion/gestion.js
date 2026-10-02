@@ -559,7 +559,8 @@
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
     } },
 
-    { page: 'l5d2lm-massage', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
+      eyebrow: 'Corps • écoute • présence',
       title: 'Massage',
       lead: 'Prendre soin peut prendre plusieurs formes.',
       body: 'Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un réveil énergétique ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**',
