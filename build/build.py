@@ -11,6 +11,7 @@ GitHub Pages, pas de build côté serveur.
 from __future__ import annotations
 
 import html
+import io
 import json
 import re
 import sys
@@ -336,8 +337,45 @@ def fetch_postcard_pools(section_slugs: list) -> dict:
     return pools
 
 
+# Les visiteurs ne chargent plus les photos depuis Supabase : chaque photo
+# publiée est téléchargée une seule fois pendant le build, convertie en WebP
+# (1600 px maximum, jamais agrandie) et servie par GitHub Pages depuis
+# media/site/. Si la conversion échoue, l'ancienne URL Supabase reste utilisée.
+MEDIA_SITE_DIR = ROOT / "media" / "site"
+PUBLIC_MEDIA_MAX_PX = 1600
+PUBLIC_MEDIA_WEBP_QUALITY = 82
+_local_media_cache: dict[str, str | None] = {}
+
+
+def _ensure_local_media(public_path: str, remote_url: str) -> str | None:
+    """Renvoie le chemin relatif de la version locale (media/site/…webp),
+    en la créant si besoin, ou None si elle ne peut pas être produite."""
+    stem = re.sub(r"[^A-Za-z0-9._-]", "_", public_path.rsplit(".", 1)[0])
+    rel = f"media/site/{stem}.webp"
+    if rel in _local_media_cache:
+        return _local_media_cache[rel]
+    target = ROOT / rel
+    if not target.exists():
+        try:
+            from PIL import Image, ImageOps
+            request = urllib.request.Request(remote_url, headers={"User-Agent": "l5d2lm-build"})
+            with urllib.request.urlopen(request, timeout=60) as response:
+                data = response.read()
+            image = ImageOps.exif_transpose(Image.open(io.BytesIO(data)))
+            image.thumbnail((PUBLIC_MEDIA_MAX_PX, PUBLIC_MEDIA_MAX_PX), Image.LANCZOS)
+            mode = "RGBA" if "A" in image.getbands() else "RGB"
+            image.convert(mode).save(target, "WEBP", quality=PUBLIC_MEDIA_WEBP_QUALITY, method=6)
+        except Exception as error:  # noqa: BLE001 — repli volontaire vers l'URL distante
+            print(f"Avertissement : photo {public_path} non convertie ({error}) — URL Supabase conservée.")
+            _local_media_cache[rel] = None
+            return None
+    _local_media_cache[rel] = rel
+    return rel
+
+
 def _slot_image_src(media: dict) -> str:
-    return f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_PUBLIC_MEDIA_BUCKET}/{media["public_path"]}'
+    remote = f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_PUBLIC_MEDIA_BUCKET}/{media["public_path"]}'
+    return _ensure_local_media(media["public_path"], remote) or remote
 
 
 def render_proposition_slot(slot: dict, media: dict | None) -> str:
@@ -630,6 +668,7 @@ def build_sitemap(published_section_slugs: set[str] | None) -> None:
 
 
 def main() -> None:
+    MEDIA_SITE_DIR.mkdir(parents=True, exist_ok=True)
     published_slots = fetch_published_slots()
     hidden_slot_keys = fetch_hidden_slot_keys()
     published_section_slugs = fetch_published_section_slugs()

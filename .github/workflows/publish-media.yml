@@ -13,7 +13,7 @@ name: Publier les emplacements photo
 # n'a changé) — pas besoin d'attendre ce passage pour voir un changement.
 on:
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "0 6 * * *"   # une fois par jour : la publication depuis /gestion reste immédiate
   workflow_dispatch: {}
 
 permissions:
@@ -33,17 +33,20 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Installer la conversion d'images
+        run: pip install pillow
+
       - name: Régénérer les pages depuis Supabase
         run: python3 build/build.py
 
       - name: Committer et publier si le contenu a changé
         run: |
-          if git diff --quiet; then
+          git add -A -- 'l5d2lm-*.html' 'sitemap.xml' 'media/site'
+          if git diff --cached --quiet; then
             echo "Aucun changement : rien à publier."
             exit 0
           fi
           git config user.name "l5d2lm-publish-bot"
           git config user.email "actions@github.com"
-          git add -A -- 'l5d2lm-*.html' 'sitemap.xml'
           git commit -m "Publication automatique des emplacements photo"
           git push

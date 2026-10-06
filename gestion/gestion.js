@@ -1519,7 +1519,7 @@
     const { data, error } = await supabase
       .from('l5d2lm_media')
       .select(`
-        id, original_filename, original_private_path, public_path,
+        id, original_filename, original_private_path, admin_thumbnail_path, public_path,
         default_annotation, alt_text, rights_status, favorite,
         publish_status, processing_status, upload_batch_id, collection_id,
         focal_x, focal_y, created_at
@@ -1663,7 +1663,91 @@
   // Une signed URL en cache peut être révoquée/expirée côté Storage avant
   // son terme théorique : si l'<img> échoue au chargement, on régénère une
   // seule fois avant d'abandonner.
-  const attachMediaImage = (img, mediaRow) => {
+  // Miniatures Gestion (480 px) : la grille ne télécharge plus l'original
+  // complet à chaque ouverture. Créée à l'import, ou une seule fois au premier
+  // affichage pour les photos anciennes, puis conservée dans l'espace
+  // miniatures (l5d2lm-admin-thumbnails, colonne admin_thumbnail_path).
+  const THUMBNAIL_MAX_PX = 480;
+  const THUMBNAIL_BUCKET = 'l5d2lm-admin-thumbnails';
+  const thumbnailJobs = new Map();
+
+  const makeThumbnailBlob = async (sourceBlob) => {
+    const bitmap = await createImageBitmap(sourceBlob);
+    const scale = Math.min(1, THUMBNAIL_MAX_PX / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    const webp = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.8));
+    if (webp && webp.type === 'image/webp') return webp;
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+  };
+
+  const storeThumbnail = async (mediaId, sourceBlob, sourceRow) => {
+    let readable = sourceBlob;
+    if (isHeicMediaRow(sourceRow)) {
+      const previewUrl = await convertHeicBlobForPreview(sourceBlob);
+      if (!previewUrl) throw new Error('Conversion HEIC impossible');
+      readable = await (await fetch(previewUrl)).blob();
+    }
+    const thumbnail = await makeThumbnailBlob(readable);
+    const path = `${mediaId}.${thumbnail.type === 'image/webp' ? 'webp' : 'jpg'}`;
+    const supabase = getSupabase();
+    const { error: uploadError } = await supabase.storage
+      .from(THUMBNAIL_BUCKET)
+      .upload(path, thumbnail, { contentType: thumbnail.type, upsert: true });
+    if (uploadError) throw uploadError;
+    const { error: updateError } = await supabase
+      .from('l5d2lm_media')
+      .update({ admin_thumbnail_path: path })
+      .eq('id', mediaId);
+    if (updateError) throw updateError;
+    const libraryRow = mediaState.library.get(mediaId);
+    if (libraryRow) libraryRow.admin_thumbnail_path = path;
+    return path;
+  };
+
+  const getSignedThumbnailUrl = async (mediaRow, { forceFresh = false } = {}) => {
+    if (!mediaRow.admin_thumbnail_path) return '';
+    const key = `thumb:${mediaRow.id}`;
+    const cached = mediaState.signedUrlCache.get(key);
+    if (!forceFresh && cached && cached.expiresAt > Date.now() + SIGNED_URL_REFRESH_MARGIN_MS) {
+      return cached.url;
+    }
+    const { data, error } = await getSupabase().storage
+      .from(THUMBNAIL_BUCKET)
+      .createSignedUrl(mediaRow.admin_thumbnail_path, SIGNED_URL_TTL_SECONDS);
+    if (error || !data?.signedUrl) return '';
+    mediaState.signedUrlCache.set(key, {
+      url: data.signedUrl,
+      expiresAt: Date.now() + SIGNED_URL_TTL_SECONDS * 1000
+    });
+    return data.signedUrl;
+  };
+
+  // Grilles et sélecteurs : miniature. Photo sans miniature : elle est créée
+  // une seule fois à partir de l'original, puis réutilisée. Repli : l'URL de
+  // l'original, comme avant.
+  const resolveThumbnailSrc = async (mediaRow) => {
+    if (!mediaRow || !mediaRow.original_private_path) return resolveMediaSrc(mediaRow);
+    if (mediaRow.admin_thumbnail_path) {
+      const url = await getSignedThumbnailUrl(mediaRow);
+      if (url) return url;
+    }
+    if (!thumbnailJobs.has(mediaRow.id)) {
+      thumbnailJobs.set(mediaRow.id, (async () => {
+        const signedUrl = await getSignedMediaUrl(mediaRow);
+        if (!signedUrl) return '';
+        const blob = await (await fetch(signedUrl)).blob();
+        await storeThumbnail(mediaRow.id, blob, mediaRow);
+        return getSignedThumbnailUrl(mediaRow, { forceFresh: true });
+      })().catch(() => ''));
+    }
+    return (await thumbnailJobs.get(mediaRow.id)) || resolveMediaSrc(mediaRow);
+  };
+
+  const attachMediaImage = (img, mediaRow, { full = false } = {}) => {
     let retried = false;
     img.addEventListener('error', () => {
       if (!mediaRow) return;
@@ -1678,7 +1762,7 @@
         else img.dispatchEvent(new Event('error'));
       });
     });
-    resolveMediaSrc(mediaRow).then((src) => {
+    (full ? resolveMediaSrc(mediaRow) : resolveThumbnailSrc(mediaRow)).then((src) => {
       if (src) img.src = src;
       else img.dispatchEvent(new Event('error'));
     });
@@ -1763,7 +1847,7 @@
       if (mediaIds.length) {
         const { data: mediaRows, error: mediaError } = await supabase
           .from('l5d2lm_media')
-          .select('id, original_filename, original_private_path, public_path, default_annotation, rights_status, favorite, focal_x, focal_y')
+          .select('id, original_filename, original_private_path, admin_thumbnail_path, public_path, default_annotation, rights_status, favorite, focal_x, focal_y')
           .in('id', mediaIds)
           .is('deleted_at', null);
         if (mediaError) throw mediaError;
@@ -2178,7 +2262,7 @@
     // que de dupliquer l'import (même règle que l'import depuis Photos).
     const { data: existingRow } = await supabase
       .from('l5d2lm_media')
-      .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+      .select('id, original_filename, original_private_path, admin_thumbnail_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
       .eq('original_sha256', hash)
       .is('deleted_at', null)
       .limit(1)
@@ -2206,11 +2290,12 @@
         original_sha256: hash,
         original_private_path: storagePath
       })
-      .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+      .select('id, original_filename, original_private_path, admin_thumbnail_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
       .single();
     if (insertError) throw insertError;
 
     mediaState.library.set(insertedRow.id, insertedRow);
+    storeThumbnail(insertedRow.id, file, { original_filename: file.name, original_mime_type: contentType }).catch(() => {});
     mediaState.importedByFilename.set(insertedRow.original_filename, insertedRow);
     return insertedRow.id;
   };
@@ -3693,7 +3778,7 @@
       const img = document.createElement('img');
       img.alt = info.alt_text || '';
       img.style.objectPosition = `${(info.focal_x ?? 0.5) * 100}% ${(info.focal_y ?? 0.5) * 100}%`;
-      attachMediaImage(img, info);
+      attachMediaImage(img, info, { full: true });
       mediaEditPhoto.appendChild(img);
     }
 
@@ -4009,7 +4094,7 @@
               default_annotation: item.kind === 'upload' && item.title ? item.title.trim() : null,
               alt_text: item.kind === 'upload' && item.annotation ? item.annotation.trim() : null
             })
-            .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+            .select('id, original_filename, original_private_path, admin_thumbnail_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
             .single();
 
           if (insertError) {
@@ -4017,7 +4102,7 @@
               duplicates += 1;
               const { data: existingRow } = await supabase
                 .from('l5d2lm_media')
-                .select('id, original_filename, original_private_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
+                .select('id, original_filename, original_private_path, admin_thumbnail_path, public_path, default_annotation, alt_text, rights_status, favorite, publish_status, processing_status, upload_batch_id, collection_id, focal_x, focal_y, created_at')
                 .eq('original_sha256', hash)
                 .is('deleted_at', null)
                 .limit(1)
@@ -4041,6 +4126,7 @@
           }
 
           mediaState.library.set(insertedRow.id, insertedRow);
+          storeThumbnail(insertedRow.id, blob, { original_filename: item.filename, original_mime_type: contentType }).catch(() => {});
           mediaState.importedByFilename.set(item.filename, insertedRow);
           mediaState.importedFilenames.add(item.filename);
           mediaState.selected.delete(item.id);
