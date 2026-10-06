@@ -350,6 +350,7 @@ _BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 _ITALIC_RE = re.compile(r"\*(.+?)\*")
 _BULLET_RE = re.compile(r"^-\s+")
 _NUMBERED_RE = re.compile(r"^\d+\.\s+")
+_META_RE = re.compile(r"^\*\*[^*]+[ \u00a0]:\*\*")
 
 
 def is_safe_url(url: str) -> bool:
@@ -383,7 +384,13 @@ def render_lead(text: str) -> str:
 
 
 def render_body(text: str) -> str:
-    """Texte riche : paragraphes, listes, gras/italique/liens."""
+    """Texte riche : paragraphes, listes, gras/italique/liens.
+
+    Trois formes de mise en page reprennent les classes du site :
+    - "**Libellé :** texte" (une ligne par libellé)  -> <p class="service-meta">
+    - "> texte" (ligne seule)                          -> <p class="service-emphasis">
+    - liste à puces "- item"                            -> <ul class="check-list">
+    """
     text = (text or "").strip()
     if not text:
         return ""
@@ -395,10 +402,14 @@ def render_body(text: str) -> str:
             continue
         if all(_BULLET_RE.match(line) for line in lines):
             items = "".join(f"<li>{_inline(html.escape(_BULLET_RE.sub('', line)))}</li>" for line in lines)
-            html_parts.append(f"<ul>{items}</ul>")
+            html_parts.append(f'<ul class="check-list">{items}</ul>')
         elif all(_NUMBERED_RE.match(line) for line in lines):
             items = "".join(f"<li>{_inline(html.escape(_NUMBERED_RE.sub('', line)))}</li>" for line in lines)
             html_parts.append(f"<ol>{items}</ol>")
+        elif all(_META_RE.match(line) for line in lines):
+            html_parts.extend(f'<p class="service-meta">{_inline(html.escape(line))}</p>' for line in lines)
+        elif len(lines) == 1 and lines[0].startswith("> "):
+            html_parts.append(f'<p class="service-emphasis">{_inline(html.escape(lines[0][2:]))}</p>')
         else:
             paragraph = "<br>".join(_inline(html.escape(line)) for line in lines)
             html_parts.append(f"<p>{paragraph}</p>")

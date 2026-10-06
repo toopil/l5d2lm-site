@@ -541,32 +541,32 @@
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-massage', label: 'Carte Massage', fields: ['title', 'body', 'button'], defaults: {
       title: 'Massages & massage éclair',
-      body: 'Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.',
+      body: "Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.",
       button_label: 'Découvrir', button_url: 'l5d2lm-massage.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-corps-expression', label: 'Carte Corps & expression', fields: ['title', 'body', 'button'], defaults: {
       title: 'Corps & expression',
-      body: 'Playful extatique, improvisation, réveil du corps, jeux de mouvement et « À portée de main ».',
+      body: "Playful extatique, improvisation, réveil du corps, jeux de mouvement et « À portée de main ».",
       button_label: 'Découvrir', button_url: 'l5d2lm-corps-expression.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-colo', label: 'Carte Colo pour adultes', fields: ['title', 'body', 'button'], defaults: {
       title: 'Colo pour adultes',
-      body: 'Retrouver l’esprit d’une colo et construire ensemble un séjour où chacun peut apporter sa magie.',
+      body: "Retrouver l’esprit d’une colo et construire ensemble un séjour où chacun peut apporter sa magie.",
       button_label: 'Découvrir', button_url: 'l5d2lm-colos-sejours.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-animation', label: 'Carte Animations participatives', fields: ['title', 'body', 'button'], defaults: {
       title: 'Animations participatives',
-      body: 'Des jeux et propositions vivantes pour rendre chacun acteur et créer des souvenirs de groupe marquants.',
+      body: "Des jeux et propositions vivantes pour rendre chacun acteur et créer des souvenirs de groupe marquants.",
       button_label: 'Découvrir', button_url: 'l5d2lm-animations-participatives.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-espaces', label: 'Carte Espaces à découvrir', fields: ['title', 'body', 'button'], defaults: {
       title: 'Espaces à découvrir',
-      body: 'Des lieux, associations, écoles et initiatives existantes à faire connaître.',
+      body: "Des lieux, associations, écoles et initiatives existantes à faire connaître.",
       button_label: 'Explorer', button_url: 'l5d2lm-espaces-a-decouvrir.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-formats', label: '« Des formats qui se construisent ensemble »', fields: ['title', 'body', 'button'], defaults: {
       title: 'Des formats qui se construisent ensemble',
-      body: 'Un atelier bien-être, une animation festival, un massage événementiel, une colo pour adultes ou un séjour créatif pour adultes peuvent naître d’une envie encore floue. La forme se précise ensuite avec vous, selon le lieu, la durée et les personnes présentes.',
+      body: "Un atelier bien-être, une animation festival, un massage événementiel, une colo pour adultes ou un séjour créatif pour adultes peuvent naître d’une envie encore floue. La forme se précise ensuite avec vous, selon le lieu, la durée et les personnes présentes.",
       button_label: 'Parler de votre idée', button_url: 'l5d2lm-contact.html'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -586,19 +586,19 @@
     { page: 'l5d2lm-massage', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage intuitif',
       lead: 'Prendre le temps.\nÉcouter le corps.\nS’adapter à ce qui est présent.',
-      body: 'Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.',
+      body: "Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.",
       button_label: 'Faire une demande pour le Massage intuitif', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-intuitif'
     } },
     { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Massage éclair', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage éclair',
       lead: 'Recevoir.\nRéveiller.\nApprendre à transmettre.',
-      body: 'Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.',
+      body: "Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\n> Deux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.",
       button_label: 'Faire une demande pour le recevoir', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Massage aquatique',
       lead: 'Se laisser porter.\nRespirer.\nRetrouver de la légèreté.',
-      body: 'Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Durée :** de 45 à 90 minutes.\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.',
+      body: "Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Durée :** de 45 à 90 minutes.\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.",
       button_label: 'Faire une demande pour le Massage aquatique', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-aquatique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-heading', label: 'En-tête « Quelques repères simples »', fields: ['eyebrow', 'title'], defaults: {
@@ -606,24 +606,24 @@
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-deroulement', label: '« Comment se déroule une séance ? »', fields: ['title', 'body'], defaults: {
       title: 'Comment se déroule une séance ?',
-      body: 'Chaque rencontre commence par un court échange. Ce temps permet de clarifier vos attentes et de repérer d’éventuelles douleurs, blessures ou zones sensibles afin que je puisse adapter la séance.\n\nIl ne s’agit pas d’un diagnostic médical, mais d’un moment d’écoute pour prendre soin du corps avec respect.\n\nUne fois installé, je vous invite à respirer, à vous déposer et à prendre le temps.'
+      body: "Chaque rencontre commence par un court échange. Ce temps permet de clarifier vos attentes et de repérer d’éventuelles douleurs, blessures ou zones sensibles afin que je puisse adapter la séance.\n\nIl ne s’agit pas d’un diagnostic médical, mais d’un moment d’écoute pour prendre soin du corps avec respect.\n\nUne fois installé, je vous invite à respirer, à vous déposer et à prendre le temps."
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-parler', label: '« Faut-il parler pendant la séance ? »', fields: ['title', 'body'], defaults: {
       title: 'Faut-il parler pendant la séance ?',
-      body: 'Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe massage éclair laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.'
+      body: "Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe massage éclair laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe."
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-premiere-fois', label: '« Et si c’est une première fois ? »', fields: ['title', 'body'], defaults: {
       title: 'Et si c’est une première fois ?',
-      body: 'Aucune expérience préalable n’est nécessaire. La proposition s’adapte à votre rythme, vos envies et vos limites.'
+      body: "Aucune expérience préalable n’est nécessaire. La proposition s’adapte à votre rythme, vos envies et vos limites."
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-chenda', label: 'Espace Chèndâ', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Lieu principal', title: 'Espace Chèndâ',
-      body: 'Je donne principalement les massages intuitifs à l’Espace Chèndâ.',
+      body: "Je donne principalement les massages intuitifs à l’Espace Chèndâ.",
       button_label: 'Voir l’adresse et l’itinéraire', button_url: 'https://search.ch/tel/sierre/avenue-general-guisan-19/espace-chenda.fr.html'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-qui-masse', label: 'Qui masse ?', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Présentation pour l’espace massage', title: 'Qui masse ?',
-      body: 'Mon parcours s’est construit entre l’animation socioculturelle, les métiers du bois, le travail manuel, le mouvement et la relation humaine.\n\nDepuis de nombreuses années, j’accompagne des personnes et des groupes à travers le jeu, la créativité, l’expression corporelle et des expériences collectives. La menuiserie et la charpente ont aussi nourri mon rapport aux mains, à la matière, aux formes, aux appuis et à la précision du geste.\n\nLe toucher a progressivement pris une place importante dans ma manière de créer du lien. Dans des contextes amicaux, associatifs ou événementiels, j’ai observé combien un contact respectueux pouvait aider à relâcher les tensions, ralentir et retrouver une présence plus concrète au corps.\n\nJe masse de manière intuitive. Je ne reproduis pas une séance identique d’une personne à l’autre. Je m’adapte aux besoins exprimés, aux zones de tension, aux limites de chacun et aux réactions du corps au fil de la séance.\n\nJ’accorde une grande importance au respect, au consentement et à un cadre clair, sécurisant et non sexualisé.'
+      body: "Mon parcours s’est construit entre l’animation socioculturelle, les métiers du bois, le travail manuel, le mouvement et la relation humaine.\n\nDepuis de nombreuses années, j’accompagne des personnes et des groupes à travers le jeu, la créativité, l’expression corporelle et des expériences collectives. La menuiserie et la charpente ont aussi nourri mon rapport aux mains, à la matière, aux formes, aux appuis et à la précision du geste.\n\nLe toucher a progressivement pris une place importante dans ma manière de créer du lien. Dans des contextes amicaux, associatifs ou événementiels, j’ai observé combien un contact respectueux pouvait aider à relâcher les tensions, ralentir et retrouver une présence plus concrète au corps.\n\nJe masse de manière intuitive. Je ne reproduis pas une séance identique d’une personne à l’autre. Je m’adapte aux besoins exprimés, aux zones de tension, aux limites de chacun et aux réactions du corps au fil de la séance.\n\nJ’accorde une grande importance au respect, au consentement et à un cadre clair, sécurisant et non sexualisé."
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-training-heading', label: 'En-tête « Recevoir, ou apprendre à transmettre »', fields: ['eyebrow', 'title', 'lead'], defaults: {
       eyebrow: 'Massage éclair', title: 'Recevoir, ou apprendre à transmettre',
@@ -631,17 +631,17 @@
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-training-recevoir', label: 'Recevoir un massage éclair', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Recevoir', title: 'Recevoir un massage éclair',
-      body: 'Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.',
+      body: "Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.",
       button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-training-transmettre', label: 'Apprendre à transmettre', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Apprendre à transmettre', title: 'Apprendre à transmettre le massage éclair',
-      body: 'Le Massage éclair a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.',
+      body: "Le Massage éclair a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.",
       button_label: 'Demander une transmission', button_url: 'l5d2lm-contact.html?category=massage&offer=transmission-reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-cta', label: 'Construire une proposition', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
       eyebrow: 'Imaginer le bon format', title: 'Construire une proposition',
-      body: 'Chaque rencontre est différente. Lorsqu’une proposition résonne avec votre besoin ou votre curiosité, le format peut s’ajuster au contexte, au lieu et aux personnes présentes.\n\nLa durée et les tarifs sont définis selon le lieu, le nombre de personnes et le contexte.',
+      body: "Chaque rencontre est différente. Lorsqu’une proposition résonne avec votre besoin ou votre curiosité, le format peut s’ajuster au contexte, au lieu et aux personnes présentes.\n\nLa durée et les tarifs sont définis selon le lieu, le nombre de personnes et le contexte.",
       button_label: 'Parler de votre besoin', button_url: 'l5d2lm-contact.html?category=massage'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -656,12 +656,12 @@
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-jeu-danse', label: 'Jeu danse (famille)', fields: ['eyebrow', 'title', 'lead', 'body'], defaults: {
       eyebrow: 'Jeu danse', title: 'Le jeu comme porte d’entrée vers la danse.', lead: 'Jeu danse / Je danse',
-      body: 'Pas pour apprendre les bons mouvements, mais pour jouer, essayer, improviser et voir ce qui se passe.\n\nTout peut commencer par presque rien : une consigne, une musique, un regard, une rencontre.\n\nLe jeu devient mouvement, le mouvement devient rencontre et, parfois presque sans s’en rendre compte, le jeu devient danse.'
+      body: "Pas pour apprendre les bons mouvements, mais pour jouer, essayer, improviser et voir ce qui se passe.\n\nTout peut commencer par presque rien : une consigne, une musique, un regard, une rencontre.\n\nLe jeu devient mouvement, le mouvement devient rencontre et, parfois presque sans s’en rendre compte, le jeu devient danse."
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique', label: 'Playful extatique (format de Jeu danse)', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Playful extatique',
       lead: 'Une exploration guidée, portée par la musique.',
-      body: 'Une exploration guidée du corps, du mouvement et du jeu, portée par la musique. Chacun reste libre de s’approprier les propositions : sensations et émotions ont leur place.\n\nCe n’est ni un cours de danse ni une chorégraphie : un espace pour se lâcher sur la musique et rencontrer les autres autrement.',
+      body: "Une exploration guidée du corps, du mouvement et du jeu, portée par la musique. Chacun reste libre de s’approprier les propositions : sensations et émotions ont leur place.\n\n> Ce n’est ni un cours de danse ni une chorégraphie : un espace pour se lâcher sur la musique et rencontrer les autres autrement.",
       button_label: 'Faire une demande pour Playful extatique', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=playful-extatique'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'a-portee-de-main', label: 'À portée de main (format de Jeu danse)', fields: ['title', 'lead', 'body', 'button'], defaults: {
@@ -673,28 +673,28 @@
     { page: 'l5d2lm-corps-expression', blockKey: 'theatre-improvisation', label: 'Théâtre d’improvisation', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Théâtre d’improvisation',
       lead: 'Des petits jeux progressifs, sans représentation à préparer.',
-      body: 'Petits jeux et exercices progressifs : ni match d’impro, ni représentation à préparer. La progression se fait crescendo, sans stress.\n\n- Chacun participe selon son envie : observer, entrer dans un jeu, en sortir.\n- L’objectif est la spontanéité, l’écoute, l’accueil de ce qui apparaît.\n\nAdapté à tous les âges, de 4 à 96 ans.',
+      body: "Petits jeux et exercices progressifs : ni match d’impro, ni représentation à préparer. La progression se fait crescendo, sans stress.\n\n- Chacun participe selon son envie : observer, entrer dans un jeu, en sortir.\n- L’objectif est la spontanéité, l’écoute, l’accueil de ce qui apparaît.\n\n> Adapté à tous les âges, de 4 à 96 ans.",
       button_label: 'Faire une demande pour le Théâtre d’improvisation', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=theatre-improvisation'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'jeux-de-mouvement', label: 'Jeux de mouvement', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Jeux de mouvement',
       lead: 'Courir, observer, réagir, improviser, coopérer.',
-      body: 'Jeu, théâtre d’improvisation, réveil du corps et danse réunis. Le contenu change selon l’âge, le lieu et l’énergie du moment.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\nEnfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.',
+      body: "Jeu, théâtre d’improvisation, réveil du corps et danse réunis. Le contenu change selon l’âge, le lieu et l’énergie du moment.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\n> Enfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.",
       button_label: 'Faire une demande pour les Jeux de mouvement', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=jeux-de-mouvement'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps', label: 'Réveil du corps', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Réveil du corps',
       lead: 'Remettre le corps en mouvement, retrouver une présence à soi.',
-      body: 'Respiration, automassage, étirements, mobilisation articulaire, danse, yoga, sons tibétains. L’ambiance s’adapte au groupe et au moment : douce ou plus dynamique.\n\n- Peut aussi devenir un rendez-vous collectif régulier.',
+      body: "Respiration, automassage, étirements, mobilisation articulaire, danse, yoga, sons tibétains. L’ambiance s’adapte au groupe et au moment : douce ou plus dynamique.\n\n- Peut aussi devenir un rendez-vous collectif régulier.",
       button_label: 'Faire une demande pour le Réveil du corps', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=reveil-du-corps'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-parcours', label: 'Présentation / parcours', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'D’où vient cette approche ?', title: 'Du jeu au mouvement, et du mouvement à la rencontre.',
-      body: 'Issu de l’animation, du théâtre d’improvisation et des jeux collectifs, Julien aime créer des situations simples où chacun peut essayer, bouger et rencontrer les autres sans pression.\n\nLa danse est venue nourrir cette approche au fil du temps, avec une envie particulière : partir du jeu plutôt que chercher immédiatement à « bien danser », et explorer différentes manières de bouger et de rencontrer l’autre.\n\nLes propositions de Corps & expression mélangent ainsi jeu, improvisation, mouvement et danse selon le groupe, le lieu et l’énergie du moment.'
+      body: "Issu de l’animation, du théâtre d’improvisation et des jeux collectifs, Julien aime créer des situations simples où chacun peut essayer, bouger et rencontrer les autres sans pression.\n\nLa danse est venue nourrir cette approche au fil du temps, avec une envie particulière : partir du jeu plutôt que chercher immédiatement à « bien danser », et explorer différentes manières de bouger et de rencontrer l’autre.\n\nLes propositions de Corps & expression mélangent ainsi jeu, improvisation, mouvement et danse selon le groupe, le lieu et l’énergie du moment."
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-cadre', label: '« Un cadre commun »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Un cadre commun', title: 'Le même esprit pour chaque proposition.',
-      body: 'Chaque proposition s’adapte au groupe, au lieu et à l’énergie du moment. Il n’y a pas de performance à réussir : chacun peut participer à son rythme, observer, ou simplement essayer. Le respect et le consentement de chaque personne restent la base.'
+      body: "Chaque proposition s’adapte au groupe, au lieu et à l’énergie du moment. Il n’y a pas de performance à réussir : chacun peut participer à son rythme, observer, ou simplement essayer. Le respect et le consentement de chaque personne restent la base."
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
@@ -708,19 +708,19 @@
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-collective-heading', label: '« Une expérience collective »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Une expérience collective', title: 'Un cadre où chacun peut prendre sa place.',
-      body: 'La Colo pour adultes s’adresse aux personnes qui souhaitent sortir du quotidien, rencontrer d’autres personnes, jouer, partager et vivre un séjour dans lequel chacun peut réellement prendre sa place.\n\nL’accompagnement peut couvrir toute la durée du séjour : organisation, co-organisation, animation ou responsabilité du cadre, selon les besoins du projet.'
+      body: "La Colo pour adultes s’adresse aux personnes qui souhaitent sortir du quotidien, rencontrer d’autres personnes, jouer, partager et vivre un séjour dans lequel chacun peut réellement prendre sa place.\n\nL’accompagnement peut couvrir toute la durée du séjour : organisation, co-organisation, animation ou responsabilité du cadre, selon les besoins du projet."
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-magie', label: '« La magie de chacun »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'La magie de chacun', title: 'Le programme ne vient pas seulement d’activités décidées à l’avance.',
-      body: 'Chaque participant peut aussi proposer sa « magie » aux autres : un jeu, une activité, une passion, un savoir-faire, une pratique ou simplement une envie.\n\nL’objectif est de créer un cadre de confiance dans lequel chacun peut participer, essayer, proposer ou simplement profiter du séjour à son rythme. Le groupe devient progressivement acteur de sa propre expérience.'
+      body: "Chaque participant peut aussi proposer sa « magie » aux autres : un jeu, une activité, une passion, un savoir-faire, une pratique ou simplement une envie.\n\nL’objectif est de créer un cadre de confiance dans lequel chacun peut participer, essayer, proposer ou simplement profiter du séjour à son rythme. Le groupe devient progressivement acteur de sa propre expérience."
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-depart', label: '« À partir de 15 adultes »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Point de départ', title: 'À partir de 15 adultes',
-      body: 'Une colo peut être organisée à partir de **15 participants adultes**.'
+      body: "Une colo peut être organisée à partir de **15 participants adultes**."
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-construction', label: '« Selon le groupe »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Construction', title: 'Selon le groupe',
-      body: 'Le contenu, la durée, le lieu et les activités sont construits en fonction des personnes présentes.'
+      body: "Le contenu, la durée, le lieu et les activités sont construits en fonction des personnes présentes."
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-actions', label: '« Participer ou soutenir »', fields: ['eyebrow', 'title', 'button'], defaults: {
       eyebrow: 'Participer ou soutenir', title: 'Choisir la manière de rejoindre le projet.',
@@ -742,31 +742,31 @@
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-rencontrer', label: '« Se rencontrer »', fields: ['title', 'body'], defaults: {
       title: 'Se rencontrer',
-      body: '- Jeux pour briser la glace\n- Jeux d’interaction et de mouvement\n- Mimes'
+      body: "- Jeux pour briser la glace\n- Jeux d’interaction et de mouvement\n- Mimes"
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-jouer', label: '« Jouer et essayer »', fields: ['title', 'body'], defaults: {
       title: 'Jouer et essayer',
-      body: '- Tir à l’arc\n- Slackline\n- Jeux de lancer\n- Jeux en bois et jeux de société'
+      body: "- Tir à l’arc\n- Slackline\n- Jeux de lancer\n- Jeux en bois et jeux de société"
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-toolbox-creer', label: '« Créer ensemble »', fields: ['title', 'body'], defaults: {
       title: 'Créer ensemble',
-      body: '- Photos de groupe marquantes et drôles\n- Propositions improvisées à partir de ce qui se passe sur le moment'
+      body: "- Photos de groupe marquantes et drôles\n- Propositions improvisées à partir de ce qui se passe sur le moment"
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-souvenirs', label: '« Photos de groupe »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Photos de groupe', title: 'Créer un souvenir qui raconte vraiment quelque chose du groupe.',
-      body: 'L’animation aide les participants à imaginer une situation, une composition, un geste ou une mise en scène collective.\n\nL’objectif est de créer un souvenir original, marquant et drôle, plutôt qu’une simple photo où tout le monde pose face à l’appareil.'
+      body: "L’animation aide les participants à imaginer une situation, une composition, un geste ou une mise en scène collective.\n\nL’objectif est de créer un souvenir original, marquant et drôle, plutôt qu’une simple photo où tout le monde pose face à l’appareil."
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-essentiel', label: '« L’essentiel »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'L’essentiel', title: 'Créer du lien, pas une performance.',
-      body: 'Il n’y a pas de résultat particulier à atteindre. L’essentiel est de provoquer des rencontres et de permettre aux personnes d’interagir les unes avec les autres.'
+      body: "Il n’y a pas de résultat particulier à atteindre. L’essentiel est de provoquer des rencontres et de permettre aux personnes d’interagir les unes avec les autres."
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-duree-public', label: '« Durée et public »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Durée et public', title: 'De 30 minutes à 4 heures',
-      body: 'Les animations peuvent durer d’une demi-heure à quatre heures et s’adresser aux enfants, aux adolescents ou aux adultes.'
+      body: "Les animations peuvent durer d’une demi-heure à quatre heures et s’adresser aux enfants, aux adolescents ou aux adultes."
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-cta', label: 'Appel à l’action final', fields: ['title', 'body', 'button'], defaults: {
       title: 'Votre événement, votre public, une ambiance ?',
-      body: 'La proposition peut se préparer en amont ou s’inventer sur place à partir de votre contexte.',
+      body: "La proposition peut se préparer en amont ou s’inventer sur place à partir de votre contexte.",
       button_label: 'Construire votre animation', button_url: 'l5d2lm-contact.html?category=animations-participatives&offer=animation-participative'
     } },
     { page: 'l5d2lm-animations-participatives', blockKey: 'animation-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -784,72 +784,72 @@
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-satellite', label: 'Le Satellite', fields: ['title', 'body', 'button'], defaults: {
       title: 'Le Satellite',
-      body: 'Sierre — Culture, partage et vie de quartier : jardin, ateliers, coworking et marché.',
+      body: "Sierre — Culture, partage et vie de quartier : jardin, ateliers, coworking et marché.",
       button_label: 'www.lesatellite.ch', button_url: 'https://www.lesatellite.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-archipel', label: 'L’Archipel', fields: ['title', 'body', 'button'], defaults: {
       title: 'L’Archipel',
-      body: 'Sion — Tiers-lieu avec ressourcerie, coworking, atelier partagé et jardin-forêt.',
+      body: "Sion — Tiers-lieu avec ressourcerie, coworking, atelier partagé et jardin-forêt.",
       button_label: 'archipelsion.ch', button_url: 'https://archipelsion.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-aslec', label: 'ASLEC', fields: ['title', 'body', 'button'], defaults: {
       title: 'ASLEC',
-      body: 'Sierre — Loisirs, éducation et culture pour enfants et ados.',
+      body: "Sierre — Loisirs, éducation et culture pour enfants et ados.",
       button_label: 'aslec.ch', button_url: 'https://aslec.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-kairos', label: 'Association Kaïros', fields: ['title', 'body', 'button'], defaults: {
       title: 'Association Kaïros',
-      body: 'Uvrier — Verger en permaculture, forêt nourricière, jus et nectars maison.',
+      body: "Uvrier — Verger en permaculture, forêt nourricière, jus et nectars maison.",
       button_label: 'associationkairos.com', button_url: 'https://www.associationkairos.com/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-digestif', label: 'Compagnie Digestif / Treffpunkt Tschüdanga', fields: ['title', 'body', 'button'], defaults: {
       title: 'Compagnie Digestif / Treffpunkt Tschüdanga',
-      body: 'Salgesch — Rencontre humain-nature-animaux en forêt de Finges : cirque, jardin et résidences d’artistes.',
+      body: "Salgesch — Rencontre humain-nature-animaux en forêt de Finges : cirque, jardin et résidences d’artistes.",
       button_label: 'compagniedigestif.ch', button_url: 'https://www.compagniedigestif.ch/fr/angebote/treffpunkt-tschudanga/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-akenes', label: 'École aux Akènes', fields: ['title', 'body', 'button'], defaults: {
       title: 'École aux Akènes',
-      body: 'Lens — École où l’enfant apprend à son rythme, en autonomie.',
+      body: "Lens — École où l’enfant apprend à son rythme, en autonomie.",
       button_label: 'ecoleauxakenes.ch', button_url: 'https://www.ecoleauxakenes.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-educaterre', label: 'EducaTerre', fields: ['title', 'body', 'button'], defaults: {
       title: 'EducaTerre',
-      body: 'Valais — Apprendre et s’épanouir au contact de la nature.',
+      body: "Valais — Apprendre et s’épanouir au contact de la nature.",
       button_label: 'educaterre.ch', button_url: 'https://educaterre.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-mandala', label: 'Mandala Schule', fields: ['title', 'body', 'button'], defaults: {
       title: 'Mandala Schule',
-      body: 'Venthône — École privée pour les 4-15 ans, proche de la nature, reconnue depuis 2015.',
+      body: "Venthône — École privée pour les 4-15 ans, proche de la nature, reconnue depuis 2015.",
       button_label: 'mandala-schule.ch', button_url: 'https://mandala-schule.ch/fr/accueil/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-canopee', label: 'Épicerie La Canopée', fields: ['title', 'body', 'button'], defaults: {
       title: 'Épicerie La Canopée',
-      body: 'Muraz — Épicerie coopérative, locale et démocratique.',
+      body: "Muraz — Épicerie coopérative, locale et démocratique.",
       button_label: 'epicerielacanopee.ch', button_url: 'https://epicerielacanopee.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-terraformation', label: 'Terra Formation', fields: ['title', 'body', 'button'], defaults: {
       title: 'Terra Formation',
-      body: 'Fondation valaisanne autour de la biodiversité, de la régénération des écosystèmes et de la transmission de pratiques écologiques.',
+      body: "Fondation valaisanne autour de la biodiversité, de la régénération des écosystèmes et de la transmission de pratiques écologiques.",
       button_label: 'terraformation.ch', button_url: 'https://www.terraformation.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-agroecologie', label: 'Journées de l’Agroécologie', fields: ['title', 'body', 'button'], defaults: {
       title: 'Journées de l’Agroécologie',
-      body: 'Événements partout en Suisse autour de l’agroécologie : ateliers, visites, formations et rencontres. Chaque personne peut aussi proposer son propre événement.',
+      body: "Événements partout en Suisse autour de l’agroécologie : ateliers, visites, formations et rencontres. Chaque personne peut aussi proposer son propre événement.",
       button_label: 'agroecologyworks.ch', button_url: 'https://www.agroecologyworks.ch/fr/journees-de-l-agroecologie/2026/events'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-passeport-possibles', label: 'Passeport des possibles', fields: ['title', 'body', 'button'], defaults: {
       title: 'Passeport des possibles',
-      body: 'Parcours ludique à Fribourg pour découvrir plusieurs associations à travers des petites activités autour du réemploi, du bricolage et de l’économie circulaire.',
+      body: "Parcours ludique à Fribourg pour découvrir plusieurs associations à travers des petites activités autour du réemploi, du bricolage et de l’économie circulaire.",
       button_label: 'lafabriquefribourg.ch', button_url: 'https://lafabriquefribourg.ch/le-passeport-des-possibles/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-transports-gratuits', label: 'Transports publics gratuits', fields: ['title', 'body', 'button'], defaults: {
       title: 'Transports publics gratuits',
-      body: 'Initiative suisse visant à rendre les transports publics locaux et régionaux gratuits, et les déplacements longue distance beaucoup plus accessibles.',
+      body: "Initiative suisse visant à rendre les transports publics locaux et régionaux gratuits, et les déplacements longue distance beaucoup plus accessibles.",
       button_label: 'transports-publics-gratuits.ch', button_url: 'https://transports-publics-gratuits.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espace-sentiers-savoirs', label: 'Sentiers des Savoirs', fields: ['title', 'body', 'button'], defaults: {
       title: 'Sentiers des Savoirs',
-      body: 'Réseau où l’on voyage, souvent à pied, pour rencontrer des personnes et apprendre directement auprès d’elles des savoir-faire artisanaux, agricoles ou liés au vivant.',
+      body: "Réseau où l’on voyage, souvent à pied, pour rencontrer des personnes et apprendre directement auprès d’elles des savoir-faire artisanaux, agricoles ou liés au vivant.",
       button_label: 'sentiers-des-savoirs.ch', button_url: 'https://sentiers-des-savoirs.ch/'
     } },
     { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -867,7 +867,7 @@
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-note', label: '« Écrire simplement »', fields: ['title', 'body', 'button'], defaults: {
       title: 'Écrire simplement',
-      body: 'Votre demande sert seulement à commencer la conversation. Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.',
+      body: "Votre demande sert seulement à commencer la conversation. Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.",
       button_label: 'l5d2lm@ik.me', button_url: 'mailto:l5d2lm@ik.me'
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
@@ -880,15 +880,15 @@
     } },
     { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-editeur', label: 'Éditeur du site', fields: ['title', 'body'], defaults: {
       title: 'Éditeur du site',
-      body: 'Les 5 Doigts de la Main, association à but non lucratif de droit suisse (Valais, Suisse).\n\nResponsable de la publication : le comité de l’association.'
+      body: "Les 5 Doigts de la Main, association à but non lucratif de droit suisse (Valais, Suisse).\n\nResponsable de la publication : le comité de l’association."
     } },
     { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-contact', label: 'Contact', fields: ['title', 'body'], defaults: {
       title: 'Contact',
-      body: 'Pour toute question relative au site ou à son contenu : [l5d2lm@ik.me](mailto:l5d2lm@ik.me), ou via la [page contact](l5d2lm-contact.html).'
+      body: "Pour toute question relative au site ou à son contenu : [l5d2lm@ik.me](mailto:l5d2lm@ik.me), ou via la [page contact](l5d2lm-contact.html)."
     } },
     { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-hebergement', label: 'Hébergement', fields: ['title', 'body'], defaults: {
       title: 'Hébergement',
-      body: 'Ce site est hébergé par GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis (GitHub Pages).'
+      body: "Ce site est hébergé par GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis (GitHub Pages)."
     } },
     { page: 'l5d2lm-mentions-legales', blockKey: 'mentions-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
@@ -2906,7 +2906,8 @@
   //
   // Même grammaire restreinte que build/texts.py (render_lead/render_body) :
   // **gras**, *italique*, [texte](url), "- item" pour une liste, ligne
-  // vide = nouveau paragraphe. Ce miroir JS ne sert QUE pour l'aperçu
+  // vide = nouveau paragraphe, "**Libellé :** texte" = ligne de repère,
+  // "> texte" = phrase d'accent. Ce miroir JS ne sert QUE pour l'aperçu
   // local dans /gestion — la seule publication qui compte reste calculée
   // côté build.py à partir du texte brut enregistré en base.
   const escapeHtml = (text) => String(text ?? '')
@@ -2939,10 +2940,16 @@
       const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
       if (!lines.length) return '';
       if (lines.every((line) => /^-\s+/.test(line))) {
-        return `<ul>${lines.map((line) => `<li>${renderInlineText(escapeHtml(line.replace(/^-\s+/, '')))}</li>`).join('')}</ul>`;
+        return `<ul class="check-list">${lines.map((line) => `<li>${renderInlineText(escapeHtml(line.replace(/^-\s+/, '')))}</li>`).join('')}</ul>`;
       }
       if (lines.every((line) => /^\d+\.\s+/.test(line))) {
         return `<ol>${lines.map((line) => `<li>${renderInlineText(escapeHtml(line.replace(/^\d+\.\s+/, '')))}</li>`).join('')}</ol>`;
+      }
+      if (lines.every((line) => /^\*\*[^*]+[ \u00a0]:\*\*/.test(line))) {
+        return lines.map((line) => `<p class="service-meta">${renderInlineText(escapeHtml(line))}</p>`).join('\n');
+      }
+      if (lines.length === 1 && lines[0].startsWith('> ')) {
+        return `<p class="service-emphasis">${renderInlineText(escapeHtml(lines[0].slice(2)))}</p>`;
       }
       return `<p>${lines.map((line) => renderInlineText(escapeHtml(line))).join('<br>')}</p>`;
     }).filter(Boolean).join('\n');
@@ -3136,6 +3143,18 @@
       const before = textarea.value.slice(0, start);
       const needsNewline = before.length && !before.endsWith('\n');
       insert(`${needsNewline ? '\n' : ''}- `, '');
+    });
+    addButton('Repère', 'Ligne de repère : libellé en gras suivi du texte (ex. Durée : 30 min)', () => {
+      const start = textarea.selectionStart;
+      const before = textarea.value.slice(0, start);
+      const needsNewline = before.length && !before.endsWith('\n');
+      insert(`${needsNewline ? '\n' : ''}**Libellé :** `, '');
+    });
+    addButton('Mise en avant', 'Phrase mise en avant (seule sur sa ligne)', () => {
+      const start = textarea.selectionStart;
+      const before = textarea.value.slice(0, start);
+      const needsNewline = before.length && !before.endsWith('\n');
+      insert(`${needsNewline ? '\n' : ''}> `, '');
     });
     return toolbar;
   };
