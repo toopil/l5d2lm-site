@@ -956,6 +956,7 @@
     libraryCounts: { bySection: new Map(), total: 0 },
     sectionOrderItems: [],
     slotAssignments: new Map(),
+    hiddenSlotKeys: new Set(),
     postcardConfigs: new Map(),
     postcardPoolBySection: new Map(),
     signedUrlCache: new Map(),
@@ -2221,6 +2222,26 @@
     });
   };
 
+  // Emplacements explicitement vidés (bouton "Retirer la photo" sur un
+  // emplacement qui n'affichait qu'une photo déjà en ligne avant ce
+  // mécanisme, pas encore "gérée" — voir l5d2lm_media_slot_overrides).
+  // Table optionnelle : si la migration n'est pas encore appliquée,
+  // l'erreur est avalée et aucun emplacement n'est considéré masqué.
+  const fetchHiddenSlotKeys = async () => {
+    mediaState.hiddenSlotKeys = new Set();
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from('l5d2lm_media_slot_overrides')
+        .select('slot_key')
+        .eq('hidden', true);
+      if (error) throw error;
+      mediaState.hiddenSlotKeys = new Set((data || []).map((row) => row.slot_key));
+    } catch (err) {
+      console.warn('Emplacements masqués non récupérés (migration pas encore appliquée ?) :', err);
+    }
+  };
+
   const renderSlotsList = () => {
     if (!mediaSlotsListEl) return;
     mediaSlotsListEl.innerHTML = '';
@@ -2242,14 +2263,18 @@
         mediaSlotsListEl.appendChild(currentGroup);
       }
 
-      const media = mediaState.slotAssignments.get(slot.slotKey);
+      const isHidden = mediaState.hiddenSlotKeys.has(slot.slotKey);
+      const media = isHidden ? null : mediaState.slotAssignments.get(slot.slotKey);
       // Une photo déjà en place avant ce mécanisme (import initial du site)
       // et jamais republiée depuis l'admin : le site public l'affiche déjà
       // (voir build/slots.py, fallback), mais elle n'est pas encore "gérée"
       // ici — à ne pas confondre avec un emplacement réellement vide.
-      const fallbackEntry = !media && slot.fallbackFilename
+      // Calculée même si masqué, pour proposer "Réafficher" seulement quand
+      // il y a réellement quelque chose à réafficher.
+      const fallbackEntry = !mediaState.slotAssignments.get(slot.slotKey) && slot.fallbackFilename
         ? allSiteMedia().find((item) => item.filename === slot.fallbackFilename)
         : null;
+      const visibleFallback = isHidden ? null : fallbackEntry;
 
       const row = document.createElement('div');
       row.className = 'media-slot-item';
@@ -2263,9 +2288,9 @@
         img.style.objectPosition = `${(media.focal_x ?? 0.5) * 100}% ${(media.focal_y ?? 0.5) * 100}%`;
         attachMediaImage(img, media);
         thumb.appendChild(img);
-      } else if (fallbackEntry) {
+      } else if (visibleFallback) {
         const img = document.createElement('img');
-        img.src = fallbackEntry.src;
+        img.src = visibleFallback.src;
         img.alt = '';
         img.loading = 'lazy';
         thumb.appendChild(img);
@@ -2281,11 +2306,13 @@
       title.textContent = slot.label;
       body.appendChild(title);
       const status = document.createElement('span');
-      status.className = media || fallbackEntry ? 'media-slot-item__status' : 'media-slot-item__status--empty';
+      status.className = media || visibleFallback ? 'media-slot-item__status' : 'media-slot-item__status--empty';
       if (media) {
         status.textContent = 'Photo publiée';
-      } else if (fallbackEntry) {
+      } else if (visibleFallback) {
         status.textContent = 'Photo déjà en ligne, pas encore gérée ici';
+      } else if (isHidden) {
+        status.textContent = 'Photo retirée — rien n’est affiché ici';
       } else {
         status.textContent = 'Aucune photo publiée';
       }
@@ -2302,16 +2329,28 @@
       chooseButton.addEventListener('click', () => openMediaPicker('slot', { slotKey: slot.slotKey }));
       actions.appendChild(chooseButton);
 
-      // Retirer : seulement quand une photo est réellement gérée ici (pas
-      // pour un simple repère "Photo à venir", ni pour une photo déjà en
-      // ligne avant ce mécanisme et pas encore gérée — rien à retirer).
-      if (media) {
+      // Retirer : dès qu'une image est réellement affichée ici, qu'elle
+      // soit gérée depuis Gestion ou juste une photo déjà en ligne avant ce
+      // mécanisme — plus seulement quand il y a une fiche média à supprimer.
+      if (media || visibleFallback) {
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'gestion-link-button';
         removeButton.textContent = 'Retirer la photo';
         removeButton.addEventListener('click', () => removeSlotMedia(slot.slotKey));
         actions.appendChild(removeButton);
+      }
+
+      // Réafficher : seulement si on vient de masquer une photo déjà en
+      // ligne qui, elle, existe toujours (le fallback n'a pas disparu,
+      // juste été masqué) — pas de bouton si rien ne reviendrait.
+      if (isHidden && fallbackEntry) {
+        const unhideButton = document.createElement('button');
+        unhideButton.type = 'button';
+        unhideButton.className = 'gestion-link-button';
+        unhideButton.textContent = 'Réafficher la photo d’origine';
+        unhideButton.addEventListener('click', () => unhideSlot(slot.slotKey));
+        actions.appendChild(unhideButton);
       }
 
       row.appendChild(actions);
@@ -2333,6 +2372,7 @@
       mediaState.slotAssignments = new Map();
       setStatus(`Impossible de vérifier les photos déjà publiées (${error.message || 'erreur inconnue'}) — la migration slot_key a-t-elle été appliquée dans Supabase ?`, 'error');
     }
+    await fetchHiddenSlotKeys();
     renderSlotsList();
   };
 
@@ -2412,6 +2452,14 @@
       .insert({ media_id: mediaId, slot_key: slotKey, role: 'fixed', active: true });
     if (insertError) throw insertError;
 
+    // Choisir une photo lève tout masquage précédent sur cet emplacement
+    // (sinon la photo tout juste choisie resterait invisible au prochain
+    // build — voir build/build.py, render_slot).
+    if (mediaState.hiddenSlotKeys.has(slotKey)) {
+      await supabase.from('l5d2lm_media_slot_overrides').delete().eq('slot_key', slotKey);
+      mediaState.hiddenSlotKeys.delete(slotKey);
+    }
+
     mediaState.slotAssignments.set(slotKey, media);
     renderSlotsList();
 
@@ -2431,12 +2479,23 @@
   // Retire la photo d'un emplacement sans la remplacer : l'emplacement
   // redevient vide ("Photo à venir" ou rien, selon le format — voir
   // build/build.py) plutôt que de forcer un remplacement immédiat.
+  // Fonctionne aussi bien pour une photo gérée depuis Gestion que pour une
+  // photo déjà en ligne avant ce mécanisme (fallback — voir
+  // l5d2lm_media_slot_overrides) : dans les deux cas, l'emplacement doit
+  // réellement devenir vide, jamais retomber sur une ancienne photo que
+  // l'admin n'a pas choisie.
   const removeSlotMedia = async (slotKey) => {
     const supabase = getSupabase();
-    const { error } = await supabase.from('l5d2lm_media_usages').delete().eq('slot_key', slotKey);
-    if (error) { setStatus(error.message || 'Impossible de retirer la photo.', 'error'); return; }
+    const { error: usageError } = await supabase.from('l5d2lm_media_usages').delete().eq('slot_key', slotKey);
+    if (usageError) { setStatus(usageError.message || 'Impossible de retirer la photo.', 'error'); return; }
+
+    const { error: overrideError } = await supabase
+      .from('l5d2lm_media_slot_overrides')
+      .upsert({ slot_key: slotKey, hidden: true }, { onConflict: 'slot_key' });
+    if (overrideError) { setStatus(overrideError.message || 'Impossible de retirer la photo.', 'error'); return; }
 
     mediaState.slotAssignments.delete(slotKey);
+    mediaState.hiddenSlotKeys.add(slotKey);
     renderSlotsList();
 
     const published = await triggerPublishNow({ silent: true });
@@ -2444,6 +2503,26 @@
       published
         ? 'Photo retirée de cet emplacement — publication du site en cours.'
         : 'Photo retirée de cet emplacement — le site public se mettra à jour automatiquement (sous 3h maximum).',
+      'success'
+    );
+  };
+
+  // Réaffiche une photo d'origine précédemment masquée (voir
+  // removeSlotMedia) — n'a de sens que pour un fallback toujours présent
+  // dans le dépôt, jamais pour une photo gérée (supprimée, pas masquable).
+  const unhideSlot = async (slotKey) => {
+    const supabase = getSupabase();
+    const { error } = await supabase.from('l5d2lm_media_slot_overrides').delete().eq('slot_key', slotKey);
+    if (error) { setStatus(error.message || 'Impossible de réafficher la photo.', 'error'); return; }
+
+    mediaState.hiddenSlotKeys.delete(slotKey);
+    renderSlotsList();
+
+    const published = await triggerPublishNow({ silent: true });
+    setStatus(
+      published
+        ? 'Photo d’origine réaffichée — publication du site en cours.'
+        : 'Photo d’origine réaffichée — le site public se mettra à jour automatiquement (sous 3h maximum).',
       'success'
     );
   };
@@ -2940,18 +3019,22 @@
         body.appendChild(snippet);
         row.appendChild(body);
 
+        const actions = document.createElement('div');
+        actions.className = 'text-block-item__actions';
         const status = textBlockStatus(block.page, block.blockKey);
         const badge = document.createElement('span');
         badge.className = `text-status-badge ${status.cssClass}`;
         badge.textContent = status.label;
-        row.appendChild(badge);
+        actions.appendChild(badge);
 
         const editButton = document.createElement('button');
         editButton.type = 'button';
         editButton.className = 'btn';
         editButton.textContent = 'Modifier';
         editButton.addEventListener('click', () => openTextEditor(block));
-        row.appendChild(editButton);
+        actions.appendChild(editButton);
+        row.appendChild(actions);
+        row.dataset.blockRow = textBlockStateKey(block.page, block.blockKey);
 
         textBlocksListEl.appendChild(row);
       });
@@ -3027,9 +3110,19 @@
     });
   };
 
+  const textEditorHome = textEditorEl?.parentElement || null;
+
+  const setEditorFeedback = (message, kind = '') => {
+    const el = document.querySelector('[data-text-editor-feedback]');
+    if (!el) return;
+    el.textContent = message;
+    el.className = `text-editor__feedback${kind ? ` is-${kind}` : ''}`;
+  };
+
   const openTextEditor = (block) => {
     textState.openBlock = block;
     textState.editorInputs = {};
+    textState.dirty = false;
     const values = textBlockCurrentValues(block);
 
     if (textEditorTitleEl) textEditorTitleEl.textContent = block.label;
@@ -3070,6 +3163,11 @@
           input.type = 'text';
           input.value = values[field] || '';
         }
+        input.addEventListener('input', () => {
+          if (textState.dirty) return;
+          textState.dirty = true;
+          setEditorFeedback('Modifications non enregistrées', 'dirty');
+        });
         wrap.appendChild(input);
         textState.editorInputs[field] = input;
         details.appendChild(wrap);
@@ -3116,14 +3214,21 @@
     }
 
     renderTextHistory(block);
+    setEditorFeedback('', '');
+
+    const row = textBlocksListEl?.querySelector(`[data-block-row="${CSS.escape(textBlockStateKey(block.page, block.blockKey))}"]`);
+    if (row && textEditorEl) row.after(textEditorEl);
     textEditorEl.hidden = false;
-    textEditorEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    textEditorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   const closeTextEditor = () => {
     textState.openBlock = null;
     textState.editorInputs = {};
-    if (textEditorEl) textEditorEl.hidden = true;
+    if (textEditorEl) {
+      if (textEditorHome && textEditorEl.parentElement !== textEditorHome) textEditorHome.appendChild(textEditorEl);
+      textEditorEl.hidden = true;
+    }
   };
 
   const collectEditorValues = (block) => {
@@ -3151,6 +3256,7 @@
     }
     const supabase = getSupabase();
     const bucket = textState.blocksByKey.get(textBlockStateKey(block.page, block.blockKey));
+    setEditorFeedback('Enregistrement en cours…', 'saving');
     try {
       if (bucket?.draft) {
         const { error } = await supabase.from('l5d2lm_text_blocks').update(values).eq('id', bucket.draft.id);
@@ -3164,8 +3270,10 @@
       await fetchTextBlocksForPages(ALL_TEXT_PAGE_SLUGS);
       renderTextBlocksList();
       openTextEditor(block);
+      setEditorFeedback('Enregistré en brouillon — le site public n’est pas encore modifié.', 'success');
       setStatus('Brouillon enregistré.', 'success');
     } catch (error) {
+      setEditorFeedback(`Erreur : ${error.message || 'enregistrement impossible'}`, 'error');
       setStatus(error.message || 'Impossible d’enregistrer le brouillon.', 'error');
     }
   };

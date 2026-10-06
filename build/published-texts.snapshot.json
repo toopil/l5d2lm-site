@@ -1,6 +1,16 @@
 [
   {
     "page_slug": "l5d2lm-massage",
+    "block_key": "massage-hero",
+    "title": "Massage",
+    "eyebrow": "Corps • écoute • présence",
+    "lead": "Prendre soin peut prendre plusieurs formes.",
+    "body": "Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un massage éclair ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**",
+    "button_label": "Faire une demande",
+    "button_url": "l5d2lm-contact.html?category=massage"
+  },
+  {
+    "page_slug": "l5d2lm-massage",
     "block_key": "massage-practical-parler",
     "title": "Faut-il parler pendant la séance ?",
     "eyebrow": null,
@@ -8,5 +18,45 @@
     "body": "Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé. De la musique peut être proposé.\n\nLe réveil énergétique laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.",
     "button_label": null,
     "button_url": null
+  },
+  {
+    "page_slug": "l5d2lm-massage",
+    "block_key": "massage-training-heading",
+    "title": "Recevoir, ou apprendre à transmettre",
+    "eyebrow": "Massage éclair",
+    "lead": "Le Massage éclair se découvre de deux façons : en le recevant, ou en apprenant à le proposer à d’autres.",
+    "body": null,
+    "button_label": null,
+    "button_url": null
+  },
+  {
+    "page_slug": "l5d2lm-massage",
+    "block_key": "massage-training-recevoir",
+    "title": "Recevoir un Massage éclair",
+    "eyebrow": "Recevoir",
+    "lead": null,
+    "body": "Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.",
+    "button_label": "Faire une demande",
+    "button_url": "l5d2lm-contact.html?category=massage&offer=reveil-energetique"
+  },
+  {
+    "page_slug": "l5d2lm-massage",
+    "block_key": "massage-training-transmettre",
+    "title": "Apprendre à transmettre le réveil énergétique",
+    "eyebrow": "Apprendre à transmettre",
+    "lead": null,
+    "body": "Le Massage éclair a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.",
+    "button_label": "Demander une transmission",
+    "button_url": "l5d2lm-contact.html?category=massage&offer=transmission-Massage éclair"
+  },
+  {
+    "page_slug": "l5d2lm-massage",
+    "block_key": "reveil-energetique",
+    "title": "Massage éclair",
+    "eyebrow": null,
+    "lead": "Recevoir.\nRéveiller.\nApprendre à transmettre.",
+    "body": "Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.",
+    "button_label": "Faire une demande pour le recevoir",
+    "button_url": "l5d2lm-contact.html?category=massage&offer=Massage éclair"
   }
 ]

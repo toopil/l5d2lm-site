@@ -8,11 +8,11 @@
   <meta name="description" content="Administration privée du site Les 5 doigts de la main.">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../l5d2lm-style.css?v=20260909a">
-  <link rel="stylesheet" href="gestion-style.css?v=20261002b">
+  <link rel="stylesheet" href="gestion-style.css?v=20261006a">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script defer src="gestion-media-catalog.js?v=20260919a"></script>
-  <script defer src="gestion.js?v=20261002e"></script>
+  <script defer src="gestion.js?v=20261006a"></script>
 </head>
 <body class="gestion-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -315,7 +315,8 @@
                 </details>
 
                 <div class="gestion-actions-line text-editor__actions">
-                  <button type="button" class="btn" data-text-save-draft>Enregistrer le brouillon</button>
+                  <p class="text-editor__feedback" data-text-editor-feedback aria-live="polite"></p>
+                <button type="button" class="btn btn-primary" data-text-save-draft>Enregistrer</button>
                   <button type="button" class="btn" data-text-preview>Aperçu</button>
                   <button type="button" class="btn btn-primary" data-text-publish>Publier</button>
                   <button type="button" class="btn" data-text-cancel>Annuler</button>
