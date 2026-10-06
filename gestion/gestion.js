@@ -708,7 +708,7 @@
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-collective-heading', label: '« Une expérience collective »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Une expérience collective', title: 'Un cadre où chacun peut prendre sa place.',
-      body: "La Colo pour adultes s’adresse aux personnes qui souhaitent sortir du quotidien, rencontrer d’autres personnes, jouer, partager et vivre un séjour dans lequel chacun peut réellement prendre sa place.\n\nL’accompagnement peut couvrir toute la durée du séjour : organisation, co-organisation, animation ou responsabilité du cadre, selon les besoins du projet."
+      body: "La Colo pour adultes s’adresse aux personnes qui souhaitent sortir du quotidien et vivre un séjour construit à plusieurs."
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-magie', label: '« La magie de chacun »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'La magie de chacun', title: 'Le programme ne vient pas seulement d’activités décidées à l’avance.',
@@ -721,10 +721,6 @@
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-construction', label: '« Selon le groupe »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Construction', title: 'Selon le groupe',
       body: "Le contenu, la durée, le lieu et les activités sont construits en fonction des personnes présentes."
-    } },
-    { page: 'l5d2lm-colos-sejours', blockKey: 'colo-practical-actions', label: '« Participer ou soutenir »', fields: ['eyebrow', 'title', 'button'], defaults: {
-      eyebrow: 'Participer ou soutenir', title: 'Choisir la manière de rejoindre le projet.',
-      button_label: 'Découvrir la Colo pour adultes et s’inscrire', button_url: 'https://form.jotform.com/toopilon/cpa--colo-pour-adultes-1'
     } },
     { page: 'l5d2lm-colos-sejours', blockKey: 'colo-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
