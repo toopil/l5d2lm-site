@@ -583,23 +583,20 @@
     { page: 'l5d2lm-massage', blockKey: 'massage-propositions-heading', label: 'En-tête « Trois propositions »', fields: ['eyebrow', 'title'], defaults: {
       eyebrow: 'Trois propositions', title: 'Choisir la forme qui correspond au moment'
     } },
-    { page: 'l5d2lm-massage', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-intuitif', label: 'Massage intuitif', fields: ['title', 'lead', 'body'], defaults: {
       title: 'Massage intuitif',
       lead: 'Prendre le temps.\nÉcouter le corps.\nS’adapter à ce qui est présent.',
-      body: "Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.",
-      button_label: 'Faire une demande pour le Massage intuitif', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-intuitif'
+      body: "Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.",
     } },
-    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Massage éclair', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Massage éclair', fields: ['title', 'lead', 'body'], defaults: {
       title: 'Massage éclair',
       lead: 'Recevoir.\nRéveiller.\nApprendre à transmettre.',
       body: "Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\n> Deux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.",
-      button_label: 'Faire une demande pour le recevoir', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
-    { page: 'l5d2lm-massage', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
+    { page: 'l5d2lm-massage', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body'], defaults: {
       title: 'Massage aquatique',
       lead: 'Se laisser porter.\nRespirer.\nRetrouver de la légèreté.',
-      body: "Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Durée :** de 45 à 90 minutes.\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.",
-      button_label: 'Faire une demande pour le Massage aquatique', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-aquatique'
+      body: "Dans l’eau, le corps n’a plus à porter tout son poids. Soutenue par la flottabilité, la personne est accompagnée dans des mouvements lents qui invitent à respirer, à relâcher et à retrouver de la fluidité.\n\n**Lieux :** Grimisuat ou Brigerbad.\n**Conditions :** l’eau est chauffée à 34 °C minimum et la tête reste hors de l’eau pendant toute la séance.\n**Après la séance :** prévoir si possible un moment calme pour prolonger l’expérience.\n\n- L’eau porte et donne une autre sensation du mouvement.\n- Le rythme s’ajuste aux réactions et au souffle.\n- Cette expérience prend place lorsque le lieu le permet.",
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-heading', label: 'En-tête « Quelques repères simples »', fields: ['eyebrow', 'title'], defaults: {
       eyebrow: 'Avant de venir', title: 'Quelques repères simples'
@@ -679,7 +676,7 @@
     { page: 'l5d2lm-corps-expression', blockKey: 'jeux-de-mouvement', label: 'Jeux de mouvement', fields: ['title', 'lead', 'body', 'button'], defaults: {
       title: 'Jeux de mouvement',
       lead: 'Courir, observer, réagir, improviser, coopérer.',
-      body: "Jeu, théâtre d’improvisation, réveil du corps et danse réunis. Le contenu change selon l’âge, le lieu et l’énergie du moment.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\n> Enfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.",
+      body: "Jeu, théâtre d’improvisation, réveil du corps et danse réunis.\n\n- Balle aux prisonniers, ninja, jeux de son et mouvement, cache-cache géant…\n- Le mouvement passe d’abord par le plaisir de jouer.\n\n> Enfants, adolescents, adultes : règles et intensité ajustées aux personnes présentes.",
       button_label: 'Faire une demande pour les Jeux de mouvement', button_url: 'l5d2lm-contact.html?category=corps-expression&offer=jeux-de-mouvement'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps', label: 'Réveil du corps', fields: ['title', 'lead', 'body', 'button'], defaults: {
@@ -690,7 +687,7 @@
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-parcours', label: 'Présentation / parcours', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'D’où vient cette approche ?', title: 'Du jeu au mouvement, et du mouvement à la rencontre.',
-      body: "Issu de l’animation, du théâtre d’improvisation et des jeux collectifs, Julien aime créer des situations simples où chacun peut essayer, bouger et rencontrer les autres sans pression.\n\nLa danse est venue nourrir cette approche au fil du temps, avec une envie particulière : partir du jeu plutôt que chercher immédiatement à « bien danser », et explorer différentes manières de bouger et de rencontrer l’autre.\n\nLes propositions de Corps & expression mélangent ainsi jeu, improvisation, mouvement et danse selon le groupe, le lieu et l’énergie du moment."
+      body: "Issu de l’animation, du théâtre d’improvisation et des jeux collectifs, Julien aime créer des situations simples où chacun peut essayer, bouger et rencontrer les autres sans pression.\n\nLa danse est venue nourrir cette approche au fil du temps, avec une envie particulière : partir du jeu plutôt que chercher immédiatement à « bien danser », et explorer différentes manières de bouger et de rencontrer l’autre.\n\nLes propositions de Corps & expression mélangent ainsi jeu, improvisation, mouvement et danse."
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-cadre', label: '« Un cadre commun »', fields: ['eyebrow', 'title', 'body'], defaults: {
       eyebrow: 'Un cadre commun', title: 'Le même esprit pour chaque proposition.',
@@ -769,9 +766,8 @@
       lead: 'Les pieds portent toute une vie.\nDe temps en temps, un peu d’attention leur fait du bien.'
     } },
 
-    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body', 'button'], defaults: {
-      eyebrow: 'Faire circuler les bonnes adresses', title: 'Espaces à découvrir',
-      lead: 'Des lieux, initiatives, écoles et projets existants à faire connaître.',
+    { page: 'l5d2lm-espaces-a-decouvrir', blockKey: 'espaces-hero', label: 'Présentation principale', fields: ['title', 'body', 'button'], defaults: {
+      title: 'Espaces à découvrir',
       body: 'Cette page rassemble des lieux, associations, écoles, projets et initiatives qui existent déjà et qui méritent d’être partagés. Ces espaces ne sont pas forcément partenaires des 5 doigts de la main. L’idée est de rendre visibles des points vivants déjà présents aux alentours.',
       button_label: 'Proposer un espace à découvrir', button_url: 'l5d2lm-contact.html?category=espaces-a-decouvrir&offer=proposer-un-lieu'
     } },
@@ -855,7 +851,7 @@
     { page: 'l5d2lm-contact', blockKey: 'contact-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body'], defaults: {
       eyebrow: 'Contact & demandes', title: 'Une envie, une idée, un lieu, une demande ?',
       lead: 'Vous pouvez écrire même si tout n’est pas encore clair.',
-      body: 'Votre demande peut concerner un massage, un massage éclair, un atelier corps & expression, « À portée de main », une colo, une animation participative ou un espace à découvrir. La forme se précisera ensuite avec vous, selon le contexte.'
+      body: 'Votre demande peut concerner un massage, un massage éclair, un atelier corps & expression, « À portée de main », une colo, une animation participative ou un espace à découvrir.'
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-demande-heading', label: 'En-tête « Demande »', fields: ['eyebrow', 'title', 'lead'], defaults: {
       eyebrow: 'Demande', title: 'Qu’est-ce qui vous amène ?',
@@ -863,7 +859,7 @@
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-note', label: '« Écrire simplement »', fields: ['title', 'body', 'button'], defaults: {
       title: 'Écrire simplement',
-      body: "Votre demande sert seulement à commencer la conversation. Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.",
+      body: "Il suffit d’indiquer un moyen de réponse, puis quelques repères utiles selon la proposition.",
       button_label: 'l5d2lm@ik.me', button_url: 'mailto:l5d2lm@ik.me'
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-footprints', label: 'Bandeau de bas de page', fields: ['lead'], defaults: {
