@@ -896,7 +896,64 @@
 
     { page: '__commun__', blockKey: 'commun-footer-tagline', label: 'Accroche du pied de page', fields: ['lead'], defaults: {
       lead: 'Créer du lien par le corps, le jeu, les émotions et le vivant.'
-    } }
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-formats-label', label: "Corps & expression — « Formats de Jeu danse »", fields: ['title'], defaults: {
+      title: "Formats de Jeu danse"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique-tags', label: "Corps & expression — étiquettes Playful extatique", fields: ['title'], defaults: {
+      title: "Musique • mouvement • jeu"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'a-portee-de-main-tags', label: "Corps & expression — étiquettes À portée de main", fields: ['title'], defaults: {
+      title: "Danse • rencontre • lien"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'theatre-improvisation-tags', label: "Corps & expression — étiquettes Théâtre d’improvisation", fields: ['title'], defaults: {
+      title: "Jeu • confiance • spontanéité"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'jeux-de-mouvement-tags', label: "Corps & expression — étiquettes Jeux de mouvement", fields: ['title'], defaults: {
+      title: "Plaisir • réaction • coopération"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'reveil-du-corps-tags', label: "Corps & expression — étiquettes Réveil du corps", fields: ['title'], defaults: {
+      title: "Présence • mobilité • énergie"
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-dates', label: "Corps & expression — annonce des prochaines dates", fields: ['title'], defaults: {
+      title: "Les prochaines dates et les prochains lieux seront annoncés bientôt."
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-rythme', label: "Corps & expression — « Le rythme et les limites de chacun »", fields: ['title', 'body'], defaults: {
+      title: "Le rythme et les limites de chacun",
+      body: "La pratique respecte le rythme, les limites et le consentement de chaque personne. Chacun peut ralentir, modifier le contact ou se retirer à tout moment."
+    } },
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-reveil-note', label: "Corps & expression — « À ne pas confondre avec le Massage éclair »", fields: ['title', 'body'], defaults: {
+      title: "À ne pas confondre avec le Massage éclair",
+      body: "Le Massage éclair est un massage très court, d’environ trois minutes. Le Réveil du corps prend la forme d’un atelier plus complet."
+    } },
+    { page: 'l5d2lm-massage', blockKey: 'massage-intuitif-duree', label: "Massage — durée Massage intuitif", fields: ['title'], defaults: {
+      title: "30 à 90 min"
+    } },
+    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique-duree', label: "Massage — durée Massage éclair", fields: ['title'], defaults: {
+      title: "≈ 3 min pour recevoir · transmission possible en individuel ou en groupe"
+    } },
+    { page: 'l5d2lm-massage', blockKey: 'massage-aquatique-duree', label: "Massage — durée Massage aquatique", fields: ['title'], defaults: {
+      title: "45 à 90 min"
+    } },
+    { page: 'l5d2lm-massage', blockKey: 'massage-formats-heading', label: "Massage — « Formats possibles »", fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: "Formats possibles",
+      title: "Où et avec qui ?",
+      lead: "Ces indications donnent un premier repère. Les possibilités concrètes dépendent toujours du lieu et du contexte."
+    } },
+    { page: 'l5d2lm-massage', blockKey: 'massage-formats-address', label: "Massage — adresse", fields: ['lead'], defaults: {
+      lead: "Avenue Général-Guisan 19\n3960 Sierre"
+    } },
+    { page: 'l5d2lm-contact', blockKey: 'contact-note-label', label: "Contact — libellé « Écrire directement »", fields: ['title'], defaults: {
+      title: "Écrire directement :"
+    } },
+    { page: 'l5d2lm-mission-declic', blockKey: 'mission-temporaire', label: "Mission Déclic — page temporaire", fields: ['eyebrow', 'title', 'lead'], defaults: {
+      eyebrow: "Page temporaire",
+      title: "En construction",
+      lead: "Cette page n’est pas encore prête."
+    } },
+    { page: 'l5d2lm-mission-declic', blockKey: 'mission-temporaire-intro', label: "Mission Déclic — texte d’attente", fields: ['lead'], defaults: {
+      lead: "Elle reviendra plus tard, quand le contenu sera clair et pleinement assumé. Pour l’instant, l’accueil et la page Contact restent disponibles."
+    } },
   ];
 
   const FIELD_LABELS = {
