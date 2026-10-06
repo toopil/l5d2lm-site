@@ -323,6 +323,18 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 .flip-card--aquatique .flip-card__duration { background: rgba(92, 138, 149, 0.18); color: #3f6570; }
 .flip-card--aquatique .offer-number { color: rgba(92, 138, 149, 0.35); }
 
+/* Logos signature des trois massages (recto uniquement) : flottants à
+   droite dans .offer-intro, le titre et l'accroche s'enroulent autour.
+   flow-root contient le float sans créer de colonne fixe. */
+.offer-intro { display: flow-root; }
+.offer-logo {
+  float: right; height: auto; max-width: none;
+  margin: 0 0 0.6rem 0.9rem;
+}
+.offer-logo--intuitif { width: clamp(104px, 30vw, 128px); }
+.offer-logo--energetique { width: clamp(98px, 28vw, 120px); }
+.offer-logo--aquatique { width: clamp(140px, 40vw, 150px); }
+
 .flip-card__face[inert] { pointer-events: none; }
 
 @media (max-width: 900px) {

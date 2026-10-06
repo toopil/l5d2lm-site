@@ -29,7 +29,7 @@ TEXT_SNAPSHOT_PATH = ROOT / "build" / "published-texts.snapshot.json"
 
 # Bump ce numéro de version quand l5d2lm-style.css ou l5d2lm-script.js changent,
 # pour casser le cache navigateur (même mécanisme que les logos, voir ?v=... dessus).
-ASSET_VERSION = "20261002g"  # ex: "20260901" — vide = pas de paramètre de version
+ASSET_VERSION = "20261006b"  # ex: "20260901" — vide = pas de paramètre de version
 
 # Lecture publique uniquement (RLS dédiée aux médias publiés) : la même clé
 # publishable déjà utilisée côté client, sans danger à committer/exposer en CI.
@@ -67,6 +67,27 @@ def fetch_published_slots() -> dict:
         if media and media.get("public_path"):
             published[row["slot_key"]] = media
     return published
+
+
+def fetch_hidden_slot_keys() -> set[str]:
+    """Slugs des emplacements explicitement vidés depuis Gestion (bouton
+    "Retirer la photo" sur un emplacement qui n'affichait qu'un fallback
+    — voir l5d2lm_media_slot_overrides). En cas d'erreur réseau/API,
+    renvoie un ensemble vide : aucun emplacement n'est masqué à tort,
+    au pire le fallback réapparaît temporairement plutôt que de risquer
+    de vider un emplacement par erreur."""
+    url = f"{SUPABASE_URL}/rest/v1/l5d2lm_media_slot_overrides?hidden=eq.true&select=slot_key"
+    req = urllib.request.Request(url, headers={
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_PUBLISHABLE_KEY}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"Avertissement : emplacements masqués non récupérés ({exc}) — aucun masquage appliqué.")
+        return set()
+    return {row["slot_key"] for row in rows}
 
 
 def _fetch_section_visibility(query: str, warning_label: str) -> set[str] | None:
@@ -403,8 +424,15 @@ def render_band_slot(slot: dict, media: dict | None) -> str:
     return f'<div class="photo-single"><img src="{src}" alt="{alt}" loading="lazy"></div>'
 
 
-def render_slot(slot: dict, media: dict | None) -> str:
+def render_slot(slot: dict, media: dict | None, hidden_slot_keys: set[str] | None = None) -> str:
     kind = slot.get("kind")
+    if hidden_slot_keys and slot["slot_key"] in hidden_slot_keys:
+        # Masqué explicitement depuis Gestion (bouton "Retirer la photo" sur
+        # un emplacement qui n'affichait qu'un fallback) : ignore à la fois
+        # une éventuelle photo gérée ET le fallback, comme si rien n'était
+        # défini pour cet emplacement.
+        media = None
+        slot = {**slot, "fallback": None}
     if kind == "postcard":
         return render_postcard_slot(slot, media)
     if kind == "float":
@@ -416,14 +444,14 @@ def render_slot(slot: dict, media: dict | None) -> str:
     return render_proposition_slot(slot, media)
 
 
-def substitute_media_slots(content: str, page_slug: str, published: dict) -> str:
+def substitute_media_slots(content: str, page_slug: str, published: dict, hidden_slot_keys: set[str] | None = None) -> str:
     for slot in SLOTS:
         if slot["page"] != page_slug:
             continue
         marker = f'<!-- MEDIA_SLOT:{slot["slot_key"]} -->'
         if marker not in content:
             continue
-        content = content.replace(marker, render_slot(slot, published.get(slot["slot_key"])))
+        content = content.replace(marker, render_slot(slot, published.get(slot["slot_key"]), hidden_slot_keys))
     return content
 
 
@@ -548,6 +576,7 @@ def build_page(
     enabled_postcard_categories: dict,
     postcard_pools: dict,
     published_text_blocks: dict,
+    hidden_slot_keys: set[str] | None = None,
 ) -> None:
     head = render_head(page, published_section_slugs)
     content = (ROOT / f'content/{page["slug"]}.html').read_text(encoding="utf-8")
@@ -557,7 +586,7 @@ def build_page(
     # au lieu de celui de .photo-band). Tant que le marqueur MEDIA_SLOT est
     # encore un simple commentaire, le remplacement est sans ambiguïté.
     content = substitute_postcard_band(content, page["slug"], enabled_postcard_categories, postcard_pools)
-    content = substitute_media_slots(content, page["slug"], published_slots)
+    content = substitute_media_slots(content, page["slug"], published_slots, hidden_slot_keys)
     content = substitute_activity_blocks(content, published_activity_slugs)
     content = substitute_text_blocks(content, page["slug"], published_text_blocks)
     # Mêmes marqueurs NAV_ITEM que le menu (voir substitute_nav_visibility) :
@@ -602,6 +631,7 @@ def build_sitemap(published_section_slugs: set[str] | None) -> None:
 
 def main() -> None:
     published_slots = fetch_published_slots()
+    hidden_slot_keys = fetch_hidden_slot_keys()
     published_section_slugs = fetch_published_section_slugs()
     published_activity_slugs = fetch_published_activity_slugs()
     enabled_postcard_categories = fetch_enabled_postcard_categories()
@@ -623,6 +653,7 @@ def main() -> None:
             enabled_postcard_categories,
             postcard_pools,
             published_text_blocks,
+            hidden_slot_keys,
         )
     build_sitemap(published_section_slugs)
     print(f"{len(PAGES)} pages générées + sitemap.xml")
