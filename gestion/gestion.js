@@ -540,7 +540,7 @@
       lead: 'Chaque proposition peut s’adapter à votre groupe, votre école, votre entreprise, votre événement, votre famille ou votre lieu culturel, en Suisse romande et en France.'
     } },
     { page: 'l5d2lm-index', blockKey: 'accueil-card-massage', label: 'Carte Massage', fields: ['title', 'body', 'button'], defaults: {
-      title: 'Massages & réveil énergétique',
+      title: 'Massages & massage éclair',
       body: 'Massage intuitif, massage aquatique et rituels courts pour une personne ou un collectif.',
       button_label: 'Découvrir', button_url: 'l5d2lm-massage.html'
     } },
@@ -577,7 +577,7 @@
       eyebrow: 'Corps • écoute • présence',
       title: 'Massage',
       lead: 'Prendre soin peut prendre plusieurs formes.',
-      body: 'Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un réveil énergétique ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**',
+      body: 'Chaque personne est différente. Selon le moment, le lieu et les besoins, je propose trois façons d’accompagner le corps : une séance intuitive, un massage éclair ou une expérience dans l’eau.\n\n**Une même intention : créer du lien, remettre du mouvement et offrir un espace où le corps peut être écouté.**',
       button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-propositions-heading', label: 'En-tête « Trois propositions »', fields: ['eyebrow', 'title'], defaults: {
@@ -589,10 +589,10 @@
       body: 'Après un temps d’échange, je construis la séance à partir de ce qui est présent. Le rythme peut être lent, plus mobile, ou alterner entre les deux. Rien n’est à réussir : le corps donne la direction.\n\n**Durée :** de 30 à 90 minutes.\n**Lieu principal :** Espace Chèndâ.\n\n- Ralentir lorsque tout va trop vite.\n- Retrouver du mouvement lorsque le corps semble immobile.\n- Disposer simplement d’un espace pour souffler.',
       button_label: 'Faire une demande pour le Massage intuitif', button_url: 'l5d2lm-contact.html?category=massage&offer=massage-intuitif'
     } },
-    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Réveil énergétique', fields: ['title', 'lead', 'body', 'button'], defaults: {
-      title: 'Réveil énergétique',
+    { page: 'l5d2lm-massage', blockKey: 'reveil-energetique', label: 'Massage éclair', fields: ['title', 'lead', 'body', 'button'], defaults: {
+      title: 'Massage éclair',
       lead: 'Recevoir.\nRéveiller.\nApprendre à transmettre.',
-      body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.',
+      body: 'Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être donnée ou reçue à différents moments de la journée : au travail, pendant une activité bénévole, après une journée fatigante ou simplement entre proches.\n\nDeux façons de la découvrir : la recevoir, ou apprendre à la transmettre à votre tour.\n\n**Durée :** environ trois minutes par personne.\n**Formats :** individuel ou en groupe.',
       button_label: 'Faire une demande pour le recevoir', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-aquatique', label: 'Massage aquatique', fields: ['title', 'lead', 'body', 'button'], defaults: {
@@ -610,7 +610,7 @@
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-parler', label: '« Faut-il parler pendant la séance ? »', fields: ['title', 'body'], defaults: {
       title: 'Faut-il parler pendant la séance ?',
-      body: 'Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe réveil énergétique laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.'
+      body: 'Ce n’est pas nécessaire. Le silence peut faire partie de l’expérience, sans jamais être imposé.\n\nLe massage éclair laisse davantage de place aux échanges, notamment lorsqu’il est partagé en groupe.'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-practical-premiere-fois', label: '« Et si c’est une première fois ? »', fields: ['title', 'body'], defaults: {
       title: 'Et si c’est une première fois ?',
@@ -626,17 +626,17 @@
       body: 'Mon parcours s’est construit entre l’animation socioculturelle, les métiers du bois, le travail manuel, le mouvement et la relation humaine.\n\nDepuis de nombreuses années, j’accompagne des personnes et des groupes à travers le jeu, la créativité, l’expression corporelle et des expériences collectives. La menuiserie et la charpente ont aussi nourri mon rapport aux mains, à la matière, aux formes, aux appuis et à la précision du geste.\n\nLe toucher a progressivement pris une place importante dans ma manière de créer du lien. Dans des contextes amicaux, associatifs ou événementiels, j’ai observé combien un contact respectueux pouvait aider à relâcher les tensions, ralentir et retrouver une présence plus concrète au corps.\n\nJe masse de manière intuitive. Je ne reproduis pas une séance identique d’une personne à l’autre. Je m’adapte aux besoins exprimés, aux zones de tension, aux limites de chacun et aux réactions du corps au fil de la séance.\n\nJ’accorde une grande importance au respect, au consentement et à un cadre clair, sécurisant et non sexualisé.'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-training-heading', label: 'En-tête « Recevoir, ou apprendre à transmettre »', fields: ['eyebrow', 'title', 'lead'], defaults: {
-      eyebrow: 'Réveil énergétique', title: 'Recevoir, ou apprendre à transmettre',
-      lead: 'Le Réveil énergétique se découvre de deux façons : en le recevant, ou en apprenant à le proposer à d’autres.'
+      eyebrow: 'Massage éclair', title: 'Recevoir, ou apprendre à transmettre',
+      lead: 'Le Massage éclair se découvre de deux façons : en le recevant, ou en apprenant à le proposer à d’autres.'
     } },
-    { page: 'l5d2lm-massage', blockKey: 'massage-training-recevoir', label: 'Recevoir un réveil énergétique', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
-      eyebrow: 'Recevoir', title: 'Recevoir un réveil énergétique',
-      body: 'Le Réveil énergétique est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.',
+    { page: 'l5d2lm-massage', blockKey: 'massage-training-recevoir', label: 'Recevoir un massage éclair', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
+      eyebrow: 'Recevoir', title: 'Recevoir un massage éclair',
+      body: 'Le Massage éclair est une pratique très courte, d’environ trois minutes, qui peut être proposée à différents moments de la journée.\n\nIl peut trouver sa place au travail, pendant une activité bénévole, après une journée fatigante, lors d’un événement ou simplement entre proches.\n\nQuelques minutes permettent d’apporter de l’attention au corps, de remettre du mouvement et de créer un court moment de présence.\n\n**Durée :** environ 3 minutes par personne.\n**Formats :** individuel ou groupe.',
       button_label: 'Faire une demande', button_url: 'l5d2lm-contact.html?category=massage&offer=reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-training-transmettre', label: 'Apprendre à transmettre', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
-      eyebrow: 'Apprendre à transmettre', title: 'Apprendre à transmettre le réveil énergétique',
-      body: 'Le Réveil énergétique a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.',
+      eyebrow: 'Apprendre à transmettre', title: 'Apprendre à transmettre le massage éclair',
+      body: 'Le Massage éclair a aussi été pensé comme une pratique simple à apprendre et à réutiliser.\n\nCette transmission ne cherche pas à former des professionnels. Elle permet d’acquérir des repères accessibles pour proposer ensuite cette pratique entre proches, en famille, dans une association, une école, une entreprise ou pendant un événement.\n\n- Une séquence courte et facile à retenir.\n- Le rythme, la respiration et la qualité de présence.\n- Comment proposer sans imposer.\n- Comment adapter la pratique au lieu et aux personnes.\n- Une mise en situation où chacun peut essayer.',
       button_label: 'Demander une transmission', button_url: 'l5d2lm-contact.html?category=massage&offer=transmission-reveil-energetique'
     } },
     { page: 'l5d2lm-massage', blockKey: 'massage-cta', label: 'Construire une proposition', fields: ['eyebrow', 'title', 'body', 'button'], defaults: {
@@ -859,7 +859,7 @@
     { page: 'l5d2lm-contact', blockKey: 'contact-hero', label: 'Présentation principale', fields: ['eyebrow', 'title', 'lead', 'body'], defaults: {
       eyebrow: 'Contact & demandes', title: 'Une envie, une idée, un lieu, une demande ?',
       lead: 'Vous pouvez écrire même si tout n’est pas encore clair.',
-      body: 'Votre demande peut concerner un massage, un réveil énergétique, un atelier corps & expression, « À portée de main », une colo, une animation participative ou un espace à découvrir. La forme se précisera ensuite avec vous, selon le contexte.'
+      body: 'Votre demande peut concerner un massage, un massage éclair, un atelier corps & expression, « À portée de main », une colo, une animation participative ou un espace à découvrir. La forme se précisera ensuite avec vous, selon le contexte.'
     } },
     { page: 'l5d2lm-contact', blockKey: 'contact-demande-heading', label: 'En-tête « Demande »', fields: ['eyebrow', 'title', 'lead'], defaults: {
       eyebrow: 'Demande', title: 'Qu’est-ce qui vous amène ?',

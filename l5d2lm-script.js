@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fields: ['location', 'date', 'message']
         },
         'reveil-energetique': {
-          label: 'Réveil énergétique',
+          label: 'Massage éclair',
           duration: 'Environ 3 minutes par personne',
           fields: ['location', 'date', 'people', 'message']
         },
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fields: ['location', 'date', 'message']
         },
         'transmission-reveil-energetique': {
-          label: 'Transmission du Réveil énergétique',
+          label: 'Transmission du Massage éclair',
           note: 'Transmission collective',
           fields: ['location', 'date', 'people', 'message']
         }
@@ -274,7 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
     'Massage intuitif': { category: 'massage', offer: 'massage-intuitif' },
     'Massage aquatique': { category: 'massage', offer: 'massage-aquatique' },
     'Réveil énergétique': { category: 'massage', offer: 'reveil-energetique' },
+    'Massage éclair': { category: 'massage', offer: 'reveil-energetique' },
     'Formation réveil énergétique': { category: 'massage', offer: 'transmission-reveil-energetique' },
+    'Formation massage éclair': { category: 'massage', offer: 'transmission-reveil-energetique' },
     'Corps & expression': { category: 'corps-expression' },
     'À portée de main — prochaines dates': {
       category: 'corps-expression',
