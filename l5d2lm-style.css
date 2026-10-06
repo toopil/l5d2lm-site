@@ -315,9 +315,9 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 .flip-card--intuitif .flip-card__duration { background: rgba(201, 131, 95, 0.16); color: #a35a37; }
 .flip-card--intuitif .offer-number { color: rgba(201, 131, 95, 0.35); }
 
-.flip-card--energetique .flip-card__face { background: #f5f7ee; }
-.flip-card--energetique .flip-card__duration { background: rgba(138, 155, 94, 0.2); color: #5f7038; }
-.flip-card--energetique .offer-number { color: rgba(138, 155, 94, 0.35); }
+.flip-card--energetique .flip-card__face { background: #faf4e2; }
+.flip-card--energetique .flip-card__duration { background: rgba(214, 168, 72, 0.2); color: #7d5c1e; }
+.flip-card--energetique .offer-number { color: rgba(214, 168, 72, 0.38); }
 
 .flip-card--aquatique .flip-card__face { background: #f1f6f7; }
 .flip-card--aquatique .flip-card__duration { background: rgba(92, 138, 149, 0.18); color: #3f6570; }
