@@ -922,10 +922,6 @@
       title: "Le rythme et les limites de chacun",
       body: "La pratique respecte le rythme, les limites et le consentement de chaque personne. Chacun peut ralentir, modifier le contact ou se retirer à tout moment."
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-reveil-note', label: "Corps & expression — « À ne pas confondre avec le Massage éclair »", fields: ['title', 'body'], defaults: {
-      title: "À ne pas confondre avec le Massage éclair",
-      body: "Le Massage éclair est un massage très court, d’environ trois minutes. Le Réveil du corps prend la forme d’un atelier plus complet."
-    } },
     { page: 'l5d2lm-massage', blockKey: 'massage-intuitif-duree', label: "Massage — durée Massage intuitif", fields: ['title'], defaults: {
       title: "30 à 90 min"
     } },
