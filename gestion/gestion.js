@@ -654,8 +654,8 @@
       body: 'Chaque proposition s’adapte à votre groupe et aux personnes présentes. Il ne s’agit pas de réussir une performance, mais d’expérimenter à son rythme.',
       button_label: 'Imaginer votre atelier', button_url: 'l5d2lm-contact.html?category=corps-expression'
     } },
-    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-jeu-danse', label: 'Jeu danse (famille)', fields: ['eyebrow', 'title', 'body'], defaults: {
-      eyebrow: 'Jeu danse', title: 'Le jeu comme porte d’entrée vers la danse.',
+    { page: 'l5d2lm-corps-expression', blockKey: 'corps-expression-jeu-danse', label: 'Jeu danse (famille)', fields: ['eyebrow', 'title', 'lead', 'body'], defaults: {
+      eyebrow: 'Jeu danse', title: 'Le jeu comme porte d’entrée vers la danse.', lead: 'Jeu danse / Je danse',
       body: 'Pas pour apprendre les bons mouvements, mais pour jouer, essayer, improviser et voir ce qui se passe.\n\nTout peut commencer par presque rien : une consigne, une musique, un regard, une rencontre.\n\nLe jeu devient mouvement, le mouvement devient rencontre et, parfois presque sans s’en rendre compte, le jeu devient danse.'
     } },
     { page: 'l5d2lm-corps-expression', blockKey: 'playful-extatique', label: 'Playful extatique (format de Jeu danse)', fields: ['title', 'lead', 'body', 'button'], defaults: {

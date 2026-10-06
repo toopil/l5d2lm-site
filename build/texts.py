@@ -111,7 +111,7 @@ TEXT_BLOCKS = [
          fields=["eyebrow", "title", "lead", "body", "button"]),
     dict(page="l5d2lm-corps-expression", block_key="corps-expression-jeu-danse",
          label="Corps & expression — famille « Jeu danse »",
-         fields=["eyebrow", "title", "body"]),
+         fields=["eyebrow", "title", "lead", "body"]),
     dict(page="l5d2lm-corps-expression", block_key="playful-extatique",
          label="Corps & expression — Playful extatique (format de Jeu danse)",
          fields=["title", "lead", "body", "button"]),
