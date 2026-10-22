@@ -339,6 +339,10 @@ h3 { font-size: 1.2rem; margin: 0 0 0.5rem; }
 
 @media (max-width: 900px) {
   .flip-cards { grid-template-columns: 1fr; }
+  /* Le décor en pointillés déborde volontairement de la grille sur
+     desktop (effet de bord) ; sur téléphone, ce débordement dépasse le
+     viewport et provoque un défilement horizontal fantôme de la page. */
+  .flip-cards::before { inset: -1.5rem 0 auto; }
 }
 
 /* Corps & expression — accroche discrète sous le titre « Jeu danse » */
